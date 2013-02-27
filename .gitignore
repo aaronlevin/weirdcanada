@@ -1,0 +1,9 @@
+*.class
+*.swp
+*.jar
+tags
+target/
+.keep
+sbt
+sbt.bat
+*.db
