@@ -36,19 +36,22 @@ class Boot {
     // Use Lift's Mapper ORM to populate the database
     // you don't need to use Mapper to use Lift... use
     // any ORM you want
-    Schemifier.schemify(true, Schemifier.infoF _, User)
+    Schemifier.schemify(true, Schemifier.infoF _, User, UlliList, UlliElement)
 
     // where to search snippet
-    LiftRules.addToPackages("code")
+    LiftRules.addToPackages("org.weirdcanada.ulli")
 
     // Build SiteMap
     def sitemap = SiteMap(
       Menu.i("Home") / "index" >> User.AddUserMenusAfter, // the simple way to declare a menu
 
+      Menu.i("Add") / "add", 
+
       // more complex because this menu allows anything in the
       // /static path to be visible
       Menu(Loc("Static", Link(List("static"), true, "/static/index"), 
-	       "Static Content")))
+	       "Static Content"))
+     )
 
     def sitemapMutators = User.sitemapMutator
 

@@ -13,7 +13,7 @@ import java.util.Date
 
 // Ulli
 import org.weirdcanada.ulli.lib._
-
+import org.weirdcanada.ulli.model.{UlliList, UlliElement}
 
 /**
  * simple trait to abstract the rendering of Ulli Lists
@@ -21,11 +21,16 @@ import org.weirdcanada.ulli.lib._
 trait UlliRenderMethods {
 
   def renderList(list: UlliList): NodeSeq => NodeSeq = {
-    "name=title" #> list.is.title &
-    "name=description" #> list.is.description &
-    "name=list" #> ulli.is.items.map { item => 
-      "name=url [href]" #> item.is.url &
-      "name=text *" #> item.is.text
+    "name=title" #> list.title &
+    "name=description" #> list.description &
+    "name=list" #> list.elements.map { element => 
+      renderElement(element)
     }
   } 
+
+  def renderElement(element: UlliElement): NodeSeq => NodeSeq = {
+    "name=url [href]" #> element.url &
+    "name=text *" #> element.text
+  }
+
 }

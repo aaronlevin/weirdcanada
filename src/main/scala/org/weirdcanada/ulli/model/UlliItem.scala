@@ -6,9 +6,9 @@ import net.liftweb.util._
 import net.liftweb.common._
 
 
-class UlliItem extends LongKeyedMapper[UlliItem] {
+class UlliElement extends LongKeyedMapper[UlliElement] {
 
-  def getSingleton = UlliItem
+  def getSingleton = UlliElement
 
   def primaryKeyField = id
 
@@ -20,4 +20,6 @@ class UlliItem extends LongKeyedMapper[UlliItem] {
   object list extends MappedLongForeignKey(this, UlliList)
 }
 
-object UlliItem extends UlliItem with LongKeyedMetaMapper[UlliItem]
+object UlliElement extends UlliElement with LongKeyedMetaMapper[UlliElement]
+
+case class UlliElementStruct(text: String, url: String, rank: Int)

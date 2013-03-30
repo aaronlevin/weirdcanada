@@ -27,8 +27,11 @@ class UlliList extends LongKeyedMapper[UlliList] with OneToMany[Long,UlliList] {
   object user extends MappedLongForeignKey(this, User)
 
   // One-to-Many
-  object items extends MappedOneToMany(UlliItem, UlliItem.list, OrderBy(UlliItem.rank, Ascending))
+  object elements extends MappedOneToMany(UlliElement, UlliElement.list, OrderBy(UlliElement.rank, Ascending))
 
 }
 
 object UlliList extends UlliList with LongKeyedMetaMapper[UlliList]
+
+// A convenience struct used in forms
+case class UlliListStruct(title: String, description: String, privacy: Boolean, elements: List[UlliElementStruct])
