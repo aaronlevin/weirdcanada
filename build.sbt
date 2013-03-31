@@ -26,7 +26,8 @@ libraryDependencies ++= {
     "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016" % "container,test" artifacts Artifact("javax.servlet", "jar", "jar"),
     "ch.qos.logback"    % "logback-classic"     % "1.0.6",
     "org.specs2"        %% "specs2"             % "1.13"           % "test",
-    "com.h2database"    % "h2"                  % "1.3.167"
+    "com.h2database"    % "h2"                  % "1.3.167",
+    "postgresql"        % "postgresql"          % "8.4-701.jdbc4"
   )
 }
 

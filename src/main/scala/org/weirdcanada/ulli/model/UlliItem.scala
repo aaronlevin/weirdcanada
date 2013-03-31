@@ -4,7 +4,8 @@ package org.weirdcanada.ulli.model
 import net.liftweb.mapper._
 import net.liftweb.util._
 import net.liftweb.common._
-
+//import net.liftweb.mapper.{By, DB}
+import net.liftweb.db.DefaultConnectionIdentifier
 
 class UlliElement extends LongKeyedMapper[UlliElement] {
 
@@ -20,6 +21,24 @@ class UlliElement extends LongKeyedMapper[UlliElement] {
   object list extends MappedLongForeignKey(this, UlliList)
 }
 
-object UlliElement extends UlliElement with LongKeyedMetaMapper[UlliElement]
+object UlliElement extends UlliElement with LongKeyedMetaMapper[UlliElement] {
+
+  def insertStruct(struct: UlliElementStruct, list: UlliList): UlliElement = {
+
+    DB.use(DefaultConnectionIdentifier) { connection => {
+      val element = 
+        UlliElement
+          .create
+          .text(struct.text)
+          .url(struct.url)
+          .rank(struct.rank)
+          .list(list)
+
+      element.save()
+      element
+    }}
+  }
+
+}
 
 case class UlliElementStruct(text: String, url: String, rank: Int)

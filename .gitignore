@@ -7,3 +7,4 @@ target/
 sbt
 sbt.bat
 *.db
+*.props

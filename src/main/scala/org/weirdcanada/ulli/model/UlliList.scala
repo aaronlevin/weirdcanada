@@ -31,7 +31,31 @@ class UlliList extends LongKeyedMapper[UlliList] with OneToMany[Long,UlliList] {
 
 }
 
-object UlliList extends UlliList with LongKeyedMetaMapper[UlliList]
+object UlliList extends UlliList with LongKeyedMetaMapper[UlliList] {
+
+  def insertStruct(struct: UlliListStruct, user: User): UlliList = {
+
+    DB.use(DefaultConnectionIdentifier) { connection => {
+
+      val list: UlliList = 
+        UlliList
+          .create
+          .title(struct.title)
+          .description(struct.description)
+          .public(struct.privacy)
+          .user(user)
+      list.save()
+
+      // Create UlliElements with correct id
+      struct
+        .elements
+        .filterNot { element => element.text.isEmpty && element.url.isEmpty }
+        .map { element => UlliElement.insertStruct(element, list) } 
+      list
+    }}
+  }
+
+}
 
 // A convenience struct used in forms
 case class UlliListStruct(title: String, description: String, privacy: Boolean, elements: List[UlliElementStruct])
