@@ -34,7 +34,14 @@ object AddUlliListSnippet extends DynamicFormHelpers {
   def addAndSaveForField = getUpdateAndSaveFuncForField[UlliListStruct](listState)
 
   // Validation functions
-  // def validateList(list: UlliListStruct): ValidationResponse = {}
+  def validateElementsForRowRemoval(rank: Int)(list: UlliListStruct): ValidationResponse = {
+    list.elements.length match {
+      case 0 => ValidationResponse(false, JsCmds.Noop)
+      case length if length <= rank => ValidationResponse(false, JsCmds.Noop)
+      case _ if list.elements(rank-1).text.isEmpty => ValidationResponse(false, JsCmds.Noop)
+      case _ => ValidationResponse(true, JsCmds.Noop)
+    }
+  }
 
  /**
    * Method used when we create a new Text Row for a given rank
@@ -66,6 +73,8 @@ object AddUlliListSnippet extends DynamicFormHelpers {
    * we'll do that during the save (by squishing them together).
    */
   def removeUlliElement(rank: Int)(state: UlliListStruct)(inputText: String): UlliListStruct = {
+    println("Removing ulli element: %s".format(rank))
+    println("element: %s".format(state.elements))
     state.elements.length match {
       case 0 => state
       case stateLength => 
@@ -91,7 +100,7 @@ object AddUlliListSnippet extends DynamicFormHelpers {
     "name=ulli-element-url-clicker [data-content]" #> SHtml.ajaxText("", addUlliUrlElement(rank), "placeholder" -> "url", "id" -> "popover-%s-%s".format(urlClickName, rank)).toString &
     "name=ulli-element-url-clicker [id]" #> "%s-%s".format(urlClickName, rank) &
     "name=ulli-element-url-clicker [onclick]" #> SHtml.onEvent( (s: String) => JsCmds.SetValById("popover-%s-%s".format(urlClickName, rank), getUlliUrl(rank))) &
-    "name=ulli-element-remove [onclick]" #> SHtml.onEvent( removeRow(rank) )
+    "name=ulli-element-remove [onclick]" #> ( SHtml.onEvent( removeRow(rank) ).cmd )
 
   /**
    * Function to replace an element with id "elements" with a Ajax form field bound to a UlliElement of rank `rank`
