@@ -18,7 +18,8 @@ import scala.annotation._
  
 object AddUlliListSnippet extends DynamicFormHelpers {
 
-  val urlClickName = "url-click"
+  private val urlClickName = "url-click"
+  private val ulliAddRowName = "e"
 
   // UlliListStruct: title, description, public, elements: List[UlliElementStruct]
   // UlliElementStruct: text, url, rank
@@ -59,22 +60,38 @@ object AddUlliListSnippet extends DynamicFormHelpers {
         state.copy(elements = state.elements.updated(rank,oldElement.copy(url = inputText)))
     }
   }
+
+  /**
+   * Method to remove an entire Row for a given rank. We don't bother amending the ranks, because
+   * we'll do that during the save (by squishing them together).
+   */
+  def removeUlliElement(rank: Int)(state: UlliListStruct)(inputText: String): UlliListStruct = {
+    state.elements.length match {
+      case 0 => state
+      case stateLength => 
+        val (unaffected, rankReduceNeeded) = state.elements.partition( _.rank < rank)
+        state.copy(elements = unaffected ::: rankReduceNeeded.tail)
+    }
+  }
  
   /**
    * Functions used to update the state in response to a client-side ajax request
    */
   def addUlliTextElement(rank: Int) = addAndSaveForField( textRowUpdateFunc(rank) )( () => JsCmds.Noop )
   def addUlliUrlElement(rank: Int) = addAndSaveForField( urlRowUpdateFunc(rank) )( () => Run("""$('#%s-%s').popover('hide');""".format(urlClickName,rank,urlClickName, rank, getUlliUrl(rank))) ) 
+  def removeRow(rank: Int) = addAndSaveForField( removeUlliElement(rank) )( () => JsCmds.Replace("%s-%s".format(ulliAddRowName,rank), Nil) )
 
   /**
    * Simple mutually-recursive `NodeSeq => NodeSeq` function that will append rows below it
    */
   def textElementTransform(rank: Int) = 
+    "name=ulli-add-element [id]" #> "%s-%s".format(ulliAddRowName,rank) &
     "name=ulli-element-text [onblur]" #> SHtml.onEvent( addUlliTextElement(rank) ) &
     "name=ulli-element-text [onfocus]" #> SHtml.onEvent( ApplyOnce[String,JsCmd]( (s: String) => After(300,addTextRow(rank+1)()), JsCmds.Noop).apply _ ).toString & 
     "name=ulli-element-url-clicker [data-content]" #> SHtml.ajaxText("", addUlliUrlElement(rank), "placeholder" -> "url", "id" -> "popover-%s-%s".format(urlClickName, rank)).toString &
     "name=ulli-element-url-clicker [id]" #> "%s-%s".format(urlClickName, rank) &
-    "name=ulli-element-url-clicker [onclick]" #> SHtml.onEvent( (s: String) => JsCmds.SetValById("popover-%s-%s".format(urlClickName, rank), getUlliUrl(rank)))
+    "name=ulli-element-url-clicker [onclick]" #> SHtml.onEvent( (s: String) => JsCmds.SetValById("popover-%s-%s".format(urlClickName, rank), getUlliUrl(rank))) &
+    "name=ulli-element-remove [onclick]" #> SHtml.onEvent( removeRow(rank) )
 
   /**
    * Function to replace an element with id "elements" with a Ajax form field bound to a UlliElement of rank `rank`

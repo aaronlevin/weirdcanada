@@ -4,7 +4,6 @@ package org.weirdcanada.ulli.model
 import net.liftweb.mapper._
 import net.liftweb.util._
 import net.liftweb.common._
-//import net.liftweb.mapper.{By, DB}
 import net.liftweb.db.DefaultConnectionIdentifier
 
 class UlliElement extends LongKeyedMapper[UlliElement] {
@@ -38,6 +37,9 @@ object UlliElement extends UlliElement with LongKeyedMetaMapper[UlliElement] {
       element
     }}
   }
+
+  def squishRank(elements: List[UlliElementStruct]): List[UlliElementStruct] = 
+    elements.zipWithIndex.map { case (elem, i) => elem.copy(rank = i + 1) }
 
 }
 
