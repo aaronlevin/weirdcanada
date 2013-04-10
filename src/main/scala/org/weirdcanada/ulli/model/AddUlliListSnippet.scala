@@ -33,16 +33,6 @@ object AddUlliListSnippet extends DynamicFormHelpers {
   // Signature: addAndSave(UlliListStruct => UlliListStruct)(successCmd: () => JsCmd): JsCmd
   def addAndSaveForField = getUpdateAndSaveFuncForField[UlliListStruct](listState)
 
-  // Validation functions
-  def validateElementsForRowRemoval(rank: Int)(list: UlliListStruct): ValidationResponse = {
-    list.elements.length match {
-      case 0 => ValidationResponse(false, JsCmds.Noop)
-      case length if length <= rank => ValidationResponse(false, JsCmds.Noop)
-      case _ if list.elements(rank-1).text.isEmpty => ValidationResponse(false, JsCmds.Noop)
-      case _ => ValidationResponse(true, JsCmds.Noop)
-    }
-  }
-
  /**
    * Method used when we create a new Text Row for a given rank
    */
@@ -73,8 +63,6 @@ object AddUlliListSnippet extends DynamicFormHelpers {
    * we'll do that during the save (by squishing them together).
    */
   def removeUlliElement(rank: Int)(state: UlliListStruct)(inputText: String): UlliListStruct = {
-    println("Removing ulli element: %s".format(rank))
-    println("element: %s".format(state.elements))
     state.elements.length match {
       case 0 => state
       case stateLength => 
