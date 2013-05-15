@@ -1,4 +1,4 @@
-package org.weirdcanada.ulli.snippet
+package org.weirdcanada.site.snippet
 
 // Lift
 import net.liftweb.util.Helpers._

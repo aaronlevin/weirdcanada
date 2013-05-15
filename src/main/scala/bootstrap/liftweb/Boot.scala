@@ -11,7 +11,7 @@ import sitemap._
 import Loc._
 import mapper._
 
-import org.weirdcanada.ulli.model._
+import org.weirdcanada.site.model._
 import net.liftmodules.JQueryModule
 
 
@@ -36,16 +36,16 @@ class Boot {
     // Use Lift's Mapper ORM to populate the database
     // you don't need to use Mapper to use Lift... use
     // any ORM you want
-    Schemifier.schemify(true, Schemifier.infoF _, User, UlliList, UlliElement)
+    //Schemifier.schemify(true, Schemifier.infoF _, User, UlliList, UlliElement)
 
     // where to search snippet
-    LiftRules.addToPackages("org.weirdcanada.ulli")
+    LiftRules.addToPackages("org.weirdcanada.site")
 
     // Build SiteMap
     def sitemap = SiteMap(
       Menu.i("Home") / "index" >> User.AddUserMenusAfter, // the simple way to declare a menu
 
-      Menu.i("Add") / "add" >> If( () => User.loggedIn_?, "You must be logged in"), 
+      Menu.i("Add") / "add" >> If( () => true , "dude"),//User.loggedIn_?, "You must be logged in"), 
 
       // more complex because this menu allows anything in the
       // /static path to be visible

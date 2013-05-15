@@ -1,4 +1,4 @@
-package org.weirdcanada.ulli.model
+package org.weirdcanada.site.model
 
 import net.liftweb.mapper._
 import net.liftweb.util._
@@ -31,6 +31,5 @@ class User extends MegaProtoUser[User] with OneToMany[Long, User] {
     override def textareaCols = 50
     override def displayName = "Personal Essay"
   }
-  object lists extends MappedOneToMany(UlliList, UlliList.user, OrderBy(UlliList.datetime, Ascending))
 }
 

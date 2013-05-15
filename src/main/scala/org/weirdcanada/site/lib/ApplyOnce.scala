@@ -1,4 +1,4 @@
-package org.weirdcanada.ulli.lib
+package org.weirdcanada.site.lib
 
 case class ApplyOnce[A,B](func: A => B, default: B) {
   var runFunc: Boolean = true

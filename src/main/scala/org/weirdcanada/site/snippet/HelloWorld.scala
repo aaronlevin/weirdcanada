@@ -1,4 +1,4 @@
-package org.weirdcanada.ulli.snippet
+package org.weirdcanada.site.snippet
 
 import scala.xml.{NodeSeq, Text}
 import net.liftweb.util._

@@ -1,4 +1,4 @@
-package org.weirdcanada.ulli.lib
+package org.weirdcanada.site.lib
 
 import net.liftweb._
 import http._
