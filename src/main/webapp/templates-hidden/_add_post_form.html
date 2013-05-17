@@ -1,81 +1,108 @@
 <div data-lift="AddWeirdCanadaPostSnippet?eager_eval=true">
 
-    <span data-lift="embed?what=_add_artist_form"></span>
+  <!-- Release info -->
 
-  <div id="add-publisher">
-    <span data-lift="embed?what=_add_publisher_form"></span>
+  <div name="add-release">
+
+    <div name="add-release-title">
+      <div class="control-group">
+        <div class="controls">
+          <input name="release-title-input">
+        </div>
+      </div>
+    </div>
+
+    <div name="add-release-format">
+      <div class="control-group">
+        <div class="controls">
+          <input name="release-format-input">
+        </div>
+      </div>
+    </div>
+
+
+    <div name="add-release-release-date">
+      <div class="control-group">
+        <div class="controls">
+          <input name="release-release-date-input">
+        </div>
+      </div>
+    </div>
+
   </div>
+
+  <!-- Artist Data -->
+  <span data-lift="embed?what=_add_artist_form"></span>
+
+  <div id="artist-elements"></div>
+
+  <!-- Publisher Data -->
+  <span data-lift="embed?what=_add_publisher_form"></span>
+
+  <div id="publisher-elements"></div>
 
   <!-- Author Data -->
-  <div id="add-author">
-    <div class="control-group" name="author-name-field">
-      <div class="controls">
-        <input name="author-name-input">
-      </div>
-    </div>
+  <span data-lift="embed?what=_add_author_form"></span>
 
-    <div class="control-group" name="author-url-field">
-      <div class="controls">
-        <input name="author-url-input">
-      </div>
-    </div>
-
-  </div>
+  <div id="author-elements"></div>
 
   <!-- Translator Data -->
-  <div id="add-translator">
 
-    <div class="control-group">
-      <div class="controls">
-        <input name="translator-name-input">
-      </div>
-    </div>
+  <span data-lift="embed?what=_add_translator_form"></span>
 
-    <div class="control-group">
-      <div class="controls">
-        <input name="translator-url-input">
-      </div>
-    </div>
+  <div id="translator-elements"></div>
 
+  <h3>Content Specific</h3>
+
+  <!-- Translator Text -->
+
+  <div name="add-translator-text">
     <div class="control-group">
       <div class="controls">
         <input name="translator-text-input">
       </div>
     </div>
-
   </div>
 
   <!-- Content -->
-  <div id="add-content-english">
+  <div name="add-content-english">
 
     <div class="control-group">
       <div class="controls">
-        <input name="from-the-english">
+        <input name="from-the-english-input">
       </div>
     </div>
     
     <div class="control-group">
       <div class="controls">
-        <input name="content-english">
+        <input name="content-english-input">
       </div>
     </div>
 
   </div>
     
-  <div id="add-content-french">
+  <div name="add-content-french">
 
     <div class="control-group">
       <div class="controls">
-        <input name="de-la-french">
+        <input name="de-la-french-input">
       </div>
     </div>
 
     <div class="control-group">
       <div class="controls">
-        <input name="content-french">
+        <input name="content-french-input">
       </div>
     </div>
 
+  </div>
+
+  <div name="action">
+    <div class="control-group">
+      <div class="controls">
+        <input name="do-something">
+      </div>
+    </div>
   </div>
 
 </div>
