@@ -86,26 +86,18 @@ object DynamicField {
 sealed trait DynamicField[A] {
   import DynamicField.makeName
   val name: String
-  implicit val zeroA: HasZero[A]
   def render[B](outerLens: Lens[B,A], outerName: Option[String]): NodeSeq => NodeSeq
-  def renderOption[B](outerLens: Lens[B, Option[A]], outerName: Option[String]): NodeSeq => NodeSeq = {
-    val newLens: Lens[B,A] = DynamicField.lensReducer(outerLens)
-    render(newLens, outerName)
-  }
-    
 }
 
-case class BasicField[A : HasZero](name: String, lens: Lens[A,String]) extends DynamicField[A] {
+case class BasicField[A](name: String, lens: Lens[A,String]) extends DynamicField[A] {
   import DynamicField.makeName
-  val zeroA = implicitly[HasZero[A]]
   def render[B](outerLens: Lens[B,A], outerName: Option[String] = None): NodeSeq => NodeSeq = {
     println(makeName(outerName, name))
     makeName(outerName, name) #> "" // SHtml.ajaxtext(OuterLens andThen lens)
   }
 }
 
-case class RecordField[A : HasZero, B : HasFields](name: String, lens: Lens[A,B]) extends DynamicField[A] {
-  val zeroA = implicitly[HasZero[A]]
+case class RecordField[A, B : HasFields](name: String, lens: Lens[A,B]) extends DynamicField[A] {
   val bRecord = implicitly[HasFields[B]]
   def render[C](outerLens: Lens[C,A], outerName: Option[String]): NodeSeq => NodeSeq = 
     bRecord
@@ -156,15 +148,33 @@ object Artist {
 }
 
 case class Publisher(name: String)
-case class Release(title: String, artist: Artist)
+object Publisher {
+  private val publisherNameLens: Lens[Publisher, String] = Lens.lensu( (p,n) => p.copy(name = n), (p) => p.name)
+  implicit object PublisherZero extends HasZero[Publisher] {
+    val zero = Publisher("")
+  }
+  implicit object PublisherRecord extends HasMultiFields[Publisher] {
+    val fields: List[DynamicField[Publisher] with MultiRender[Publisher]] = List(
+      new BasicField[Publisher]("name", publisherNameLens) with MultiRender[Publisher] { val zeroA = implicitly[HasZero[Publisher]] }
+    )
+  }
+}
+case class Release(title: String, artist: Artist, publishers: List[Publisher])
 object Release {
   implicit object ReleaseZero extends HasZero[Release] { 
-    val zero = Release("", implicitly[HasZero[Artist]].zero)
+    val zero = Release("", implicitly[HasZero[Artist]].zero, Nil)
   }
   implicit object ReleaseRecord extends HasFields[Release] {
+
+    private def releasePublishersLens: Lens[Release, Map[Int,Publisher]] = Lens.lensu(
+      set = (r: Release, pm: Map[Int,Publisher]) => r.copy(publishers = pm.toList.sortBy { _._1 }.map { _._2})
+      , get = (r: Release) => r.publishers.zipWithIndex.map { x => (x._2, x._1)}.toMap
+      )
+
     val fields = List(
       BasicField[Release]("title", Lens.lensu[Release,String]((r,t) => r.copy(title = t), (r) => r.title))
     , RecordField[Release, Artist]("artist", Lens.lensu[Release,Artist]((r,a) => r.copy(artist = a), (r) => r.artist))
+    , ManyRecordField[Release, Publisher]("publisher", releasePublishersLens) 
     )
   }
 }
