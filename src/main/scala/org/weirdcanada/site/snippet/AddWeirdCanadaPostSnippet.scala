@@ -17,6 +17,7 @@ import scala.annotation.tailrec
 
 // 3rd Party
 import scalaz.Lens
+import org.joda.time.DateTime
 
 trait Renderable {
   def renderAsXml: NodeSeq
@@ -64,13 +65,29 @@ case class Post(
         .get(this)
         .map { artistUrlLens.get }
         .map { url => if(url.isEmpty) Text(url) else <a href={url} target="_blank">::web/sounds::</a> }
-        .foldLeft(NodeSeq.Empty){ case (a,b) => a ++ Text(" // ") ++ b }
-        .tail
+        .foldLeft(NodeSeq.Empty){ case (a,b) => a ++ Text(" // ") ++ b } match {
+          case NodeSeq.Empty => NodeSeq.Empty
+          case xs => xs.tail
+        }
 
-    val dateStamp = 1234
+    val dateStamp = (new DateTime).getMillis()
 
-    val authors = postAuthorsLens.get(this).map { _.renderAsXml }.mkString(" and ")
-    val translators = postTranslatorsLens.get(this).map { _.renderAsXml}.mkString(" and")
+    val authors = 
+      postAuthorsLens
+        .get(this)
+        .map { _.renderAsXml }
+        .foldLeft(NodeSeq.Empty){ case (a,b) => a ++ Text(" and ") ++ b } match {
+          case NodeSeq.Empty => NodeSeq.Empty
+          case xs => xs.tail
+        }
+    val translators = 
+      postTranslatorsLens
+        .get(this)
+        .map { _.renderAsXml }
+        .foldLeft(NodeSeq.Empty){ case(a,b) => a ++ Text(" and ") ++ b } match {
+          case NodeSeq.Empty => NodeSeq.Empty
+          case xs => xs.tail
+        }
 
     <div class="contentContainer">
     <div class="contentImage">
@@ -93,14 +110,14 @@ case class Post(
     </ul>
     <div id="languageTabContent" class="tab-content">
     <div class="tab-pane fade in active" id={"#english-%s".format(dateStamp)}>
-    <p class="contentAuthor">{"%s %s".format(fromThe,authors)}:</p>
+    <p class="contentAuthor">{Text(fromThe + " ") ++ authors}:</p>
     <p>
     { contentEnglish }
     </p>
     </div>
     <div class="tab-pane fade" id={"#francais-%s".format(dateStamp)}>
-    <p class="contentAuthor">{"%s %s".format(deLa,authors)}:
-    (<em>{"%s %s".format(deLa,translators)}</em>)</p>
+    <p class="contentAuthor">{Text(deLa + " ") ++ authors}:
+    (<em>{Text(translatorText + " ") ++ translators}</em>)</p>
     <p>
     { contentFrench }
     </p>
@@ -418,7 +435,7 @@ object AddWeirdCanadaPostSnippet extends DynamicFormHelpers {
   }
 
   def addArtist(index: Int) = 
-    "name=artist-id [id]" #> "%s-%s".format(artistIdName, index) &
+    "name=add-artist [id]" #> "%s-%s".format(artistIdName, index) &
     "name=artist-number *" #> (index+1) &
     "name=artist-name-input" #> SHtml.ajaxText("", artistNameUpdateFunc(index), "placeholder" -> "Artist Name")  &
     "name=artist-url-input" #> SHtml.ajaxText("", artistUrlUpdateFunc(index), "placeholder" -> "URL") &
@@ -430,7 +447,7 @@ object AddWeirdCanadaPostSnippet extends DynamicFormHelpers {
   val addArtistMemoize = SHtml.memoize( addArtist(0) )
 
   def addPublisher(index: Int) = 
-    "name=publisher-id [id]" #> "%s-%s".format(publisherIdName, index) &
+    "name=add-publisher [id]" #> "%s-%s".format(publisherIdName, index) &
     "name=publisher-number *" #> (index + 1) &
     "name=publisher-name-input" #> SHtml.ajaxText("", publisherNameUpdateFunc(index), "placeholder" -> "Publisher Name") &
     "name=publisher-url-input" #> SHtml.ajaxText("", publisherUrlUpdateFunc(index), "placeholder" -> "URL") &
@@ -442,7 +459,7 @@ object AddWeirdCanadaPostSnippet extends DynamicFormHelpers {
   val addPublisherMemoize = SHtml.memoize( addPublisher(0) )
 
   def addAuthor(index: Int) =
-    "name=author-id [id]" #> "%s-%s".format(authorIdName, index) &
+    "name=add-author [id]" #> "%s-%s".format(authorIdName, index) &
     "name=author-number *" #> (index+1) &
     "name=author-name-input" #> SHtml.ajaxText("", authorNameUpdateFunc(index), "placeholder" -> "Author Name") &
     "name=author-url-input" #> SHtml.ajaxText("", authorUrlUpdateFunc(index), "placeholder" -> "URL") &
@@ -452,7 +469,7 @@ object AddWeirdCanadaPostSnippet extends DynamicFormHelpers {
   val addAuthorMemoize = SHtml.memoize( addAuthor(0) )
 
   def addTranslator(index: Int) =
-    "name=translator-id [id]" #> "%s-%s".format(translatorIdName, index) &
+    "name=add-translator [id]" #> "%s-%s".format(translatorIdName, index) &
     "name=translator-number *" #> (index+1) &
     "name=translator-name-input" #> SHtml.ajaxText("", translatorNameUpdateFunc(index), "placeholder" -> "Translator Name") &
     "name=translator-url-input" #> SHtml.ajaxText("", translatorUrlUpdateFunc(index), "placeholder" -> "URL") &
@@ -475,17 +492,17 @@ object AddWeirdCanadaPostSnippet extends DynamicFormHelpers {
   def releaseInfo = 
     "name=release-title-input" #> SHtml.ajaxText("", releaseTitleUpdateFunc, "placeholder" -> "Title") &
     "name=release-format-input" #> "" &
-    "name=release-release-date-input" #> ""
+    "name=release-release-date-input" #> "" &
+    "name=add-artist" #> addArtistMemoize &
+    "name=add-publisher" #> addPublisherMemoize
 
   def render = 
     "name=add-release" #> releaseInfo &
-    "#add-artist" #> addArtistMemoize &
-    "#add-publisher" #> addPublisherMemoize &
-    "#add-author" #> addAuthorMemoize &
-    "#add-translator" #> addTranslatorMemoize &
+    "name=add-author" #> addAuthorMemoize &
+    "name=add-translator" #> addTranslatorMemoize &
     "name=add-translator-text" #> translatorText &
     "name=add-content-english" #> contentEnglish &
     "name=add-content-french" #> contentFrench &
-    "name=do-something" #> SHtml.ajaxButton("Done", () => Alert(postState.is.renderAsXml.toString))
+    "name=do-something" #> SHtml.ajaxButton("Done", () => JsCmds.SetValById("result-input", postState.is.renderAsXml.toString)) 
 
 }

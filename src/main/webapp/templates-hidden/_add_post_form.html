@@ -1,45 +1,7 @@
 <div data-lift="AddWeirdCanadaPostSnippet?eager_eval=true">
 
   <!-- Release info -->
-
-  <div name="add-release">
-
-    <div name="add-release-title">
-      <div class="control-group">
-        <div class="controls">
-          <input name="release-title-input">
-        </div>
-      </div>
-    </div>
-
-    <div name="add-release-format">
-      <div class="control-group">
-        <div class="controls">
-          <input name="release-format-input">
-        </div>
-      </div>
-    </div>
-
-
-    <div name="add-release-release-date">
-      <div class="control-group">
-        <div class="controls">
-          <input name="release-release-date-input">
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Artist Data -->
-  <span data-lift="embed?what=_add_artist_form"></span>
-
-  <div id="artist-elements"></div>
-
-  <!-- Publisher Data -->
-  <span data-lift="embed?what=_add_publisher_form"></span>
-
-  <div id="publisher-elements"></div>
+  <span data-lift="embed?what=_add_release_form"></span>
 
   <!-- Author Data -->
   <span data-lift="embed?what=_add_author_form"></span>
@@ -101,6 +63,14 @@
     <div class="control-group">
       <div class="controls">
         <input name="do-something">
+      </div>
+    </div>
+  </div>
+
+  <div name="result">
+    <div class="control-group">
+      <div class="controls">
+        <textarea name="result-input" id="result-input" rows="8" cols="100" placeholder="result"></textarea>
       </div>
     </div>
   </div>
