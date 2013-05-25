@@ -12,12 +12,14 @@ import common._
 import util.Helpers._
 
 // Scala
-import scala.xml.{NodeSeq, Text, Elem}
+import scala.xml.{NodeSeq, Text, Elem, Unparsed, XML}
 import scala.annotation.tailrec
+import org.xml.sax.SAXParseException
 
 // 3rd Party
-import scalaz.Lens
+import org.clapper.markwrap.{MarkupType, MarkWrap}
 import org.joda.time.DateTime
+import scalaz.Lens
 
 trait Renderable {
   def renderAsXml: NodeSeq
@@ -109,17 +111,17 @@ case class Post(
     <li><a href={"#francais-%s".format(dateStamp)} data-toggle="tab" onclick="_gaq.push([_trackEvent, posts, translation-toggle, francais]);">français</a></li>
     </ul>
     <div id="languageTabContent" class="tab-content">
-    <div class="tab-pane fade in active" id={"#english-%s".format(dateStamp)}>
+    <div class="tab-pane fade in active" id={"english-%s".format(dateStamp)}>
     <p class="contentAuthor">{Text(fromThe + " ") ++ authors}:</p>
     <p>
-    { contentEnglish }
+    { if(contentEnglish.isEmpty) Text("") else Unparsed(Post.markdownParser.parseToHTML(contentEnglish)) }
     </p>
     </div>
-    <div class="tab-pane fade" id={"#francais-%s".format(dateStamp)}>
+    <div class="tab-pane fade" id={"francais-%s".format(dateStamp)}>
     <p class="contentAuthor">{Text(deLa + " ") ++ authors}:
     (<em>{Text(translatorText + " ") ++ translators}</em>)</p>
     <p>
-    { contentFrench }
+    { if(contentFrench.isEmpty) Text("") else Unparsed(Post.markdownParser.parseToHTML(contentFrench)) }
     </p>
     </div>
     </div>
@@ -135,6 +137,7 @@ case class Post(
  * So, let's setup some lenses
  */
 object SupportLenses {
+
 
   // views on a release
   val releaseTitleLens = Lens.lensu( (r: Release, newTitle: String) => r.copy(title = newTitle), (r: Release) => r.title)
@@ -190,6 +193,8 @@ object SupportLenses {
 object Post {
 
   import SupportLenses._
+
+  val markdownParser = MarkWrap.parserFor(MarkupType.Markdown)
 
   // Update artist name for a given index
   def updateArtistName(state: Post, text: String, index: Int): Post = {

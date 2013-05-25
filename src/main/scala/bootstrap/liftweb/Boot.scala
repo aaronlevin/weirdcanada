@@ -40,6 +40,7 @@ class Boot {
 
     // where to search snippet
     LiftRules.addToPackages("org.weirdcanada.site")
+    LiftRules.addToPackages("org.weirdcanada.site.model")
 
     // Build SiteMap
     def sitemap = SiteMap(

@@ -14,7 +14,7 @@ seq(com.github.siasia.WebPlugin.webSettings :_*)
 
 unmanagedResourceDirectories in Test <+= (baseDirectory) { _ / "src/main/webapp" }
 
-scalacOptions ++= Seq("-deprecation", "-unchecked")
+scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 
 libraryDependencies ++= {
   val liftVersion = "2.5-RC1"
@@ -30,7 +30,8 @@ libraryDependencies ++= {
     "postgresql"        % "postgresql"          % "8.4-701.jdbc4",
     "org.scalaz"        %% "scalaz-core" % "7.0.0",
     "joda-time"         % "joda-time"           % "2.2",
-    "org.joda"          % "joda-convert"        % "1.2"
+    "org.joda"          % "joda-convert"        % "1.2",
+    "org.clapper"       % "markwrap_2.10"       % "1.0.1"
   )
 }
 

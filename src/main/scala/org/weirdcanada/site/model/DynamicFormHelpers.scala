@@ -80,6 +80,35 @@ trait DynamicFormHelpers {
 
     updateAndSave _
     }
+
+  def getUpdateAndSaveFuncForDynamicForm[T](data: RequestVar[T], validators: List[T => ValidationResponse] = Nil) = {
+
+    def updateAndSave(f: Option[T] => String => Option[T])(successCmd: () => JsCmd): String => JsCmd = (inputString: String) => 
+      try {
+
+        // Get current data & transformed data
+        val currentData = data.is
+        val newData = f(Some(currentData))(inputString)
+        println("newData: %s".format(newData))
+        newData match {
+          case None => JsCmds.Noop
+          case Some(newStateData) => 
+            // validation of new data
+            val validationRollUp = foldValidators(newStateData)(validators)
+
+            // Apply logic to determine if state is updated and Success command executed
+            validationLogic(currentData, newStateData, validationRollUp, successCmd, (t:T) => data.set(t))
+        }
+      } catch {
+        case e: Throwable =>
+          JsCmds.Replace("saved", <div id="saved">Error saving form: {e.toString}</div>)
+      }
+
+      updateAndSave _
+  }
+
+
+
   
   def validInt(in: String): Boolean = {
     in.forall(_.isDigit)
