@@ -32,7 +32,7 @@ object TestSnippet extends DynamicFormCreator {
 
   import Post._
 
-  private object postState extends RequestVar[NewPost](NewPost(NewRelease("", List(NewArtist("","","","")), Nil, "",""), Nil, Nil, "", "", "", "", ""))
+  private object postState extends RequestVar[NewPost](NewPost(NewRelease("", Nil, Nil, "",""), Nil, Nil, "", "", "", "", ""))
 
   // Add and save function
   def updateState = getUpdateAndSaveFuncForField[NewPost](postState)

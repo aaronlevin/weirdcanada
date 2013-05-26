@@ -3,8 +3,7 @@ import scala.reflect.runtime.universe._
 
 // Scala
 import scalaz.Lens
-import Lens.{mapVLens => xxx, lensId}
-import scalaz.syntax._
+import Lens.{mapVLens, lensId}
 
 // Weird Canada
 import org.weirdcanada.site.lib.{ApplyOnce}
@@ -22,49 +21,52 @@ import util.Helpers._
 import scala.xml.{NodeSeq, Text, Elem}
 import scala.annotation.tailrec
 
-object Cool {
-  def mapVLens[K,V](index: K): Lens[Map[K,V],Option[V]] = Lens.lensu(
-    set = (m: Map[K,V], ov: Option[V]) => { println("mapVLens set(%s -- %s)".format(m,ov)); ov match {
-      case None => m - index
-      case Some(v) => m.updated(index,v)
-    }}
-  , get = (m: Map[K,V]) => {println("mapVLens get: %s".format(m.get(index))); m.get(index)}
-  )
-}
-import Cool._
-
+/*
+ * Trait that can be mixed in to provide a method creating `NodeSeq => NodeSeq`
+ * methods that will create dynamic forms. 
+ */
 trait DynamicFormCreator extends DynamicFormHelpers { 
-  println("\n")
 
-  import DynamicField.{liftLens}
-
-  /** updateStateFunction: (A => String => A) => (() => JsCmd) => (String => JsCmd)
+  /*
+   * Method to fetch the `NodeSeq => NodeSeq` method for a type `A` that implements
+   * the `HasFields` typeclass.
+   *
+   * @param formState a `RequestVar` object holding the form state.
+   * @return a method to transform `NodeSeq`s
    */
   def renderField[A : HasFields](formState: RequestVar[A]): NodeSeq => NodeSeq = {
     val record = implicitly[HasFields[A]]
-    val updateStateFunction = getUpdateAndSaveFuncForDynamicForm[A](formState)
+    val updateStateFunction = getUpdateAndSaveFuncForField[A](formState)
     record
       .fields
       .foldLeft( (ns: NodeSeq) => ns){ (acc, field) => 
-        acc andThen field.render(updateStateFunction)(liftLens(lensId[A]), None)
+        acc andThen field.render(updateStateFunction)(lensId[A], None)
       }
   }
 }
 
+/*
+ * Typeclass to encompass types that have a list of dynamic fields.
+ */
 trait HasFields[A] {
   val fields: List[DynamicField[A]]
 }
 
+/*
+ * Typeclass that encompasses types that have the notion of an "empty". For example,
+ * consider: `case class Artist(name: String, url: String)`
+ * an "empty" artist may be: `Artist("", "")`
+ */
 trait HasEmpty[A] {
   val empty: A
 }
 
-/**
- * TODO: Does the lens returned from lensReducer obey the lens laws}
+/*
+ * Companion object to the `DynamicField` trait. Supplies many helper methods
  */
 object DynamicField {
 
-  type FormStateUpdate[A] = (Option[A] => String => Option[A]) => (() => JsCmd) => (String => JsCmd)
+  type FormStateUpdate[A] = (A => String => A) => (() => JsCmd) => (String => JsCmd)
 
   def label(outerName: Option[String], name: String): String =
     "%s%s".format(outerName.map{ _ + "-"}.getOrElse(""), name)
@@ -81,43 +83,82 @@ object DynamicField {
   def makeInput(outerName: Option[String], name: String): String =
     "%s-input".format(makeName(outerName, name))
 
+  /** TODO:
+   * This lens is needed for the case that we want to update a field in a map or list
+   * but it does not exist yet. In these cases, we need to create a `blank` instance of
+   * the field that can be added to the map/list and then the field we're lensin' on can
+   * be updated. E.g. you can't update the name of an `Artist` when no artist exists at 
+   * index 0 in `Map[Int,Artist]`. 
+   *
+   * Alas, this Lens is not a true lens. It breaks the second lens law:
+   *   2. forall a. lens.set(a, lens.get(a)) = a
+   *   consider the case where a = None you will get:
+   *   lens.set(None, lens.get(None))
+   *   = lens.set(None, a.empty)
+   *   = Some(a.empty)
+   *   != None
+   * Possible different approaches:
+   *   1. Partial lenses
+   *   2. State actions 
+   *
+   *   @return a lens from Option[A] to A
+   */
   def optionLens[A : HasEmpty]: Lens[Option[A],A] = Lens.lensu(
     get = (oa) => oa.getOrElse( implicitly[HasEmpty[A]].empty )
   , set = (oa,a) => Some(a)
   )
 
-  def liftLens[A,B](lens: Lens[B,A]): Lens[Option[B], Option[A]] = {
-    Lens.lensu(
-      get = (ob) => ob.map { lens.get } 
-    , set = (ob,oa) => { println("liftLens: set(%s -- %s)".format(ob, oa)); for {
-      b <- ob
-      a <- oa
-    } yield {lens.set(b,a)} }
-    )
-  }
-
-  def liftLensA[A,B](lens: Lens[A,Option[B]]): Lens[Option[A],Option[B]] = 
-    Lens.lensu(
-      get = (oa) => oa.flatMap { lens.get }
-    , set = (oa, ob) => {println("liftLensA: set(%s -- %s)".format(oa, ob)); oa.map { a =>  lens.set(a,ob) } }
-    )
 }
 
+/*
+ * Trait to represent a Dynamic Fields. Classes mixing in this trait must provide
+ * a render method that takes some state and a lens and renders the field (or subfields)
+ * in addition to a `String` reprsenting the name of the field (does not need to be unique).
+ */
 sealed trait DynamicField[A] {
-  import DynamicField.{makeName,liftLens,FormStateUpdate}
+  import DynamicField.{makeName,FormStateUpdate}
   val name: String
-  //def render[B](outerLens: Lens[Option[B],Option[A]], outerName: Option[String]): NodeSeq => NodeSeq
-  def render[B](formStateUpdater: FormStateUpdate[B])(outerLens: Lens[Option[B],Option[A]], outerName: Option[String]): NodeSeq => NodeSeq
+
+  /*
+   * Method that renders a form.
+   *
+   * @param formStateUpdater  a method used to construct a function that updates the form state and returns some JsCmds for UI 
+   * @param outerLens         Lens from the parent of the current field.
+   * @param outerName         Concatenated name from the parent field(s)
+   * @return Return a method to transform `NodeSeq`
+   */
+  def render[B](formStateUpdater: FormStateUpdate[B])(outerLens: Lens[B,A], outerName: Option[String]): NodeSeq => NodeSeq
 }
 
+/*
+ * The most basic field: a field with no SubFields. Will correspond to a basic "<input>" on a form.
+ *
+ * @constructor create a new `BasicField` of type `A`
+ * @param name The name of the field
+ * @param lens a lens from the field type `A` to String (for updating the field from string input)
+ */
 case class BasicField[A](name: String, lens: Lens[A,String]) extends DynamicField[A] {
-  import DynamicField.{makeName,makeNameAdd,makeInput, FormStateUpdate, liftLens, label}
-  def render[B](formStateUpdater: FormStateUpdate[B])(outerLens: Lens[Option[B],Option[A]], outerName: Option[String] = None): NodeSeq => NodeSeq = {
-    // I cry to hav to call .get at the end of this, but it, theoretically, should be safe. 
-    def updateFunc(stateOption: Option[B])(inputString: String): Option[B] = {
-      println("updateFunc: set(%s -- %s)".format(stateOption, Some(inputString)))
-      println("outerLens(state) = %s".format(outerLens.get(stateOption)))
-      (outerLens >=> liftLens(lens)).set(stateOption, Some(inputString))
+  import DynamicField.{makeName,makeNameAdd,makeInput, FormStateUpdate, label}
+
+  /*
+   * Method to render a Basic field.
+   *
+   * @param formStateUpdater  a method to construct a function that updates the form state and returns some JsCmds for UI
+   * @param outerLens         Lens from the parent of this field
+   * @param outerName         Concatenated name from the parent field
+   * @return a method to transform `NodeSeq`
+   */
+  def render[B](formStateUpdater: FormStateUpdate[B])(outerLens: Lens[B,A], outerName: Option[String] = None): NodeSeq => NodeSeq = {
+
+    /*
+     * A method composing lenses for the ability to update this field with the input string.
+     *
+     * @param state       state data of type `B` reprsenting the parent form state to be updated.
+     * @param inputString inputString from a user (coming via ajax on a form)
+     * @return an updated version of the state. 
+     */
+    def updateFunc(state: B)(inputString: String): B = {
+      (outerLens >=> lens).set(state, inputString)
     }
 
     val jsCmd = () => Noop
@@ -126,29 +167,75 @@ case class BasicField[A](name: String, lens: Lens[A,String]) extends DynamicFiel
   }
 }
 
+/* 
+ * A Field of type `A` that encompasses a Structure of cardinality 1 for type `B`. 
+ * Type `B` must implement the `HasFields` typeclass (ensuring that `B` has fields to render)
+ *
+ * @constructor create a `RecordField` from type `A` to type `B`
+ * @param name the name of the field
+ * @param lens a lens from `A` to `B`
+ */
 case class RecordField[A, B : HasFields](name: String, lens: Lens[A,B]) extends DynamicField[A] {
-  import DynamicField.{makeNameAdd,liftLens,FormStateUpdate}
+  import DynamicField.{makeNameAdd,FormStateUpdate}
   val bRecord = implicitly[HasFields[B]]
-  def render[C](formStateUpdater: FormStateUpdate[C])(outerLens: Lens[Option[C],Option[A]], outerName: Option[String]): NodeSeq => NodeSeq = {
-    // Checked. this actually triggers "name=release" (checked by replacing with 'cool')
+
+  /*
+   * Render a structured field by calling the `render` method on its subfields and passing a composition
+   * of the outer and current lense.
+   *
+   * @param formStateUpdater  a method to construct a function that updates the form state and returns some JsCmds for UI
+   * @param outerLens         Lens from the parent of this field
+   * @param outerName         Concatenated name from the parent field
+   * @return a method to transform `NodeSeq`
+   */
+  def render[C](formStateUpdater: FormStateUpdate[C])(outerLens: Lens[C,A], outerName: Option[String]): NodeSeq => NodeSeq = {
     makeNameAdd(None, name) #> 
       bRecord
         .fields
-        .foldLeft( (ns: NodeSeq) => ns ){ (acc, field) => acc andThen field.render(formStateUpdater)(outerLens andThen liftLens(lens), Some(name)) }
+        .foldLeft( (ns: NodeSeq) => ns ){ (acc, field) => acc andThen field.render(formStateUpdater)(outerLens >=> lens, Some(name)) }
   }
 }
 
+/*
+ * A field of type `A` which contains a structure (`B`) of cardinality larger than 1. `B` must implement
+ * the `HasEmpty` typeclass in addition to the `HasFields` typeclass. `B` must implement `HasFields` so we
+ * can insert an "empty" `B` when updating a subfield of `B` when one doesn't already exist (i.e. updating the
+ * `name` on a `Comment`). An example is a `Post` has many `Comments`
+ *
+ * @constructor create a `ManyRecordField` from type `A` to type `B`
+ * @param name the name of the field
+ * @param lens a lens from `A` to `Map[Int,B]`
+ */
 case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens[A, Map[Int,B]]) extends DynamicField[A] {
-  import DynamicField.{makeAdd, makeName, makeNameAdd, label, liftLensA,FormStateUpdate}
+  import DynamicField.{makeAdd, makeName, makeNameAdd, label, FormStateUpdate,optionLens}
   val bRecord = implicitly[HasFields[B]]
   val bEmpty = implicitly[HasEmpty[B]]
 
-  // Primary render method
-  def render[C](formStateUpdater: FormStateUpdate[C])(outerLens: Lens[Option[C],Option[A]], outerName: Option[String]): NodeSeq => NodeSeq = {
+  /*
+   * Render a `ManyRecordField` by creating some chrome to allow us to, recursively, add additional copies of this field,
+   * and then pass rendering off to the subfields.
+   *
+   * @param formStateUpdater  a method to construct a function that updates the form state and returns some JsCmds for UI
+   * @param outerLens         Lens from the parent of this field
+   * @param outerName         Concatenated name from the parent field
+   * @return a method to transform `NodeSeq`
+   */
+  def render[C](formStateUpdater: FormStateUpdate[C])(outerLens: Lens[C,A], outerName: Option[String]): NodeSeq => NodeSeq = {
 
-    def lensAtIndex(index: Int): Lens[Option[C], Option[B]] = outerLens andThen liftLensA(lens andThen mapVLens(index))
+    /*
+     * Convenience method to return a lens for a given index of the `Map[Int,B]`
+     *
+     * @param index the index of the map we're lensing over.
+     * @return a lens from `C` to `B`
+     */
+    def lensAtIndex(index: Int): Lens[C, B] = outerLens >=> lens >=> mapVLens(index) >=> optionLens[B]
 
-    // Method to add a new record, dynamically.
+    /*
+     * Convenience method that creates the `JsCmd`s necessary to add a copy of a `B` form closed over the index
+     *
+     * @param index the index of the map we're currently lensing over
+     * @return a unital method returning `JsCmd`
+     */
     def addNewRecordForm(index: Int): () => JsCmd = { () =>
       Replace(
         "%s-elements".format(label(outerName, name)), 
@@ -156,156 +243,59 @@ case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens
       )
     }
 
-    def removeRecordFromState(index: Int)(stateOption: Option[C])(inputString: String): Option[C] = lensAtIndex(index).set(stateOption, None)
+    /*
+     * Remove a record at an index from the state object
+     *
+     * @param index the index of the map we're lensing over
+     * @param state the state object to which we're updating
+     * @param inputString a string from the user
+     * @return an amended state object with the entry at `index` removed from the map under lens
+     */
+    def removeRecordFromState(index: Int)(state: C)(inputString: String): C = (outerLens >=> lens >=> mapVLens(index)).set(state, None)
 
+    /*
+     * Remove the record fields from the form
+     *
+     * @param index the index of the record we want to remove
+     * @return a method that when called removes the desired form fields
+     */
     def removeRecordFromForm(index: Int): () => JsCmd = { () =>
       val jsCmd = () => Replace("%s-%s".format(makeNameAdd(outerName, name), index), Nil)
       val fieldUpdateFunc: String => JsCmd = formStateUpdater( removeRecordFromState(index) )( jsCmd )
     }
 
     
+    /*
+     * Render the Record at a certain index. The surrounding chrome is intended to keep track of 
+     * the index of the form we're updating and provide methods to add or remove copies. At the 
+     * bottom of the form will be a "+" button to recursively add another form (index + 1).
+     *
+     * @param index the index of the record we want to remove
+     * @return a method to transform `NodeSeq`
+     */
     def renderAtIndex(index: Int): NodeSeq => NodeSeq = {
       "%s [id]".format(makeNameAdd(None, name)) #> "%s-%s".format(makeAdd(outerName, name), index) andThen
       makeName(None, "%s-number".format(name)) #> (index+1) andThen
       bRecord
         .fields
         .foldLeft( (ns: NodeSeq) => ns ){ (acc, field) => 
-           val newLens: Lens[Option[C], Option[B]] = lensAtIndex(index)
+           val newLens: Lens[C, B] = lensAtIndex(index)
            acc andThen field.render(formStateUpdater)(newLens, outerName)
          } andThen
       makeName(None, "%s-add [onclick]".format(name)) #> SHtml.onEvent( (s: String) => addNewRecordForm(index+1)() ) & 
       makeName(None, "%s-remove [onclick]".format(name)) #> SHtml.onEvent( (s: String) => removeRecordFromForm(index)() ) 
     }
 
-   // made lazy to avoid: http://stackoverflow.com/questions/13328502/what-does-forward-reference-extends-over-definition-of-value-mean-in-scala
+    // made lazy to avoid: 
+    // http://stackoverflow.com/questions/13328502/what-does-forward-reference-extends-over-definition-of-value-mean-in-scala
     lazy val addRecordMemoize = SHtml.memoize( renderAtIndex(0) )
 
-    // This is making the right selection, has been tested. 
     makeNameAdd(None, name) #> addRecordMemoize &
     "#%s-elements [id]".format(label(None, name)) #> "%s-elements".format(label(outerName, name))
   }
 
 }
 
-case class Author(name: String, url: String)
-object Author {
-  private val authorNameLens: Lens[Author, String] = Lens.lensu( (a, n) => a.copy(name = n), (a) => a.name )
-  private val authorUrlLens: Lens[Author,String] = Lens.lensu( (a, u) => a.copy(url = u), (a) => a.url )
-
-  implicit object AuthorRecord extends HasFields[Author] {
-    val fields: List[DynamicField[Author]] = List(
-      BasicField[Author]("author-name", authorNameLens)
-    , BasicField[Author]("author-url", authorUrlLens)
-    )
-  }
-} 
-case class Translator(name: String, url: String)
-object Translator {
-  private val translatorNameLens: Lens[Translator, String] = Lens.lensu( (t, n) => t.copy(name = n), (t) => t.name )
-  private val translatorUrlLens: Lens[Translator, String] = Lens.lensu( (t, u) => t.copy(url = u), (t) => t.url )
-
-  implicit object TranslatorRecord extends HasFields[Translator] {
-    val fields: List[DynamicField[Translator]] = List(
-      BasicField[Translator]("translator-name", translatorNameLens)
-    , BasicField[Translator]("translator-url", translatorUrlLens)
-    )
-  }
-}
-case class Artist(name: String, url: String, city: String, province: String)
-object Artist {
-  private val artistNameLens: Lens[Artist, String] = Lens.lensu( (a, n) => {println("artistNameLens: set(%s)".format(n)); a.copy(name = n)}, (a) => a.name )
-  private val artistUrlLens: Lens[Artist, String] = Lens.lensu( (a, u) => a.copy(url = u), (a) => a.url )
-  private val artistCityLens: Lens[Artist, String] = Lens.lensu( (a, c) => a.copy(city = c), (a) => a.city )
-  private val artistProvinceLens: Lens[Artist, String] = Lens.lensu( (a, p) => a.copy(province = p), (a) => a.province )
-
-  implicit object ArtistRecord extends HasFields[Artist] {
-    val fields: List[DynamicField[Artist]] = List(
-      BasicField[Artist]("artist-name", artistNameLens)
-    , BasicField[Artist]("artist-url", artistUrlLens)
-    , BasicField[Artist]("artist-city", artistCityLens)
-    , BasicField[Artist]("artist-province", artistProvinceLens)
-    )
-  }
-}
-case class Publisher(name: String, url: String, city: String, province: String)
-
-object Publisher {
-  private val publisherNameLens: Lens[Publisher, String] = Lens.lensu( (p, n) => p.copy(name = n), (p) => p.name )
-  private val publisherUrlLens: Lens[Publisher, String] = Lens.lensu( (p, u) => p.copy(url = u), (p) => p.url )
-  private val publisherCityLens: Lens[Publisher, String] = Lens.lensu( (p, c) => p.copy(city = c), (p) => p.city )
-  private val publisherProvinceLens: Lens[Publisher, String] = Lens.lensu( (p, pr) => p.copy(province = pr), (p) => p.province )
-
-  implicit object PublisherRecord extends HasFields[Publisher] {
-    val fields: List[DynamicField[Publisher]] = List(
-      BasicField[Publisher]("publisher-name", publisherNameLens)
-    , BasicField[Publisher]("publisher-url", publisherUrlLens)
-    , BasicField[Publisher]("publisher-city", publisherCityLens)
-    , BasicField[Publisher]("publisher-province", publisherProvinceLens)
-    )
-  }
-}
-case class Release(title: String, artists: List[Artist], publishers: List[Publisher], format: String, releaseDate: String)
-object Release {
-  private val releaseTitleLens: Lens[Release, String] = Lens.lensu( (r,t) => r.copy(title = t), (r) => r.title)
-  private val releaseArtistsLens: Lens[Release, Map[Int,Artist]] = Lens.lensu(
-    set = (r: Release, am: Map[Int,Artist]) => {println("releaseArtistsLens: set(%s)".format(am));r.copy(artists = am.toList.sortBy { _._1 }.map { _._2})}
-  , get = (r: Release) => r.artists.zipWithIndex.map { x => (x._2, x._1)}.toMap
-  )
-  private val releasePublishersLens: Lens[Release, Map[Int,Publisher]] = Lens.lensu(
-    set = (r: Release, pm: Map[Int,Publisher]) => r.copy(publishers = pm.toList.sortBy { _._1 }.map { _._2})
-  , get = (r: Release) => r.publishers.zipWithIndex.map { x => (x._2, x._1)}.toMap
-  )
-  private val releaseFormatLens: Lens[Release, String] = Lens.lensu( (r,f) => r.copy(format = f), (r) => r.format)
-  private val releaseReleaseDateLens: Lens[Release, String] = Lens.lensu( (r,d) => r.copy(releaseDate = d), (r) => r.releaseDate)
-
-  implicit object ReleaseRecord extends HasFields[Release] {
-    val fields: List[DynamicField[Release]] = List(
-      BasicField[Release]("release-title", releaseTitleLens)
-    , ManyRecordField[Release, Artist]("artist", releaseArtistsLens)
-    , ManyRecordField[Release, Publisher]("publisher", releasePublishersLens)
-    , BasicField[Release]("release-format", releaseFormatLens)
-    , BasicField[Release]("release-release-date", releaseReleaseDateLens)
-    )
-  }
-}
-
-case class Post(
-  release: Release,
-  authors: List[Author],
-  translators: List[Translator], 
-  translatorText: String,
-  fromThe: String, 
-  contentEnglish: String, 
-  deLa: String, 
-  contentFrench: String
-)
-object Post {
-  private val postReleaseLens: Lens[Post,Release] = Lens.lensu( (p,r) => p.copy(release = r), (p) => p.release)
-  private val postAuthorsLens: Lens[Post, Map[Int, Author]] = Lens.lensu(
-    set = (p: Post, am: Map[Int,Author]) => p.copy(authors = am.toList.sortBy { _._1 }.map { _._2})
-  , get = (p: Post) => p.authors.zipWithIndex.map { x => (x._2, x._1)}.toMap
-  )
-  private val postTranslatorsLens: Lens[Post, Map[Int, Translator]] = Lens.lensu( 
-    set = (p: Post, tm: Map[Int,Translator]) => p.copy(translators = tm.toList.sortBy { _._1 }.map { _._2})
-  , get = (p: Post) => p.translators.zipWithIndex.map { x => (x._2, x._1)}.toMap
-  )
-  private val postFromTheLens: Lens[Post, String] = Lens.lensu( (p,ft) => p.copy(fromThe = ft), (p) => p.fromThe)
-  private val postContentEnglishLens: Lens[Post, String] = Lens.lensu( (p,ce) => p.copy(contentEnglish = ce), (p) => p.contentEnglish)
-  private val postDeLaLens: Lens[Post, String] = Lens.lensu( (p,dl) => p.copy(deLa = dl), (p) => p.deLa)
-  private val postContentFrenchLens: Lens[Post, String] = Lens.lensu( (p,cf) => p.copy(contentFrench = cf), (p) => p.contentFrench)
-
-  implicit object PostRecord extends HasFields[Post] {
-    val fields: List[DynamicField[Post]] = List(
-      RecordField[Post, Release]("release", postReleaseLens)
-    , ManyRecordField[Post, Author]("author", postAuthorsLens)
-    , ManyRecordField[Post, Translator]("translator", postTranslatorsLens)
-    , BasicField[Post]("from-the", postFromTheLens)
-    , BasicField[Post]("content-english", postContentEnglishLens)
-    , BasicField[Post]("de-la", postDeLaLens)
-    , BasicField[Post]("content-french", postContentFrenchLens)
-    )
-  }
-}
 
 object Main extends App {
   override def main(args: Array[String]) = {
