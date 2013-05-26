@@ -1,7 +1,8 @@
 package org.weirdcanada.site.snippet
 
 // Weird Canada
-import org.weirdcanada.site.lib.{ApplyOnce}
+import org.weirdcanada.site.lib.{ApplyOnce} 
+import org.weirdcanada.dynamicform.{DynamicFormHelpers}
 
 // Lift
 import net.liftweb._

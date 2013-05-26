@@ -1,13 +1,7 @@
-package org.weirdcanada.site.model
-import scala.reflect.runtime.universe._
+package org.weirdcanada.dynamicform
 
 // Scala
-import scalaz.Lens
-import Lens.{mapVLens, lensId}
-
-// Weird Canada
-import org.weirdcanada.site.lib.{ApplyOnce}
-import org.weirdcanada.site.snippet.{DynamicFormHelpers}
+import scala.xml.{NodeSeq, Text}
 
 // Lift
 import net.liftweb._
@@ -17,98 +11,10 @@ import JsCmds.{After, Alert, Replace, Run, Noop}
 import common._
 import util.Helpers._
 
-// Scala
-import scala.xml.{NodeSeq, Text, Elem}
-import scala.annotation.tailrec
+// 3rd party
+import scalaz.Lens
+import scalaz.Lens.{mapVLens, lensId}
 
-/*
- * Trait that can be mixed in to provide a method creating `NodeSeq => NodeSeq`
- * methods that will create dynamic forms. 
- */
-trait DynamicFormCreator extends DynamicFormHelpers { 
-
-  /*
-   * Method to fetch the `NodeSeq => NodeSeq` method for a type `A` that implements
-   * the `HasFields` typeclass.
-   *
-   * @param formState a `RequestVar` object holding the form state.
-   * @return a method to transform `NodeSeq`s
-   */
-  def renderField[A : HasFields](formState: RequestVar[A]): NodeSeq => NodeSeq = {
-    val record = implicitly[HasFields[A]]
-    val updateStateFunction = getUpdateAndSaveFuncForField[A](formState)
-    record
-      .fields
-      .foldLeft( (ns: NodeSeq) => ns){ (acc, field) => 
-        acc andThen field.render(updateStateFunction)(lensId[A], None)
-      }
-  }
-}
-
-/*
- * Typeclass to encompass types that have a list of dynamic fields.
- */
-trait HasFields[A] {
-  val fields: List[DynamicField[A]]
-}
-
-/*
- * Typeclass that encompasses types that have the notion of an "empty". For example,
- * consider: `case class Artist(name: String, url: String)`
- * an "empty" artist may be: `Artist("", "")`
- */
-trait HasEmpty[A] {
-  val empty: A
-}
-
-/*
- * Companion object to the `DynamicField` trait. Supplies many helper methods
- */
-object DynamicField {
-
-  type FormStateUpdate[A] = (A => String => A) => (() => JsCmd) => (String => JsCmd)
-
-  def label(outerName: Option[String], name: String): String =
-    "%s%s".format(outerName.map{ _ + "-"}.getOrElse(""), name)
-
-  def makeName(outerName: Option[String], name: String): String =
-    "name=%s".format(label(outerName, name))
-
-  def makeNameAdd(outerName: Option[String], name: String): String =
-    "name=add-%s".format(label(outerName, name))
-
-  def makeAdd(outerName: Option[String], name: String): String =
-    "add-%s".format(label(outerName, name))
-
-  def makeInput(outerName: Option[String], name: String): String =
-    "%s-input".format(makeName(outerName, name))
-
-  /** TODO:
-   * This lens is needed for the case that we want to update a field in a map or list
-   * but it does not exist yet. In these cases, we need to create a `blank` instance of
-   * the field that can be added to the map/list and then the field we're lensin' on can
-   * be updated. E.g. you can't update the name of an `Artist` when no artist exists at 
-   * index 0 in `Map[Int,Artist]`. 
-   *
-   * Alas, this Lens is not a true lens. It breaks the second lens law:
-   *   2. forall a. lens.set(a, lens.get(a)) = a
-   *   consider the case where a = None you will get:
-   *   lens.set(None, lens.get(None))
-   *   = lens.set(None, a.empty)
-   *   = Some(a.empty)
-   *   != None
-   * Possible different approaches:
-   *   1. Partial lenses
-   *   2. State actions 
-   *
-   *   @return a lens from Option[A] to A
-   */
-  def optionLens[A : HasEmpty]: Lens[Option[A],A] = Lens.lensu(
-    get = (oa) => oa.getOrElse( implicitly[HasEmpty[A]].empty )
-  , set = (oa,a) => Some(a)
-  )
-
-}
 
 /*
  * Trait to represent a Dynamic Fields. Classes mixing in this trait must provide
@@ -189,7 +95,7 @@ case class RecordField[A, B : HasFields](name: String, lens: Lens[A,B]) extends 
    * @return a method to transform `NodeSeq`
    */
   def render[C](formStateUpdater: FormStateUpdate[C])(outerLens: Lens[C,A], outerName: Option[String]): NodeSeq => NodeSeq = {
-    makeNameAdd(None, name) #> 
+    makeNameAdd(None, name) #>
       bRecord
         .fields
         .foldLeft( (ns: NodeSeq) => ns ){ (acc, field) => acc andThen field.render(formStateUpdater)(outerLens >=> lens, Some(name)) }
@@ -238,7 +144,7 @@ case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens
      */
     def addNewRecordForm(index: Int): () => JsCmd = { () =>
       Replace(
-        "%s-elements".format(label(outerName, name)), 
+        "%s-elements".format(label(outerName, name)),
         renderAtIndex(index)( addRecordMemoize.applyAgain() ) ++ <div id={"%s-elements".format(label(outerName,name))}></div>
       )
     }
@@ -264,7 +170,7 @@ case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens
       val fieldUpdateFunc: String => JsCmd = formStateUpdater( removeRecordFromState(index) )( jsCmd )
     }
 
-    
+
     /*
      * Render the Record at a certain index. The surrounding chrome is intended to keep track of 
      * the index of the form we're updating and provide methods to add or remove copies. At the 
@@ -278,12 +184,12 @@ case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens
       makeName(None, "%s-number".format(name)) #> (index+1) andThen
       bRecord
         .fields
-        .foldLeft( (ns: NodeSeq) => ns ){ (acc, field) => 
+        .foldLeft( (ns: NodeSeq) => ns ){ (acc, field) =>
            val newLens: Lens[C, B] = lensAtIndex(index)
            acc andThen field.render(formStateUpdater)(newLens, outerName)
          } andThen
-      makeName(None, "%s-add [onclick]".format(name)) #> SHtml.onEvent( (s: String) => addNewRecordForm(index+1)() ) & 
-      makeName(None, "%s-remove [onclick]".format(name)) #> SHtml.onEvent( (s: String) => removeRecordFromForm(index)() ) 
+      makeName(None, "%s-add [onclick]".format(name)) #> SHtml.onEvent( (s: String) => addNewRecordForm(index+1)() ) &
+      makeName(None, "%s-remove [onclick]".format(name)) #> SHtml.onEvent( (s: String) => removeRecordFromForm(index)() )
     }
 
     // made lazy to avoid: 
@@ -293,15 +199,53 @@ case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens
     makeNameAdd(None, name) #> addRecordMemoize &
     "#%s-elements [id]".format(label(None, name)) #> "%s-elements".format(label(outerName, name))
   }
-
 }
 
+/*
+ * Companion object to the `DynamicField` trait. Supplies many helper methods
+ */   
+object DynamicField {
+        
+  type FormStateUpdate[A] = (A => String => A) => (() => JsCmd) => (String => JsCmd)
+        
+  def label(outerName: Option[String], name: String): String =
+    "%s%s".format(outerName.map{ _ + "-"}.getOrElse(""), name)
+        
+  def makeName(outerName: Option[String], name: String): String =
+    "name=%s".format(label(outerName, name))
 
-object Main extends App {
-  override def main(args: Array[String]) = {
-    import Release._
-    println("")
-    //println(ReleaseRecord.nodeSeqTransformer)
-  }
+  def makeNameAdd(outerName: Option[String], name: String): String =
+    "name=add-%s".format(label(outerName, name))
+
+  def makeAdd(outerName: Option[String], name: String): String =
+    "add-%s".format(label(outerName, name))
+
+  def makeInput(outerName: Option[String], name: String): String =
+    "%s-input".format(makeName(outerName, name))
+
+  /** TODO:
+   * This lens is needed for the case that we want to update a field in a map or list
+   * but it does not exist yet. In these cases, we need to create a `blank` instance of
+   * the field that can be added to the map/list and then the field we're lensin' on can
+   * be updated. E.g. you can't update the name of an `Artist` when no artist exists at 
+   * index 0 in `Map[Int,Artist]`. 
+   *
+   * Alas, this Lens is not a true lens. It breaks the second lens law:
+   *   2. forall a. lens.set(a, lens.get(a)) = a
+   *   consider the case where a = None you will get:
+   *   lens.set(None, lens.get(None))
+   *   = lens.set(None, a.empty)
+   *   = Some(a.empty)
+   *   != None
+   * Possible different approaches:
+   *   1. Partial lenses
+   *   2. State actions 
+   *
+   *   @return a "lens" from Option[A] to A
+   */
+  def optionLens[A : HasEmpty]: Lens[Option[A],A] = Lens.lensu(
+    get = (oa) => oa.getOrElse( implicitly[HasEmpty[A]].empty )
+  , set = (oa,a) => Some(a)
+  )
 }
 

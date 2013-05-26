@@ -7,9 +7,9 @@ import Lens.{mapVLens, lensId}
 
 // Weird Canada
 import org.weirdcanada.site.lib.{ApplyOnce}
+import org.weirdcanada.dynamicform.DynamicFormCreator
 import org.weirdcanada.site.model.{
-  DynamicFormCreator
-, Post => NewPost
+  Post => NewPost
 , Release => NewRelease
 , Author => NewAuthor
 , Translator => NewTranslator
