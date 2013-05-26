@@ -1,5 +1,8 @@
 package org.weirdcanada.site.model
 
+// scala
+import scala.xml.{Text, NodeSeq}
+
 // weirdcanada
 import org.weirdcanada.dynamicform.{BasicField, DynamicField, HasEmpty, HasFields}
 
@@ -21,5 +24,8 @@ object Translator {
   implicit object TranslatorEmpty extends HasEmpty[Translator] {
     val empty: Translator = Translator("","")
   }
+
+  def renderAsXml(translator: Translator): NodeSeq = 
+    if(translator.url.isEmpty) Text(translator.name) else <a href={translator.url} target="_blank">{translator.name}</a>
 }
 

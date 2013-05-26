@@ -8,13 +8,7 @@ import Lens.{mapVLens, lensId}
 // Weird Canada
 import org.weirdcanada.site.lib.{ApplyOnce}
 import org.weirdcanada.dynamicform.DynamicFormCreator
-import org.weirdcanada.site.model.{
-  Post => NewPost
-, Release => NewRelease
-, Author => NewAuthor
-, Translator => NewTranslator
-, Artist => NewArtist
-, Publisher => NewPublisher}
+import org.weirdcanada.site.model.{Post, Release}
 
 // Lift
 import net.liftweb._
@@ -32,12 +26,14 @@ object TestSnippet extends DynamicFormCreator {
 
   import Post._
 
-  private object postState extends RequestVar[NewPost](NewPost(NewRelease("", Nil, Nil, "",""), Nil, Nil, "", "", "", "", ""))
+  private object postState extends RequestVar[Post](Post(Release("", Nil, Nil, "",""), Nil, Nil, "", "", "", "", ""))
 
   // Add and save function
-  def updateState = getUpdateAndSaveFuncForField[NewPost](postState)
+  def updateState = getUpdateAndSaveFuncForField[Post](postState)
 
   val renderFunction = renderField(postState)
 
-  def render = renderFunction
+  def render = renderFunction andThen
+    "name=do-something" #> SHtml.ajaxButton("Done", () => JsCmds.SetValById("result-input", Post.renderAsXml(postState.is).toString)) 
+
 }

@@ -1,4 +1,4 @@
-package org.weirdcanada.site.snippet
+package org.weirdcanada.fake //site.snippet
 
 // Weird Canada
 import org.weirdcanada.site.lib.{ApplyOnce} 

@@ -1,5 +1,8 @@
 package org.weirdcanada.site.model
 
+// scala
+import scala.xml.{NodeSeq, Text}
+
 // weirdcanada
 import org.weirdcanada.dynamicform.{BasicField, DynamicField, HasEmpty, HasFields}
 
@@ -26,4 +29,8 @@ object Publisher {
   implicit object PublisherEmpty extends HasEmpty[Publisher] {
     val empty: Publisher = Publisher("","","","")
   }
+
+  def renderAsXml(publisher: Publisher): NodeSeq =
+    if(publisher.url.isEmpty) Text(publisher.name) else <a href={publisher.url} target="_blank">{publisher.name}</a>
+
 }
