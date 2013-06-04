@@ -18,7 +18,7 @@ object RunWebApp extends App {
   server.setHandler(context0)
 
   try {
-    println(">>> STARTING EMBEDDED JETTY SERVER, PRESS ANY KEY TO STOP")
+    println(">>> XXX STARTING EMBEDDED JETTY SERVER, PRESS ANY KEY TO STOP")
     server.start()
     while (System.in.available() == 0) {
       Thread.sleep(5000)

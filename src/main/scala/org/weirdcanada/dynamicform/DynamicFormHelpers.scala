@@ -67,7 +67,7 @@ trait DynamicFormHelpers {
         // Get current data & transformed data
         val currentData = data.is
         val newData = f(currentData)(inputString)
-        println("new state: %s".format(newData))
+        //println("This is the updated state: %s".format(newData))
 
         // validation of new data
         val validationRollUp = foldValidators(newData)(validators)

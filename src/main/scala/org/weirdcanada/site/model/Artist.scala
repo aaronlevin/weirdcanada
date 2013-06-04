@@ -10,6 +10,7 @@ import org.weirdcanada.dynamicform.{BasicField, DynamicField, HasEmpty, HasField
 import scalaz.Lens
 
 case class Artist(name: String, url: String, city: String, province: String)
+
 object Artist {
   val artistNameLens: Lens[Artist, String] = Lens.lensu( (a, n) => a.copy(name = n), (a) => a.name )
   val artistUrlLens: Lens[Artist, String] = Lens.lensu( (a, u) => a.copy(url = u), (a) => a.url )

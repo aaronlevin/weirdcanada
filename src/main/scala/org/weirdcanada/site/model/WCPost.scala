@@ -2,11 +2,17 @@ package org.weirdcanada.site.model
 
 // scala
 import scala.xml.{Elem, NodeSeq, Text, Unparsed}
+
 // weirdcanada
 import org.weirdcanada.dynamicform.{BasicField, DynamicField, HasEmpty, HasFields, ManyRecordField, RecordField}
 
 // scalaz
 import scalaz.Lens
+
+// Lift
+import net.liftweb.http.SHtml
+import net.liftweb.http.js.JsCmd
+import net.liftweb.util.Helpers._
 
 // 3rd Party
 import org.clapper.markwrap.{MarkupType, MarkWrap}
@@ -47,16 +53,22 @@ object Post {
   val postDeLaLens: Lens[Post, String] = Lens.lensu( (p,dl) => p.copy(deLa = dl), (p) => p.deLa)
   val postContentFrenchLens: Lens[Post, String] = Lens.lensu( (p,cf) => p.copy(contentFrench = cf), (p) => p.contentFrench)
 
+  private def textAreaRender(selector: String)(filler: String)(updateFunc: String => JsCmd): NodeSeq => NodeSeq =
+    selector #> SHtml.ajaxTextarea("", updateFunc, "placeholder" -> filler)
+
+  private val englishRender = textAreaRender("name=content-english-input")("English Content") _
+  private val frenchRender = textAreaRender("name=content-french-input")("French Content") _
+
   implicit object PostRecord extends HasFields[Post] {
     val fields: List[DynamicField[Post]] = List(
       RecordField[Post, Release]("release", postReleaseLens)
     , ManyRecordField[Post, Author]("author", postAuthorsMapLens)
     , ManyRecordField[Post, Translator]("translator", postTranslatorsMapLens)
     , BasicField[Post]("translator-text", postTranslatorTextLens)
-    , BasicField[Post]("from-the", postFromTheLens)
-    , BasicField[Post]("content-english", postContentEnglishLens)
-    , BasicField[Post]("de-la", postDeLaLens)
-    , BasicField[Post]("content-french", postContentFrenchLens)
+    , BasicField[Post]("from-the-english", postFromTheLens)
+    , BasicField[Post]("content-english", postContentEnglishLens, Some(englishRender) )
+    , BasicField[Post]("de-la-french", postDeLaLens)
+    , BasicField[Post]("content-french", postContentFrenchLens, Some(frenchRender) )
     )
   }
 

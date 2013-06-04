@@ -43,7 +43,7 @@ sealed trait DynamicField[A] {
  * @param name The name of the field
  * @param lens a lens from the field type `A` to String (for updating the field from string input)
  */
-case class BasicField[A](name: String, lens: Lens[A,String]) extends DynamicField[A] {
+case class BasicField[A](name: String, lens: Lens[A,String], transformer: Option[(String => JsCmd) => (NodeSeq => NodeSeq)] = None) extends DynamicField[A] {
   import DynamicField.{makeName,makeNameAdd,makeInput, FormStateUpdate, label}
 
   /*
@@ -69,9 +69,26 @@ case class BasicField[A](name: String, lens: Lens[A,String]) extends DynamicFiel
 
     val jsCmd = () => Noop
     val fieldUpdateFunc: String => JsCmd = formStateUpdater(updateFunc)(jsCmd)
-    makeInput(None, name) #> SHtml.ajaxText("", fieldUpdateFunc, "placeholder" -> label(None, name))
+    transformer match {
+      case None => BasicField.defaultTransformer(name, fieldUpdateFunc)
+      case Some(transformer) => transformer(fieldUpdateFunc)
+    }
   }
 }
+
+/*
+ * Companion object for BasicField
+ */
+object BasicField {
+
+  import DynamicField.{makeInput}
+
+  def defaultTransformer(name: String, updateFunc: String => JsCmd): NodeSeq => NodeSeq = 
+    makeInput(None, name) #> SHtml.ajaxText("", updateFunc, "placeholder" -> name)
+
+}
+
+
 
 /* 
  * A Field of type `A` that encompasses a Structure of cardinality 1 for type `B`. 
@@ -82,7 +99,7 @@ case class BasicField[A](name: String, lens: Lens[A,String]) extends DynamicFiel
  * @param lens a lens from `A` to `B`
  */
 case class RecordField[A, B : HasFields](name: String, lens: Lens[A,B]) extends DynamicField[A] {
-  import DynamicField.{makeNameAdd,FormStateUpdate}
+  import DynamicField.{label,makeNameAdd,FormStateUpdate}
   val bRecord = implicitly[HasFields[B]]
 
   /*
@@ -98,7 +115,7 @@ case class RecordField[A, B : HasFields](name: String, lens: Lens[A,B]) extends 
     makeNameAdd(None, name) #>
       bRecord
         .fields
-        .foldLeft( (ns: NodeSeq) => ns ){ (acc, field) => acc andThen field.render(formStateUpdater)(outerLens >=> lens, Some(name)) }
+        .foldLeft( (ns: NodeSeq) => ns ){ (acc, field) => acc andThen field.render(formStateUpdater)(outerLens >=> lens, Some(label(outerName,name))) }
   }
 }
 
@@ -165,9 +182,9 @@ case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens
      * @param index the index of the record we want to remove
      * @return a method that when called removes the desired form fields
      */
-    def removeRecordFromForm(index: Int): () => JsCmd = { () =>
-      val jsCmd = () => Replace("%s-%s".format(makeNameAdd(outerName, name), index), Nil)
-      val fieldUpdateFunc: String => JsCmd = formStateUpdater( removeRecordFromState(index) )( jsCmd )
+    def removeRecordFromForm(index: Int): String => JsCmd = { 
+      val jsCmd = () => Replace("%s-%s".format(makeAdd(outerName, name), index), Nil)
+      formStateUpdater( removeRecordFromState(index) )( jsCmd )
     }
 
 
@@ -181,15 +198,15 @@ case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens
      */
     def renderAtIndex(index: Int): NodeSeq => NodeSeq = {
       "%s [id]".format(makeNameAdd(None, name)) #> "%s-%s".format(makeAdd(outerName, name), index) andThen
-      makeName(None, "%s-number".format(name)) #> (index+1) andThen
+      makeName(None, "%s-number *".format(name)) #>  (index+1) andThen
       bRecord
         .fields
         .foldLeft( (ns: NodeSeq) => ns ){ (acc, field) =>
            val newLens: Lens[C, B] = lensAtIndex(index)
-           acc andThen field.render(formStateUpdater)(newLens, outerName)
+           acc andThen field.render(formStateUpdater)(newLens, Some(label(outerName,name)))
          } andThen
       makeName(None, "%s-add [onclick]".format(name)) #> SHtml.onEvent( (s: String) => addNewRecordForm(index+1)() ) &
-      makeName(None, "%s-remove [onclick]".format(name)) #> SHtml.onEvent( (s: String) => removeRecordFromForm(index)() )
+      makeName(None, "%s-remove [onclick]".format(name)) #> SHtml.onEvent( (s: String) => removeRecordFromForm(index)(s) )
     }
 
     // made lazy to avoid: 
