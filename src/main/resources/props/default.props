@@ -1,4 +1,0 @@
-db.driver=org.postgresql.Driver
-db.url=jdbc:postgresql:ulli
-db.user=weirdcanada
-db.password=weird
