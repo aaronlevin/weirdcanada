@@ -1,0 +1,41 @@
+#!/bin/bash
+
+source bash_variables
+
+for file in "$@"
+do
+	if [ ${file#*.} = "mp3" ]
+	then
+		MP3_FILE="$file"
+		WAV_FILE=${MP3_FILE%.*}".wav"
+		OGG_FILE=${MP3_FILE%.*}".ogg"
+
+		echo ">> ... converting $MP3_FILE to wav"
+
+		mpg123 -w $WAV_FILE $MP3_FILE
+
+		echo ">> ... converting $WAV_FILE to ogg"
+
+		oggenc $WAV_FILE
+		
+		echo ">> ... uploading $MP3_FILE"
+
+		curl -T "$MP3_FILE" "$WEIRD_FTP""/binary/" --user "$WEIRD_USER":"$WEIRD_PASS"
+		
+		echo ">> ... uploading $OGG_FILE"
+
+		curl -T "$OGG_FILE" "$WEIRD_FTP""/binary/" --user "$WEIRD_USER":"$WEIRD_PASS"
+
+		echo "
+<audio controls=\"controls\" class=\"audioTrack\">
+	<source src=\"http://weirdcanada.com/binary/$OGG_FILE\" type='audio/ogg; codecs=\"vorbis\"' />
+	<source src=\"http://weirdcanada.com/binary/$MP3_FILE\" type='audio/mpeg; codecs=\"mp3\"' />
+</audio>
+<p class=\"audioTrack\"><a href=\"http://weirdcanada.com/binary/$MP3_FILE\" target=\"_blank\">TRACKNAME</a></p>
+"
+
+		rm $WAV_FILE
+	fi
+done
+
+exit

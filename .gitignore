@@ -9,3 +9,4 @@ sbt.bat
 *.db
 *.props
 src/main/resources/props/default.props
+scripts/bash_variables
