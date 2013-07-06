@@ -1,3 +1,5 @@
+import AssemblyKeys._
+
 name := "weirdcanada"
 
 version := "0.0.1"
@@ -15,6 +17,17 @@ seq(com.github.siasia.WebPlugin.webSettings :_*)
 unmanagedResourceDirectories in Test <+= (baseDirectory) { _ / "src/main/webapp" }
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
+
+assemblySettings
+
+mainClass in assembly := Some("org.weirdcanada.http.WeirdCanadaServer")
+
+mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
+  {
+    case "about.html"     => MergeStrategy.discard
+    case x => old(x)
+  }
+}
 
 libraryDependencies ++= {
   val liftVersion = "2.5-RC1"
