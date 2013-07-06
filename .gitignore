@@ -12,3 +12,4 @@ src/main/resources/props/default.props
 scripts/bash_variables
 tmp.txt
 src/main/scala/org/weirdcanada/site/snippet/Tmp.scala.bk
+src/test/scala/code/snippet/HelloWorldTest.scala.bk
