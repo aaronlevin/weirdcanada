@@ -44,9 +44,9 @@ object WeirdCanadaServer {
     context.setServer(server)
     context.setWar("src/main/webapp")
 
-    val context0: ContextHandler = new ContextHandler();
-    context0.setHandler(context)
-    server.setHandler(context0)
+    val contextHandler: ContextHandler = new ContextHandler();
+    contextHandler.setHandler(context)
+    server.setHandler(contextHandler)
 
     try {
       println(">>> XXX STARTING EMBEDDED JETTY SERVER, PRESS ANY KEY TO STOP")
