@@ -1,5 +1,13 @@
 package org.weirdcanada.http
 
+// Java
+import javax.servlet.DispatcherType
+import java.util.EnumSet
+
+// Lift
+import net.liftweb.http.LiftFilter
+import bootstrap.liftweb.{Boot => BootClass}
+
 // 3rd Party
 import org.eclipse.jetty.server.{
   Connector
@@ -10,6 +18,7 @@ import org.eclipse.jetty.server.{
 , Server
 , ServerConnector }
 import org.eclipse.jetty.server.handler.ContextHandler
+import org.eclipse.jetty.servlet.{DefaultServlet, FilterHolder, FilterMapping}
 import org.eclipse.jetty.webapp.WebAppContext
 
 object WeirdCanadaServer {
@@ -43,6 +52,13 @@ object WeirdCanadaServer {
     val context = new WebAppContext()
     context.setServer(server)
     context.setWar("src/main/webapp")
+
+    // Use lift to filter all requests
+    //val filter = new FilterHolder(classOf[net.liftweb.http.LiftFilter])
+    //filter.setInitParameter("bootloader", classOf[BootClass].getName)
+
+    //context.addFilter(filter, "/*", EnumSet.of(DispatcherType.REQUEST))
+    //context.addServlet(classOf[DefaultServlet], "/")
 
     val contextHandler: ContextHandler = new ContextHandler();
     contextHandler.setHandler(context)
