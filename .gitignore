@@ -8,6 +8,7 @@ sbt
 sbt.bat
 *.db
 *.props
+*.pyc
 src/main/resources/props/default.props
 scripts/bash_variables
 tmp.txt
