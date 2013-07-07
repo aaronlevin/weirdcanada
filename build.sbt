@@ -24,7 +24,7 @@ mainClass in assembly := Some("org.weirdcanada.http.WeirdCanadaServer")
 
 mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
   {
-    case "about.html"     => MergeStrategy.discard
+    case "about.html" => MergeStrategy.discard
     case x => old(x)
   }
 }
