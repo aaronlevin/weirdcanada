@@ -12,6 +12,9 @@ def install_java():
 def install_postgres():
     sudo('apt-get install postgresql')
 
+def install_nginx():
+    sudo('apt-get install nginx')
+
 def setup_db():
     sudo("psql -u postgres psql postgres -c \"create user weirdcanada with encrypted password 'xxx';\"")
     sudo("psql -u postgres psql postgres -c \"create database weirdcanada;\"")
@@ -34,10 +37,12 @@ def deploy():
     put_startup_script()
 
 def start_admin_app():
-    run('dtach -n deploy/weirdcanada-admin')
+    run('dtach -n /tmp/weirdcanada-admin-session deploy/weirdcanada-admin')
 
 def configure_box():
     install_pyton()
     install_java()
     install_postgres()
+    install_nginx()
+    setup_db()
     sudo('apt-get install dtach')
