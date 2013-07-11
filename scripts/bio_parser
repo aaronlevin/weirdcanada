@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Structure of csv file:
+# Name
+# Byline
+# (City, Province)
+# website
+# email
+# text
+
+while read row; do
+
+  NAME=`echo -e "$row" | cut -f1 -s | sed "s/[/\&]/\\\\\&/g"`
+  BYLINE=`echo -e "$row" | cut -f2 -s |  sed  "s/[/\&]/\\\\\&/g"`
+  GEO=`echo -e "$row" | cut -f3 -s |  sed  "s/[/\&]/\\\\\&/g"`
+  WEBSITE=`echo -e "$row" | cut -f4 -s |  sed  "s/[/\&]/\\\\\&/g"`
+  EMAIL=`echo -e "$row" | cut -f5 -s |  sed  "s/[/\&]/\\\\\&/g"`
+  TEXT=`echo -e "$row" | cut -f6 -s |  sed  "s/[/\&]/\\\\\&/g"`
+  
+  TEMPLATE=\
+'<div class="contributorRow">
+<div class="contributorContainer">
+<div class="contributorImage">
+IMAGE
+</div>
+<div class="contributorInfo">
+<ul>
+<li class="contributorName">{{name}}</li>
+<li class="contributorTitle">{{byline}}</li>
+<li class="contributorCity">{{geo}}</li>
+<li class="contributorWeb">w: {{website}}</li>
+<li class="contributorEmail">e: {{email}}</li>
+</ul>
+</div>
+</div>
+<div class="contributorBio">
+{{text}}
+</div>
+</div>'
+
+  echo "$TEMPLATE" \
+    | sed "s/{{name}}/$NAME/g" \
+    | sed "s/{{byline}}/$BYLINE/g" \
+    | sed "s/{{geo}}/$GEO/g" \
+    | sed "s/{{website}}/$WEBSITE/g" \
+    | sed "s/{{email}}/$EMAIL/g" \
+    | sed "s/{{text}}/$TEXT/g" 
+
+done
