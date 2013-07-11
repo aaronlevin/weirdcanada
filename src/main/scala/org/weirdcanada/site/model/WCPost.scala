@@ -147,6 +147,12 @@ object Post {
     </div>
   </div>
 </div>
+
+<audio controls="controls" class="audioTrack" preload="none" >
+<source src="OGG_FILE_URL"  type="audio/ogg" />
+<source src="MP3_FILE_URL"  type="audio/mpeg" />
+</audio>
+<p class="audioTrack"><a href="MP3_FILE_URL" target="_blank">ARTIST_NAME - TRACK_NAME</a></p>
   }
 }
 
