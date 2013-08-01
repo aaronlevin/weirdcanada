@@ -1,77 +1,136 @@
 ﻿#!/usr/bin/python
-import sys, os
+import sys, os, getopt
 import smtplib, email, email.encoders, email.mime.text, email.mime.base
 import gspread
+import traceback
 
 DEBUG = True
-
-EMAIL_USERNAME = "email_address@gmail.com"
-EMAIL_PASSWORD = "password"
-SPREADSHEET_KEY = "0AhnGs-PFWpMhdHI3WlRtb1RHejZEbWN4YmNvQ0RMT2c"
 
 # Note that gspread begins indexing at 1, 
 # while the rest of computers start at 0
 IS_CANADIAN_ARTIST_COL = 8 # I
 IS_PHYSICAL_COL = 10 # K
 HAS_BEEN_EMAILED_COL = 14 # O
+EMAIL_ADDRESS_COL = 5
 
 HAS_BEEN_EMAILED = "Yes"
 HAS_NOT_BEEN_EMAILED = "No"
 
 
 def main(argv=None):
+    username, password, spreadsheet_key = parseArguments(argv)
+    
     try:
-        gc = gspread.login(EMAIL_USERNAME, EMAIL_PASSWORD)
-        worksheet = gc.open_by_key(SPREADSHEET_KEY).sheet1
+        gc = gspread.login(username, password)
+        worksheet = gc.open_by_key(spreadsheet_key).sheet1
+    except gspread.exceptions.AuthenticationError:
+        print("Error: Unable to log in - exiting")
+        return -1
     except Exception, e:
-        print("Error: Couldn't open the spreadsheet", e)
+        print("Error: exiting", e)
+        print traceback.print_exc(15)
+        return -1
         
     try:
-        emailBands(worksheet)
+        emailer = Emailer(worksheet, username, password)
+        emailer.sendEmails()
     except Exception, e:
         print("Error emailing bands: ", e)
+        print traceback.print_exc(15)
+        return -1
     
-def emailBands(worksheet):
-    unCanadianEmails = []
-    digitalOnlyEmails = []
-    successEmails = []
-        
-    for row, submissionRow in enumerate(worksheet.get_all_values()):
-        if submissionRow[0] == "" or row == 0:
-            continue
-        
-        emailAddress = submissionRow[5]
-        emailInfo = {"cellRow": row,
-                     "email": emailAddress}
-        
-        if submissionRow[HAS_BEEN_EMAILED_COL] != HAS_BEEN_EMAILED:            
-            if not isCanadianAlbum(submissionRow):
-                unCanadianEmails.append(emailInfo)
-            elif isDigitalOnly(submissionRow):
-                digitalOnlyEmails.append(emailInfo)
+def parseArguments(argv):
+    username = None
+    password = None
+    spreadsheet = None
+    
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "u:p:s:h", [
+        "username=", "password=", "spreadsheet=", "help"])
+        for opt, arg in opts:
+            if opt in ("-h", "--help"):
+                print getHelpText()
+                sys.exit(2)
+            elif opt in ("-u", "--username"):
+                username = arg
+            elif opt in ("-p", "--password"):
+                password = arg
+            elif opt in ("-s", "--spreadsheet"):
+                spreadsheet = arg
             else:
-                successEmails.append(emailInfo)
+                print "Incorrect arguments, -h for help."
+
+    except getopt.GetoptError:
+        sys.exit(2)
         
-    print("Sending physical-only emails")
-    physicalEmail = PhysicalFailureEmail(worksheet, digitalOnlyEmails)
-    physicalEmail.send()
-    print("Sending Can-Con-only emails")
-    canadaEmail = CanadianFailureEmail(worksheet, unCanadianEmails)
-    canadaEmail.send()
-    print("Sending Success Emails")
-    successEmail = SuccessEmail(worksheet, successEmails)
-    successEmail.send()
-            
-def isCanadianAlbum(submissionRow):
-    return submissionRow[IS_CANADIAN_ARTIST_COL].strip() == "Yes"
+    if not username or not password or not spreadsheet:
+        print "You need to pass the required arguments. -h for help"
+        sys.exit(2)
+        
+    return username, password, spreadsheet
     
-def isDigitalOnly(submissionRow):
-    return "Digitally Released Only" == submissionRow[IS_PHYSICAL_COL].strip()
+        
+def getHelpText():
+    print """
+    -u      --username      the username of your Google Account
+    -p      --password      the password of your Google Account
+    -s      --spreadsheet   your Google Spreadsheet key (found in the url).
+                            It might look something like this: 
+                                0AhnGs-PFWpMhdHI3WlRtb1RHejZEbWN4YmNvQ0RMT2c
+    -h      --help          display this message
+    """
+    
+    
+class Emailer():
+
+    def __init__(self, worksheet, username, password):
+        self.worksheet = worksheet
+        self.credentials = (username, password, )
+        
+    def sendEmails(self):
+        unCanadianEmails = []
+        digitalOnlyEmails = []
+        successEmails = []
+            
+        for row, submissionRow in enumerate(self.worksheet.get_all_values()):
+            if submissionRow[0] == "" or row == 0:
+                continue
+            
+            emailAddress = submissionRow[EMAIL_ADDRESS_COL]
+            emailInfo = {"cellRow": row,
+                         "email": emailAddress}
+            
+            if submissionRow[HAS_BEEN_EMAILED_COL] != HAS_BEEN_EMAILED:            
+                if not self.isCanadianAlbum(submissionRow):
+                    unCanadianEmails.append(emailInfo)
+                elif self.isDigitalOnly(submissionRow):
+                    digitalOnlyEmails.append(emailInfo)
+                else:
+                    successEmails.append(emailInfo)
+            
+        print("Sending physical-only emails")
+        physicalEmail = PhysicalFailureEmail(
+            self.worksheet, digitalOnlyEmails, self.credentials)
+        physicalEmail.send()
+        print("Sending Can-Con-only emails")
+        canadaEmail = CanadianFailureEmail(
+            self.worksheet, unCanadianEmails, self.credentials)
+        canadaEmail.send()
+        print("Sending Success Emails")
+        successEmail = SuccessEmail(self.worksheet, successEmails, self.credentials)
+        successEmail.send()
+                
+    def isCanadianAlbum(self, submissionRow):
+        return submissionRow[IS_CANADIAN_ARTIST_COL].strip() == "Yes"
+        
+    def isDigitalOnly(self, submissionRow):
+        return "Digitally Released Only" == submissionRow[IS_PHYSICAL_COL].strip()
     
     
 class Email():
     
-    def __init__(self, worksheet, emailInfoList):
+    def __init__(self, worksheet, emailInfoList, credentials):
+        self.username, self.password = credentials
         self.worksheet = worksheet
         self.emailInfoList = emailInfoList
         self.sendSuccesses = []
@@ -81,11 +140,11 @@ class Email():
         
     def setEmailServer(self):
         if DEBUG == True:
-            emailServer = "localhost"
-            emailPort = 25
+            self.emailServer = "localhost"
+            self.emailPort = 25
         else:
-            emailServer = "smtp.gmail.com"
-            emailPort = 587
+            self.emailServer = "smtp.gmail.com"
+            self.emailPort = 587
     
     def send(self):
         self.connectToEmailServer()
@@ -108,16 +167,16 @@ class Email():
         if DEBUG == False:
             self.server.ehlo()
             self.server.starttls()
-            self.server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
+            self.server.login(self.username, self.password)
         
     def sendEmail(self, toAddress):
         emailMsg = email.MIMEMultipart.MIMEMultipart('alternative')
         emailMsg["Subject"] = self.subject
-        emailMsg["From"] = EMAIL_USERNAME
+        emailMsg["From"] = self.username
         emailMsg["To"] = toAddress
         emailMsg.attach(email.mime.text.MIMEText(
             self.htmlEmail, 'html'))
-        self.server.sendmail(EMAIL_USERNAME, [toAddress], emailMsg.as_string())
+        self.server.sendmail(self.username, [toAddress], emailMsg.as_string())
             
     def addRecipient(self, recipient):
         self.emailInfoList.append(recipient)
