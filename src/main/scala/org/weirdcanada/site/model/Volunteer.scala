@@ -53,7 +53,6 @@ object Volunteer {
   // Helper function to create text areas
   import DynamicFormFieldRenderHelpers.textAreaRender
 
-
   implicit object VolunteerRecord extends HasFields[Volunteer] { 
     val fields: List[DynamicField[Volunteer]] = List(
       BasicField[Volunteer]("volunteer-firstname", volunteerFirstNameLens),
@@ -62,13 +61,13 @@ object Volunteer {
       BasicField[Volunteer]("volunteer-phone", volunteerPhoneLens),
       BasicField[Volunteer]("volunteer-city", volunteerCityLens),
       BasicField[Volunteer]("volunteer-province", volunteerProvinceLens),
-      ManyRecordField[Volunteer, String]("volunteer-interests", volunteerInterestsLens),
+      ManyRecordField[Volunteer, String]("interests", volunteerInterestsLens),
       BasicField[Volunteer]("volunteer-availability", volunteerAvailabilityLens),
       BasicField[Volunteer]("volunteer-whyworkwithus", volunteerWhyWorkWithUsLens),
       BasicField[Volunteer]("volunteer-gender", volunteerGenderLens),
       BasicField[Volunteer]("volunteer-address", volunteerAddressLens),
       BasicField[Volunteer]("volunteer-birthday", volunteerBirthdayLens),
-      RecordField[Volunteer, VolunteerBio]("volunteer-bio", volunteerBioLens)
+      RecordField[Volunteer, VolunteerBio]("volunteerbio", volunteerBioLens)
     )
   }
 }
