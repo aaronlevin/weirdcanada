@@ -49,7 +49,8 @@ libraryDependencies ++= {
     "org.scalaz"        %% "scalaz-core" % "7.0.0",
     "joda-time"         % "joda-time"           % "2.2",
     "org.joda"          % "joda-convert"        % "1.2",
-    "org.clapper"       % "markwrap_2.10"       % "1.0.1"
+    "org.clapper"       % "markwrap_2.10"       % "1.0.1",
+    "net.databinder.dispatch" %% "dispatch-core" % "0.10.1"
   )
 }
 
