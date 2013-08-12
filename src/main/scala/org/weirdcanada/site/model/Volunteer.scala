@@ -5,6 +5,7 @@ import org.weirdcanada.dynamicform.{
   BasicField, 
   DynamicField, 
   DynamicFieldPrimitives,
+  DynamicFormFieldRenderHelpers,
   HasEmpty, 
   HasFields,
   ManyRecordField,
@@ -34,6 +35,7 @@ case class Volunteer(
 
 object Volunteer {
 
+  // Boilerplate lenses
   val volunteerFirstNameLens: Lens[Volunteer, String] = Lens.lensu( (v, n) => v.copy(firstName = n), (v) => v.firstName)
   val volunteerLastNameLens: Lens[Volunteer, String] = Lens.lensu( (v, n) => v.copy(lastName = n), (v) => v.lastName)
   val volunteerEmailLens: Lens[Volunteer, String] = Lens.lensu( (v, s) => v.copy(email = s), (v) => v.email)
@@ -47,6 +49,10 @@ object Volunteer {
   val volunteerAddressLens: Lens[Volunteer, String] = Lens.lensu( (v, s) => v.copy(address = s), (v) => v.address)
   val volunteerBirthdayLens: Lens[Volunteer, String] = Lens.lensu( (v, s) => v.copy(birthday = s), (v) => v.birthday)
   val volunteerBioLens: Lens[Volunteer, VolunteerBio] = Lens.lensu( (v, s) => v.copy(bio = s), (v) => v.bio)
+
+  // Helper function to create text areas
+  import DynamicFormFieldRenderHelpers.textAreaRender
+
 
   implicit object VolunteerRecord extends HasFields[Volunteer] { 
     val fields: List[DynamicField[Volunteer]] = List(

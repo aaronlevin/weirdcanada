@@ -6,6 +6,9 @@ import net.liftweb.http._
 import net.liftweb.common.{Full,Box}
 import js.{JsCmd, JsCmds}
 
+// scala
+import scala.xml.NodeSeq
+
 /**
  * This trait provides functions to help create dynamic forms using Lift's
  * SHtml.memoize method. See AddCuratedListSnippet for example usage.
@@ -81,4 +84,10 @@ trait DynamicFormHelpers {
 
     updateAndSave _
   }
+}
+
+object DynamicFormFieldRenderHelpers {
+
+  def textAreaRender(selector: String)(filler: String)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = 
+    selector #> SHtml.ajaxTextarea("", updateFunc, "placeholder" -> filler)
 }
