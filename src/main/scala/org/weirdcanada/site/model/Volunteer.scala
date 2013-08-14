@@ -11,7 +11,6 @@ import org.weirdcanada.dynamicform.{
   ManyRecordField,
   RecordField
 }
-
 import DynamicFieldPrimitives.{StringPrimitive,StringPrimitiveEmpty}
 
 // scalaz
@@ -70,5 +69,5 @@ object Volunteer {
       RecordField[Volunteer, VolunteerBio]("volunteerbio", volunteerBioLens)
     )
   }
-}
 
+}
