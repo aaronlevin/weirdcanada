@@ -12,6 +12,7 @@ import Loc._
 import mapper._
 
 import org.weirdcanada.site.model._
+import org.weirdcanada.site.snippet.AddVolunteerSnippet
 import net.liftmodules.JQueryModule
 
 
@@ -47,15 +48,19 @@ class Boot {
       Menu.i("Home") / "index" >> User.AddUserMenusAfter, // the simple way to declare a menu
 
       Menu.i("Add") / "add" >> If( () => true , "dude"),//User.loggedIn_?, "You must be logged in"), 
-      Menu.i("Add Volunteer") / "add-volunteer" >> If( () => User.loggedIn_? , "dude, login, yo!"), 
+      Menu.i("Add Volunteer") / "add-volunteer" >> If( () => User.loggedIn_? , "dude, login, yo!")
 
       // more complex because this menu allows anything in the
       // /static path to be visible
-      Menu(Loc("Static", Link(List("static"), true, "/static/index"), 
-	       "Static Content"))
+      //Menu(Loc("Static", Link(List("static"), true, "/static/index"), 
+	     //  "Static Content"))
      )
 
     def sitemapMutators = User.sitemapMutator
+
+    LiftRules.snippetDispatch.append {
+      case "AddVolunteerSnippet" => new AddVolunteerSnippet(DB)
+    }
 
     // set the sitemap.  Note if you don't want access control for
     // each page, just comment this line out.

@@ -11,11 +11,16 @@ import js.{JsCmd, JsCmds}
 import JsCmds.{After, Alert, Replace, Run, Noop}
 import common._
 import util.Helpers._
+import net.liftweb.db.DB
 
 // scalaz
 import scalaz.Lens
 
-object AddVolunteerSnippet extends DynamicFormCreator {
+class AddVolunteerSnippet(db: DB) extends DynamicFormCreator with DispatchSnippet {
+
+  def dispatch = {
+    case "render" => render
+  }
 
   private object volunteerState extends RequestVar[Volunteer](Volunteer(
     "","","","","","",Map.empty[Int,String],"","","","","",VolunteerBio("","","","")
