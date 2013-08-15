@@ -18,6 +18,12 @@ import scalaz.Lens
 
 class AddVolunteerSnippet(db: DB) extends DynamicFormCreator with DispatchSnippet {
 
+  // import volunteer helper methods
+  import Volunteer.insertIntoDB
+
+  // insertion function
+  val insertVolunteerDB = insertIntoDB(db) _
+
   def dispatch = {
     case "render" => render
   }
@@ -31,6 +37,18 @@ class AddVolunteerSnippet(db: DB) extends DynamicFormCreator with DispatchSnippe
   val renderFunction = renderField(volunteerState)
 
   def render = renderFunction andThen
-    "name=process-volunteer" #> SHtml.ajaxButton("Done", () => Noop)
+    "name=process-volunteer" #> SHtml.ajaxButton("Done", () => insertVolunteer(volunteerState))
+
+  private def insertVolunteer(v: RequestVar[Volunteer]): JsCmd = {
+    val volunteer = v.is
+    try {
+      insertVolunteerDB(volunteer)
+      Alert("Success!")
+    } catch {
+      case e: Exception => Alert("Issue inserting: %s".format(e))
+    }
+  }
+
+
 
 }

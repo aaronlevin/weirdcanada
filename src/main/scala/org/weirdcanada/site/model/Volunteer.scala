@@ -13,6 +13,9 @@ import org.weirdcanada.dynamicform.{
 }
 import DynamicFieldPrimitives.{StringPrimitive,StringPrimitiveEmpty}
 
+// Lift
+import net.liftweb.db.{DB, DefaultConnectionIdentifier}
+
 // scalaz
 import scalaz.Lens
 
@@ -68,6 +71,59 @@ object Volunteer {
       BasicField[Volunteer]("volunteer-birthday", volunteerBirthdayLens),
       RecordField[Volunteer, VolunteerBio]("volunteerbio", volunteerBioLens)
     )
+  }
+
+  private val sqlSelectVolunteerId = 
+    """
+    SELECT id FROM wc_volunteer WHERE first_name = ? AND last_name = ?;
+    """
+
+  private val sqlInsertVolunteer: String = 
+    """
+    INSERT INTO wc_volunteer 
+      (id, first_name, last_name, email, phone, city, province, availability, why, gender, address, birthday, bio, byline, website, image)
+      VALUES (default,?,?,?,?,?,?,?,?,?,?,'now',?,?,?,?);
+    """
+  private val sqlInsertVolunteerInterest =
+    """
+    INSERT INTO wc_volunteer_interest VALUES (default,?,?)
+    """
+
+  def insertIntoDB(db: DB)(volunteer: Volunteer) = {
+    DB.use(DefaultConnectionIdentifier) { conn =>
+      DB.prepareStatement(sqlInsertVolunteer, conn) { s =>
+        s.setString(1, volunteer.firstName)
+        s.setString(2, volunteer.lastName)
+        s.setString(3, volunteer.email)
+        s.setString(4, volunteer.phone)
+        s.setString(5, volunteer.city)
+        s.setString(6, volunteer.province)
+        s.setString(7, volunteer.availability)
+        s.setString(8, volunteer.whyWorkWithUs)
+        s.setString(9, volunteer.gender)
+        s.setString(10, volunteer.address)
+        s.setString(11, volunteer.bio.description)
+        s.setString(12, volunteer.bio.byline)
+        s.setString(13, volunteer.bio.website)
+        s.setString(14, volunteer.bio.image)
+        s.executeUpdate()
+      }
+      val volunteerId = DB.prepareStatement(sqlSelectVolunteerId, conn) { s =>
+        s.setString(1, volunteer.firstName)
+        s.setString(2, volunteer.lastName)
+        val rs = s.executeQuery() 
+        rs.next()
+        rs.getLong(1)
+      }
+      volunteer.interests.toList.foreach { case (_,i) =>
+        DB.prepareStatement(sqlInsertVolunteerInterest, conn) { s =>
+          s.setString(1,i)
+          s.setLong(2,volunteerId)
+          s.executeUpdate()
+        }
+      }
+
+    }
   }
 
 }
