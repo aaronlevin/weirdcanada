@@ -1,5 +1,16 @@
 <div name="add-volunteer">
 
+  <script>
+    $(function(){
+      $('#birthday').datepicker({
+        format: 'yyyy-mm-dd',
+        todayBtn: 'linked',
+        }).on('changeDate', function(ev) {
+          $('#birthday').blur();
+      });
+    });
+  </script>
+
   <h3>Volunteer #<span name="volunteer-number">1</span></h3>
 
   <div class="control-group" name="volunteer-firstname-field">
@@ -88,7 +99,8 @@
   </div>
 
   <div class="control-group" name="volunteer-birthday-field">
-    <div class="controls">
+    <div class="controls input-append date" data-date="2013-07-01" data-date-format="yyyy-mm-dd" >
+      <label>Birthday</label>
       <input name="volunteer-birthday-input">
     </div>
   </div>

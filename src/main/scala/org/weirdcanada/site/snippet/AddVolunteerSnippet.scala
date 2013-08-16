@@ -16,6 +16,9 @@ import net.liftweb.db.DB
 // scalaz
 import scalaz.Lens
 
+// 3rd party
+import org.joda.time.DateTime
+
 class AddVolunteerSnippet(db: DB) extends DynamicFormCreator with DispatchSnippet {
 
   // import volunteer helper methods
@@ -29,7 +32,7 @@ class AddVolunteerSnippet(db: DB) extends DynamicFormCreator with DispatchSnippe
   }
 
   private object volunteerState extends RequestVar[Volunteer](Volunteer(
-    "","","","","","",Map.empty[Int,String],"","","","","",VolunteerBio("","","","")
+    "","","","","","",Map.empty[Int,String],"","","","",new DateTime,VolunteerBio("","","","")
   ))
 
   def updateState = getUpdateAndSaveFuncForField[Volunteer](volunteerState)

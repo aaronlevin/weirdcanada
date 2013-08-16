@@ -14,10 +14,23 @@ import org.weirdcanada.dynamicform.{
 import DynamicFieldPrimitives.{StringPrimitive,StringPrimitiveEmpty}
 
 // Lift
+import net.liftweb.common.{Empty, Full}
 import net.liftweb.db.{DB, DefaultConnectionIdentifier}
+import net.liftweb.http.SHtml
+import net.liftweb.http.js.JsCmd
+import net.liftweb.util.Helpers._
 
 // scalaz
 import scalaz.Lens
+
+// Scala
+import scala.xml.NodeSeq
+
+// 3rd party
+import org.joda.time.DateTime
+
+// Java
+import java.sql.Timestamp
 
 case class Volunteer(
   firstName: String,
@@ -31,7 +44,7 @@ case class Volunteer(
   whyWorkWithUs: String,
   gender: String,
   address: String,
-  birthday: String,
+  birthday: DateTime,
   bio: VolunteerBio
 )
 
@@ -49,11 +62,27 @@ object Volunteer {
   val volunteerWhyWorkWithUsLens: Lens[Volunteer, String] = Lens.lensu( (v, s) => v.copy(whyWorkWithUs = s), (v) => v.whyWorkWithUs)
   val volunteerGenderLens: Lens[Volunteer, String] = Lens.lensu( (v, s) => v.copy(gender = s), (v) => v.gender)
   val volunteerAddressLens: Lens[Volunteer, String] = Lens.lensu( (v, s) => v.copy(address = s), (v) => v.address)
-  val volunteerBirthdayLens: Lens[Volunteer, String] = Lens.lensu( (v, s) => v.copy(birthday = s), (v) => v.birthday)
+  val volunteerBirthdayLens: Lens[Volunteer, String] = Lens.lensu( (v, s) => v.copy(birthday = new DateTime(s)), (v) => v.birthday.toString("yyyy-MM-dd"))
   val volunteerBioLens: Lens[Volunteer, VolunteerBio] = Lens.lensu( (v, s) => v.copy(bio = s), (v) => v.bio)
 
   // Helper function to create text areas
   import DynamicFormFieldRenderHelpers.textAreaRender
+
+  private def birthdayRenderer(updateFunc: String => JsCmd): NodeSeq => NodeSeq = 
+    "name=volunteer-birthday-input" #> SHtml.ajaxText((new DateTime).toString("yyyy-MM-dd"), updateFunc, "id" -> "birthday")
+
+  private val genderSelectOptions: Seq[(String, String)] = Seq(("", "(select gender)"),("male", "Male"), ("female", "Female"), ("other", "Other"))
+
+  private def genderSelectRenderer(updateFunc: String => JsCmd): NodeSeq => NodeSeq =
+    "name=volunteer-gender-input" #> SHtml.ajaxSelect(genderSelectOptions, Empty, updateFunc)
+
+  private val provinceSelectOptions: Seq[(String,String)] = Seq(("","(select province)"),("bc","British Columbia"),("ab","Alberta"),("sk","Saskatchewan"),("mb","Manitoba"),("on","Ontario"),("qc","Quebec"),("nb","New Brunswick"),("ns","Nova Scotia"),("nl","Newfoundland and Labrador"),("yk","Yukon"),("nt", "Northwest Territories"),("nu", "Nunavut"))
+
+  private def provinceSelectRenderer(updateFunc: String => JsCmd): NodeSeq => NodeSeq = 
+    "name=volunteer-province-input" #> SHtml.ajaxSelect(provinceSelectOptions, Empty, updateFunc)
+
+  private val addressArea = textAreaRender("name=volunteer-address-input")("Address") _
+  private val whyWorkWithUsArea = textAreaRender("name=volunteer-whyworkwithus-input")("Why Work With Us") _
 
   implicit object VolunteerRecord extends HasFields[Volunteer] { 
     val fields: List[DynamicField[Volunteer]] = List(
@@ -62,13 +91,13 @@ object Volunteer {
       BasicField[Volunteer]("volunteer-email", volunteerEmailLens),
       BasicField[Volunteer]("volunteer-phone", volunteerPhoneLens),
       BasicField[Volunteer]("volunteer-city", volunteerCityLens),
-      BasicField[Volunteer]("volunteer-province", volunteerProvinceLens),
+      BasicField[Volunteer]("volunteer-province", volunteerProvinceLens, Some(provinceSelectRenderer)),
       ManyRecordField[Volunteer, String]("interests", volunteerInterestsLens),
       BasicField[Volunteer]("volunteer-availability", volunteerAvailabilityLens),
-      BasicField[Volunteer]("volunteer-whyworkwithus", volunteerWhyWorkWithUsLens),
-      BasicField[Volunteer]("volunteer-gender", volunteerGenderLens),
-      BasicField[Volunteer]("volunteer-address", volunteerAddressLens),
-      BasicField[Volunteer]("volunteer-birthday", volunteerBirthdayLens),
+      BasicField[Volunteer]("volunteer-whyworkwithus", volunteerWhyWorkWithUsLens, Some(whyWorkWithUsArea)),
+      BasicField[Volunteer]("volunteer-gender", volunteerGenderLens, Some(genderSelectRenderer)),
+      BasicField[Volunteer]("volunteer-address", volunteerAddressLens, Some(addressArea)),
+      BasicField[Volunteer]("volunteer-birthday", volunteerBirthdayLens, Some(birthdayRenderer)),
       RecordField[Volunteer, VolunteerBio]("volunteerbio", volunteerBioLens)
     )
   }
@@ -82,7 +111,7 @@ object Volunteer {
     """
     INSERT INTO wc_volunteer 
       (id, first_name, last_name, email, phone, city, province, availability, why, gender, address, birthday, bio, byline, website, image)
-      VALUES (default,?,?,?,?,?,?,?,?,?,?,'now',?,?,?,?);
+      VALUES (default,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
     """
   private val sqlInsertVolunteerInterest =
     """
@@ -102,10 +131,11 @@ object Volunteer {
         s.setString(8, volunteer.whyWorkWithUs)
         s.setString(9, volunteer.gender)
         s.setString(10, volunteer.address)
-        s.setString(11, volunteer.bio.description)
-        s.setString(12, volunteer.bio.byline)
-        s.setString(13, volunteer.bio.website)
-        s.setString(14, volunteer.bio.image)
+        s.setTimestamp(11, new Timestamp(volunteer.birthday.getMillis))
+        s.setString(12, volunteer.bio.description)
+        s.setString(13, volunteer.bio.byline)
+        s.setString(14, volunteer.bio.website)
+        s.setString(15, volunteer.bio.image)
         s.executeUpdate()
       }
       val volunteerId = DB.prepareStatement(sqlSelectVolunteerId, conn) { s =>

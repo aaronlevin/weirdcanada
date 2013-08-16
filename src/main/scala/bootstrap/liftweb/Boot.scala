@@ -47,7 +47,7 @@ class Boot {
     def sitemap = SiteMap(
       Menu.i("Home") / "index" >> User.AddUserMenusAfter, // the simple way to declare a menu
 
-      Menu.i("Add") / "add" >> If( () => true , "dude"),//User.loggedIn_?, "You must be logged in"), 
+      Menu.i("Add") / "add" >> If( () => true , "dude"), 
       Menu.i("Add Volunteer") / "add-volunteer" >> If( () => User.loggedIn_? , "dude, login, yo!")
 
       // more complex because this menu allows anything in the

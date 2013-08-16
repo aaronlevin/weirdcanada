@@ -15,7 +15,8 @@ BEGIN;
     bio TEXT,
     byline TEXT,
     website TEXT,
-    image TEXT
+    image TEXT,
+    UNIQUE (first_name, last_name, email)
   );
 
   CREATE TABLE wc_volunteer_interest (

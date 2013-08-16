@@ -5,6 +5,7 @@ import org.weirdcanada.dynamicform.{
   BasicField, 
   DynamicField, 
   DynamicFieldPrimitives,
+  DynamicFormFieldRenderHelpers,
   HasEmpty, 
   HasFields,
   ManyRecordField,
@@ -28,11 +29,16 @@ object VolunteerBio {
   val volunteerBioDescriptionLens: Lens[VolunteerBio, String] = Lens.lensu( (vb, s) => vb.copy(description = s), (vb) => vb.description)
   val volunteerBioImageLens: Lens[VolunteerBio, String] = Lens.lensu( (vb, s) => vb.copy(image = s), (vb) => vb.image)
 
+  // generate text areas!
+  import DynamicFormFieldRenderHelpers.textAreaRender
+
+  private val descriptionArea = textAreaRender("name=volunteerbio-description-input")("Description") _
+
   implicit object VolunteerBioRecord extends HasFields[VolunteerBio] {
     val fields: List[DynamicField[VolunteerBio]] = List(
       BasicField[VolunteerBio]("volunteerbio-byline", volunteerBioBylineLens),
       BasicField[VolunteerBio]("volunteerbio-website", volunteerBioWebsiteLens),
-      BasicField[VolunteerBio]("volunteerbio-description", volunteerBioDescriptionLens),
+      BasicField[VolunteerBio]("volunteerbio-description", volunteerBioDescriptionLens, Some(descriptionArea)),
       BasicField[VolunteerBio]("volunteerbio-image", volunteerBioImageLens)
     )
   }
