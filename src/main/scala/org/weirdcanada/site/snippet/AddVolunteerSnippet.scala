@@ -32,7 +32,7 @@ class AddVolunteerSnippet(db: DB) extends DynamicFormCreator with DispatchSnippe
   }
 
   private object volunteerState extends RequestVar[Volunteer](Volunteer(
-    "","","","","","",Map.empty[Int,String],"","","","",new DateTime,VolunteerBio("","","","","","")
+    "Aaron","","","","","",Map.empty[Int,String],"","","","",new DateTime,VolunteerBio("COOL GUY","","","","","")
   ))
 
   def updateState = getUpdateAndSaveFuncForField[Volunteer](volunteerState)

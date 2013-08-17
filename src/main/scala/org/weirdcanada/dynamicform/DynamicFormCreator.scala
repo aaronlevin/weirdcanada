@@ -25,10 +25,11 @@ trait DynamicFormCreator extends DynamicFormHelpers {
   def renderField[A : HasFields](formState: RequestVar[A]): NodeSeq => NodeSeq = {
     val record = implicitly[HasFields[A]]
     val updateStateFunction = getUpdateAndSaveFuncForField[A](formState)
+    val initialState = formState.is
     record
       .fields
       .foldLeft( (ns: NodeSeq) => ns){ (acc, field) => 
-        acc andThen field.render(updateStateFunction)(lensId[A], None)
+        acc andThen field.render(updateStateFunction, initialState)(lensId[A], None)
       }
   }
 }

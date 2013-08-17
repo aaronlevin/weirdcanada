@@ -33,7 +33,7 @@ sealed trait DynamicField[A] {
    * @param outerName         Concatenated name from the parent field(s)
    * @return Return a method to transform `NodeSeq`
    */
-  def render[B](formStateUpdater: FormStateUpdate[B])(outerLens: Lens[B,A], outerName: Option[String]): NodeSeq => NodeSeq
+  def render[B](formStateUpdater: FormStateUpdate[B], state: B)(outerLens: Lens[B,A], outerName: Option[String]): NodeSeq => NodeSeq
 }
 
 /*
@@ -54,7 +54,7 @@ case class BasicField[A](name: String, lens: Lens[A,String], transformer: Option
    * @param outerName         Concatenated name from the parent field
    * @return a method to transform `NodeSeq`
    */
-  def render[B](formStateUpdater: FormStateUpdate[B])(outerLens: Lens[B,A], outerName: Option[String] = None): NodeSeq => NodeSeq = {
+  def render[B](formStateUpdater: FormStateUpdate[B], state: B)(outerLens: Lens[B,A], outerName: Option[String] = None): NodeSeq => NodeSeq = {
 
     /*
      * A method composing lenses for the ability to update this field with the input string.
@@ -67,10 +67,18 @@ case class BasicField[A](name: String, lens: Lens[A,String], transformer: Option
       (outerLens >=> lens).set(state, inputString)
     }
 
+    /*
+     * A method composing lenses for the ability to "get" this field
+     *
+     * @param state     state data of type `B` representing the parent form state to be getted.
+     * @return the value
+     */
+    def getFunc(state: B): String = (outerLens >=> lens).get(state)
+
     val jsCmd = () => Noop
     val fieldUpdateFunc: String => JsCmd = formStateUpdater(updateFunc)(jsCmd)
     transformer match {
-      case None => BasicField.defaultTransformer(name, fieldUpdateFunc)
+      case None => BasicField.defaultTransformer(name, fieldUpdateFunc, getFunc(state))
       case Some(transformer) => transformer(fieldUpdateFunc)
     }
   }
@@ -83,8 +91,8 @@ object BasicField {
 
   import DynamicField.{makeInput}
 
-  def defaultTransformer(name: String, updateFunc: String => JsCmd): NodeSeq => NodeSeq = 
-    makeInput(None, name) #> SHtml.ajaxText("", updateFunc, "placeholder" -> name)
+  def defaultTransformer(name: String, updateFunc: String => JsCmd, value: => String): NodeSeq => NodeSeq = 
+    makeInput(None, name) #> SHtml.ajaxText("", updateFunc, "placeholder" -> name, "value" -> value) 
 
 }
 
@@ -111,11 +119,11 @@ case class RecordField[A, B : HasFields](name: String, lens: Lens[A,B]) extends 
    * @param outerName         Concatenated name from the parent field
    * @return a method to transform `NodeSeq`
    */
-  def render[C](formStateUpdater: FormStateUpdate[C])(outerLens: Lens[C,A], outerName: Option[String]): NodeSeq => NodeSeq = {
+  def render[C](formStateUpdater: FormStateUpdate[C], state: C)(outerLens: Lens[C,A], outerName: Option[String]): NodeSeq => NodeSeq = {
     makeNameAdd(None, name) #>
       bRecord
         .fields
-        .foldLeft( (ns: NodeSeq) => ns ){ (acc, field) => acc andThen field.render(formStateUpdater)(outerLens >=> lens, Some(label(outerName,name))) }
+        .foldLeft( (ns: NodeSeq) => ns ){ (acc, field) => acc andThen field.render(formStateUpdater, state)(outerLens >=> lens, Some(label(outerName,name))) }
   }
 }
 
@@ -143,7 +151,7 @@ case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens
    * @param outerName         Concatenated name from the parent field
    * @return a method to transform `NodeSeq`
    */
-  def render[C](formStateUpdater: FormStateUpdate[C])(outerLens: Lens[C,A], outerName: Option[String]): NodeSeq => NodeSeq = {
+  def render[C](formStateUpdater: FormStateUpdate[C], state: C)(outerLens: Lens[C,A], outerName: Option[String]): NodeSeq => NodeSeq = {
 
     /*
      * Convenience method to return a lens for a given index of the `Map[Int,B]`
@@ -203,7 +211,7 @@ case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens
         .fields
         .foldLeft( (ns: NodeSeq) => ns ){ (acc, field) =>
            val newLens: Lens[C, B] = lensAtIndex(index)
-           acc andThen field.render(formStateUpdater)(newLens, Some(label(outerName,name)))
+           acc andThen field.render(formStateUpdater, state)(newLens, Some(label(outerName,name)))
          } andThen
       makeName(None, "%s-add [onclick]".format(name)) #> SHtml.onEvent( (s: String) => addNewRecordForm(index+1)() ) &
       makeName(None, "%s-remove [onclick]".format(name)) #> SHtml.onEvent( (s: String) => removeRecordFromForm(index)(s) )
