@@ -12,22 +12,31 @@ function cityAjaxCall(chosenCity){
     url: 'http://api.weirdcanada.com/api/' + urlSubString,
     success: function(data) {
 
+      var today = moment(new Date()).subtract('hours',8);
+
       jQuery.each(data, function(key, val) {
-        eventItem = '';
-        eventItem += '<ul class="featuredEvent">';
-        eventItem += '<li class="eventDate">'+ val.eventDateTime + '</li>';
-        eventItem += '<li class="eventInfo">';
-        eventItem += '<span class="eventPresenter">' + val.presenter +'</span>: ';
-        eventItem += '<span class="eventDescription">' + val.description + '</span> @ ';
-        eventItem += '<span class="eventVenue">' + val.venueName +'</span> ';
-        eventItem += '(<span class="eventCity">' + val.city + '</span>)';
-        eventItem += '</li>';
-        eventItem += '<li class="eventDetails">(<a href="'+ val.url + '" target="_blank">more details</a>)</li>';
-        eventItem += '</ul>';
-        items.push('<li class="event">' + eventItem + '</li>');
+        var eventDate = moment(val.eventDateTime);
+        if(today <= eventDate) {
+          eventItem = '';
+          eventItem += '<ul class="featuredEvent">';
+          eventItem += '<li class="eventDate">'+ eventDate.format("dddd, MMMM Do, YYYY") + '</li>';
+          eventItem += '<li class="eventHeader">';
+          eventItem += '<span class="eventPresenter">' + val.presenter +'</span> prsents: ';
+          eventItem += '</li>'
+          eventItem += '<li class="eventInfo">';
+          eventItem += '<span class="eventDescription">' + val.description + '</span>';
+          eventItem += '</li>';
+          eventItem += '<li class="eventLocation">';
+          eventItem += '@ <span class="eventVenue">' + val.venueName +'</span> ';
+          eventItem += '(<span class="eventCity">' + val.city + '</span>)';
+          eventItem += '</li>';
+          eventItem += '<li class="eventDetails">(<a href="'+ val.url + '" target="_blank">more details</a>)</li>';
+          eventItem += '</ul>';
+          items.push('<li class="event">' + eventItem + '</li>');
+        }
       });
       if(items.length == 0){
-			items.push('<li class="event">There are no featured events for this location at this time.</li>');
+			items.push('<li class="event">Our wizards could not conjure any events. If you know of any, please send them in: listings@weirdcanada.com</li>');
       }
     }})
 	.done(function(){jQuery("ul#featuredEvents").html(items.join(''));})
