@@ -220,7 +220,7 @@ case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens
     // http://stackoverflow.com/questions/13328502/what-does-forward-reference-extends-over-definition-of-value-mean-in-scala
     lazy val addRecordMemoize = SHtml.memoize( renderAtIndex(0) )
 
-    val items: Iterable[(B,Int)] = ((outerLens >=> lens).get(state)).map { case (_, b) => b }.zipWithIndex
+    val items: List[(Int, B)] = ((outerLens >=> lens).get(state)).toList
 
     items match {
       case Nil => 
@@ -228,7 +228,7 @@ case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens
         "#%s-elements [id]".format(label(None, name)) #> "%s-elements".format(label(outerName, name))
       case _ => 
         makeNameAdd(None, name) #> addRecordMemoize &
-        makeNameAdd(None, name) #> items.map { case (b, i) => renderAtIndex(i) } &
+        makeNameAdd(None, name) #> items.map { case (i, b) => renderAtIndex(i) } &
         "#%s-elements [id]".format(label(None, name)) #> "%s-elements".format(label(outerName, name))
     }
 
