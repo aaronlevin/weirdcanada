@@ -63,9 +63,8 @@ case class BasicField[A](name: String, lens: Lens[A,String], transformer: Option
      * @param inputString inputString from a user (coming via ajax on a form)
      * @return an updated version of the state. 
      */
-    def updateFunc(state: B)(inputString: String): B = {
+    def updateFunc(state: B)(inputString: String): B = 
       (outerLens >=> lens).set(state, inputString)
-    }
 
     /*
      * A method composing lenses for the ability to "get" this field
@@ -221,8 +220,18 @@ case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens
     // http://stackoverflow.com/questions/13328502/what-does-forward-reference-extends-over-definition-of-value-mean-in-scala
     lazy val addRecordMemoize = SHtml.memoize( renderAtIndex(0) )
 
-    makeNameAdd(None, name) #> addRecordMemoize &
-    "#%s-elements [id]".format(label(None, name)) #> "%s-elements".format(label(outerName, name))
+    val items: Iterable[(B,Int)] = ((outerLens >=> lens).get(state)).map { case (_, b) => b }.zipWithIndex
+
+    items match {
+      case Nil => 
+        makeNameAdd(None, name) #> addRecordMemoize &
+        "#%s-elements [id]".format(label(None, name)) #> "%s-elements".format(label(outerName, name))
+      case _ => 
+        makeNameAdd(None, name) #> addRecordMemoize &
+        makeNameAdd(None, name) #> items.map { case (b, i) => renderAtIndex(i) } &
+        "#%s-elements [id]".format(label(None, name)) #> "%s-elements".format(label(outerName, name))
+    }
+
   }
 }
 
