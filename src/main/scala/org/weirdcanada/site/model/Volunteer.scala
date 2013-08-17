@@ -110,8 +110,8 @@ object Volunteer {
   private val sqlInsertVolunteer: String = 
     """
     INSERT INTO wc_volunteer 
-      (id, first_name, last_name, email, phone, city, province, availability, why, gender, address, birthday, bio, byline, website, image)
-      VALUES (default,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+      (id, first_name, last_name, email, phone, city, province, availability, why, gender, address, birthday, bio_english, bio_francais, byline_english, byline_francais, website, image)
+      VALUES (default,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
     """
   private val sqlInsertVolunteerInterest =
     """
@@ -132,10 +132,12 @@ object Volunteer {
         s.setString(9, volunteer.gender)
         s.setString(10, volunteer.address)
         s.setTimestamp(11, new Timestamp(volunteer.birthday.getMillis))
-        s.setString(12, volunteer.bio.description)
-        s.setString(13, volunteer.bio.byline)
-        s.setString(14, volunteer.bio.website)
-        s.setString(15, volunteer.bio.image)
+        s.setString(12, volunteer.bio.descriptionEnglish)
+        s.setString(13, volunteer.bio.descriptionFrancais)
+        s.setString(14, volunteer.bio.bylineEnglish)
+        s.setString(15, volunteer.bio.bylineFrancais)
+        s.setString(16, volunteer.bio.website)
+        s.setString(17, volunteer.bio.image)
         s.executeUpdate()
       }
       val volunteerId = DB.prepareStatement(sqlSelectVolunteerId, conn) { s =>

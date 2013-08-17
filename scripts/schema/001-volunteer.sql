@@ -12,8 +12,10 @@ BEGIN;
     gender VARCHAR(10),
     address TEXT,
     birthday TIMESTAMP,
-    bio TEXT,
-    byline TEXT,
+    bio_english TEXT,
+    bio_francais TEXT,
+    byline_english TEXT,
+    byline_francais TEXT,
     website TEXT,
     image TEXT,
     UNIQUE (first_name, last_name, email)
