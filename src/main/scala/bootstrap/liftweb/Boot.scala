@@ -61,7 +61,7 @@ class Boot {
     def sitemapMutators = User.sitemapMutator
 
     LiftRules.snippetDispatch.append {
-      case "AddVolunteerSnippet" => new AddVolunteerSnippet(DB)
+      case "AddVolunteerSnippet" => new AddVolunteerSnippet(DB, ReqVolunteer.currentValue)
     }
 
     // set the sitemap.  Note if you don't want access control for
@@ -94,13 +94,22 @@ class Boot {
     /**
      * Rewrite rules
      */
-    /*
     val adminRewriteRules: LiftRules.RewritePF = {
-
+      /**
+       * This rewrite rule matches on:
+       * /edit-volunteer/firstName/lastName
+       */
       case RewriteRequest(ParsePath(EditVolunteerUrl(volunteerData), _, _, _), GetRequest, _) => 
+        Volunteer.getVolunteerByName(DB)(volunteerData.firstName, volunteerData.lastName) match {
+          case Some(volunteer) => 
+            ReqVolunteer.setCurrentValue(Full(volunteer))
+            RewriteResponse(List("add-volunteer"))
+          case None => 
+            RewriteResponse(List("add-volunteer"))
+        }
+    }
 
-
-    }*/
+    LiftRules.statelessRewrite.prepend(adminRewriteRules)
 
     // Make a transaction span the whole HTTP request
     S.addAround(DB.buildLoanWrapper)

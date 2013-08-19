@@ -19,7 +19,7 @@ import scalaz.Lens
 // 3rd party
 import org.joda.time.DateTime
 
-class AddVolunteerSnippet(db: DB) extends DynamicFormCreator with DispatchSnippet {
+class AddVolunteerSnippet(db: DB, volunteer: Box[Volunteer]) extends DynamicFormCreator with DispatchSnippet {
 
   // import volunteer helper methods
   import Volunteer.insertIntoDB
@@ -31,9 +31,13 @@ class AddVolunteerSnippet(db: DB) extends DynamicFormCreator with DispatchSnippe
     case "render" => render
   }
 
-  private object volunteerState extends RequestVar[Volunteer](Volunteer(
-    "","","","","","",Map.empty[Int,String],"","","","",new DateTime,VolunteerBio("","","","","","")
-  ))
+  private object volunteerState extends RequestVar[Volunteer](
+    volunteer openOr {
+      Volunteer(
+      "","","","","","",Map.empty[Int,String],"","","","",new DateTime,VolunteerBio("","","","","","")
+      )
+    }
+  )
 
   def updateState = getUpdateAndSaveFuncForField[Volunteer](volunteerState)
 

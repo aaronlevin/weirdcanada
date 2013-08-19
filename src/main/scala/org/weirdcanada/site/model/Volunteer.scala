@@ -201,15 +201,15 @@ object Volunteer {
       wcv.address,
       wcv.birthday,
       wcv.bio_english,
-      wcv.bio_french,
+      wcv.bio_francais,
       wcv.byline_english,
-      wcv.byline_french,
+      wcv.byline_francais,
       wcv.website,
       wcv.image,
       wcvi.interest
     FROM
       wc_volunteer_interest AS wcvi
-      INNER JOIN wc_volunteer as wcv
+      INNER JOIN wc_volunteer AS wcv ON (wcv.id = wcvi.volunteer_id)
     WHERE
       wcv.first_name = ?
       AND wcv.last_name = ?
