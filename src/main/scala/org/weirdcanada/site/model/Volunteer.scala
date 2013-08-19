@@ -12,6 +12,7 @@ import org.weirdcanada.dynamicform.{
   RecordField
 }
 import DynamicFieldPrimitives.{StringPrimitive,StringPrimitiveEmpty}
+import org.weirdcanada.site.lib.DBHelpers
 
 // Lift
 import net.liftweb.common.{Empty, Full}
@@ -24,13 +25,14 @@ import net.liftweb.util.Helpers._
 import scalaz.Lens
 
 // Scala
+import scala.annotation.tailrec
 import scala.xml.NodeSeq
 
 // 3rd party
 import org.joda.time.DateTime
 
 // Java
-import java.sql.Timestamp
+import java.sql.{PreparedStatement, ResultSet, Timestamp}
 
 case class Volunteer(
   firstName: String,
@@ -158,4 +160,77 @@ object Volunteer {
     }
   }
 
+  /**
+   * Helper method to create a volunteer from result set
+   */
+  private def getVolunteerFromRs(rs: ResultSet): Volunteer = 
+    Volunteer(
+      rs.getString(1),
+      rs.getString(2),
+      rs.getString(3),
+      rs.getString(4),
+      rs.getString(5),
+      rs.getString(6),
+      Map(rs.getRow -> rs.getString(18)),
+      Option(rs.getString(7)).getOrElse(""),
+      Option(rs.getString(8)).getOrElse(""),
+      Option(rs.getString(9)).getOrElse(""),
+      Option(rs.getString(10)).getOrElse(""),
+      Option(new DateTime(rs.getTimestamp(11))).getOrElse(new DateTime()),
+      VolunteerBio(
+        Option(rs.getString(12)).getOrElse(""),
+        Option(rs.getString(13)).getOrElse(""),
+        Option(rs.getString(14)).getOrElse(""),
+        Option(rs.getString(15)).getOrElse(""),
+        Option(rs.getString(16)).getOrElse(""),
+        Option(rs.getString(17)).getOrElse("")
+      )
+    )
+
+  private val sqlGetVolunteerByName = """
+    SELECT 
+      wcv.first_name,
+      wcv.last_name,
+      wcv.email,
+      wcv.phone,
+      wcv.city,
+      wcv.province,
+      wcv.availability,
+      wcv.why,
+      wcv.gender,
+      wcv.address,
+      wcv.birthday,
+      wcv.bio_english,
+      wcv.bio_french,
+      wcv.byline_english,
+      wcv.byline_french,
+      wcv.website,
+      wcv.image,
+      wcvi.interest
+    FROM
+      wc_volunteer_interest AS wcvi
+      INNER JOIN wc_volunteer as wcv
+    WHERE
+      wcv.first_name = ?
+      AND wcv.last_name = ?
+  """
+
+  def getVolunteerByName(db: DB)(firstName: String, lastName: String): Option[Volunteer] = {
+    DB.use(DefaultConnectionIdentifier) { conn =>
+      DB.prepareStatement(sqlGetVolunteerByName, conn) { s =>
+        s.setString(1, firstName)
+        s.setString(2, lastName)
+
+        val volunteers: List[Volunteer] = DBHelpers.executeQuery(s){ getVolunteerFromRs }
+
+        volunteers.headOption.map { v =>
+          volunteers.foldLeft(v){ (acc, newV) => 
+            val accMap = acc.interests
+            val newMap = newV.interests
+            acc.copy(interests = (accMap ++ newMap))
+          }
+        }
+      }
+    }
+  }
 }

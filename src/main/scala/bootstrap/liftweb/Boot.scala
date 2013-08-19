@@ -11,6 +11,8 @@ import sitemap._
 import Loc._
 import mapper._
 
+import org.weirdcanada.site.lib.{EditVolunteerUrl, VolunteerUrlData}
+import org.weirdcanada.site.lib.RequestVars.ReqVolunteer
 import org.weirdcanada.site.model._
 import org.weirdcanada.site.snippet.AddVolunteerSnippet
 import net.liftmodules.JQueryModule
@@ -88,6 +90,17 @@ class Boot {
     // Use HTML5 for rendering
     LiftRules.htmlProperties.default.set((r: Req) =>
       new Html5Properties(r.userAgent))    
+
+    /**
+     * Rewrite rules
+     */
+    /*
+    val adminRewriteRules: LiftRules.RewritePF = {
+
+      case RewriteRequest(ParsePath(EditVolunteerUrl(volunteerData), _, _, _), GetRequest, _) => 
+
+
+    }*/
 
     // Make a transaction span the whole HTTP request
     S.addAround(DB.buildLoanWrapper)

@@ -1,23 +1,23 @@
 BEGIN;
   CREATE TABLE wc_volunteer (
-    id SERIAL PRIMARY KEY,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    phone VARCHAR(12) NOT NULL,
-    city TEXT NOT NULL,
-    province varchar(2) NOT NULL,
-    availability TEXT,
-    why TEXT,
-    gender VARCHAR(10),
-    address TEXT,
-    birthday TIMESTAMP,
-    bio_english TEXT,
-    bio_francais TEXT,
-    byline_english TEXT,
-    byline_francais TEXT,
-    website TEXT,
-    image TEXT,
+    id SERIAL PRIMARY KEY, -- 1
+    first_name TEXT NOT NULL, -- 2
+    last_name TEXT NOT NULL, -- 3
+    email TEXT NOT NULL, -- 4
+    phone VARCHAR(12) NOT NULL, -- 5
+    city TEXT NOT NULL, -- 6
+    province varchar(2) NOT NULL, -- 7
+    availability TEXT, -- 8
+    why TEXT, -- 9
+    gender VARCHAR(10), -- 10
+    address TEXT, -- 11
+    birthday TIMESTAMP, -- 12
+    bio_english TEXT, -- 13
+    bio_francais TEXT, -- 14
+    byline_english TEXT, -- 15
+    byline_francais TEXT, -- 16
+    website TEXT, -- 17
+    image TEXT, -- 18
     UNIQUE (first_name, last_name, email)
   );
 
