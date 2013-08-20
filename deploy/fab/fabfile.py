@@ -39,6 +39,11 @@ def deploy():
 def start_admin_app():
     run('dtach -n /tmp/weirdcanada-admin-session deploy/weirdcanada-admin')
 
+def restart_admin_app():
+    run('jps | grep \'weirdcanada-admin\.jar\' | grep -oP \'^\d+\' | while read line; do kill -9 "$line"; done')
+    start_admin_app()
+
+
 def configure_box():
     install_pyton()
     install_java()
