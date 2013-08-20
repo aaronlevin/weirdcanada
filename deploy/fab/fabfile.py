@@ -15,6 +15,9 @@ def install_postgres():
 def install_nginx():
     sudo('apt-get install nginx')
 
+def install_sbt():
+    sudo('wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch//0.12.4/sbt-launch.jar')
+
 def setup_db():
     sudo("psql -u postgres psql postgres -c \"create user weirdcanada with encrypted password 'xxx';\"")
     sudo("psql -u postgres psql postgres -c \"create database weirdcanada;\"")
@@ -49,5 +52,6 @@ def configure_box():
     install_java()
     install_postgres()
     install_nginx()
+    install_sbt()
     setup_db()
     sudo('apt-get install dtach')
