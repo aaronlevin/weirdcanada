@@ -4,7 +4,6 @@
 tags
 target/
 .keep
-sbt
 sbt.bat
 *.db
 *.props
