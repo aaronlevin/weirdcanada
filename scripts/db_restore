@@ -1,0 +1,5 @@
+#!/bin/bash
+
+source bash_variables
+
+PGPASSWORD="$PGPASSWORD" pg_dump -Fc weirdcanada -U weirdcanada > weirdcanada-db.dump
