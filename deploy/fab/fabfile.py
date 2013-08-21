@@ -1,4 +1,4 @@
-from fabric.api import run, sudo, env, put
+from fabric.api import run, sudo, env, put, cd
 
 env.use_ssh_config = True
 env.hosts = ['ec2-weirdcanada-admin']
@@ -23,29 +23,34 @@ def setup_db():
     sudo("psql -u postgres psql postgres -c \"create database weirdcanada;\"")
     sudo("psql -u postgres psql postgres -c \"grant all privileges on database weirdcanada to weirdcanada;\"")
 
-def put_war():
-    run('mkdir -p src/main')
-    put('src/main/webapp', 'src/main')
+def put_props():
+    put('src/main/resources/props/production.default.props', '/home/ubuntu/weirdcanada/src/main/resources/props/production.default.props')
+    put('src/main/resources/props/default.props', '/home/ubuntu/weirdcanada/src/main/resources/props/default.props')
 
-def put_startup_script():
-    put('deploy/weirdcanada-admin', '/tmp/weirdcanada-admin')
-    sudo('cp /tmp/weirdcanada-admin /etc/init.d')
-    sudo('chmod +x /etc/init.d/weirdcanada-admin')
-    sudo('rm /tmp/weirdcanada-admin')
+def fetch_changes():
+    with cd('/home/ubuntu/weirdcanada'):
+        run('git fetch origin')
+        run('git merge origin/master --ff-only')
 
-def deploy():
-    put_war()
-    run('mkdir -p deploy/jars')
-    put('deploy/jars/weirdcanada-admin.jar', 'deploy/jars/weirdcanada-admin.jar')
-    put_startup_script()
+def build():
+    with cd('/home/ubuntu/weirdcanada'):
+        run('./sbt compile')
+        run('./sbt assembly')
+        run('cp target/scala-2.10/weirdcanada-assembly-0.0.1.jar deploy/jars/weirdcanada-admin.jar')
 
 def start_admin_app():
-    run('dtach -n /tmp/weirdcanada-admin-session deploy/weirdcanada-admin')
+    with cd('/home/ubuntu/weirdcanada'):
+        run('dtach -n /tmp/weirdcanada-admin-session /home/ubuntu/weirdcanada/deploy/weirdcanada-admin')
 
 def restart_admin_app():
     run('jps | grep \'weirdcanada-admin\.jar\' | grep -oP \'^\d+\' | while read line; do kill -9 "$line"; done')
     start_admin_app()
 
+def deploy():
+    put_props()
+    fetch_changes()
+    build()
+    restart_admin_app()
 
 def configure_box():
     install_pyton()
