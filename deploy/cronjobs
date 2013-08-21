@@ -1,1 +1,1 @@
-0 0 * * * * /home/ubuntu/weirdcanada/scripts/dump
+0 0 * * * * /home/ubuntu/weirdcanada/scripts/db_restore

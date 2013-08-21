@@ -33,6 +33,16 @@ def fetch_changes():
         run('git fetch origin')
         run('git merge origin/master --ff-only')
 
+def update_cronjobs():
+    fetch_changes()
+    with cd('/home/ubuntu/weirdcanada'):
+        run('touch cron.tmp')
+        run('crontab -l > cron.tmp || true')
+        run('cat scripts/cronjobs >> cron.tmp')
+        run('sort -u cron.tmp > cron2.tmp')
+        run('crontab cron2.tmp')
+        run('rm cron.tmp cron2.tmp')
+
 def build():
     with cd('/home/ubuntu/weirdcanada'):
         run('./sbt compile')
