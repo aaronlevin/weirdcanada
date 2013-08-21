@@ -26,6 +26,7 @@ def setup_db():
 def put_props():
     put('src/main/resources/props/production.default.props', '/home/ubuntu/weirdcanada/src/main/resources/props/production.default.props')
     put('src/main/resources/props/default.props', '/home/ubuntu/weirdcanada/src/main/resources/props/default.props')
+    put('scripts/bash_variables', '/home/ubuntu/weirdcanada/scripts/bash_variables')
 
 def fetch_changes():
     with cd('/home/ubuntu/weirdcanada'):
