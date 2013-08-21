@@ -111,13 +111,7 @@ object Volunteer {
 
   private val sqlInsertVolunteer: String = 
     """
-    INSERT INTO wc_volunteer 
-      (id, first_name, last_name, email, phone, city, province, availability, why, gender, address, birthday, bio_english, bio_francais, byline_english, byline_francais, website, image)
-      VALUES (default,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
-    """
-  private val sqlInsertVolunteerInterest =
-    """
-    INSERT INTO wc_volunteer_interest VALUES (default,?,?)
+    SELECT volunteer_upsert(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?::text[])
     """
 
   def insertIntoDB(db: DB)(volunteer: Volunteer) = {
@@ -140,23 +134,10 @@ object Volunteer {
         s.setString(15, volunteer.bio.bylineFrancais)
         s.setString(16, volunteer.bio.website)
         s.setString(17, volunteer.bio.image)
-        s.executeUpdate()
+        s.setArray(18, conn.createArrayOf("varchar", volunteer.interests.values.toArray))
+        
+        s.execute()
       }
-      val volunteerId = DB.prepareStatement(sqlSelectVolunteerId, conn) { s =>
-        s.setString(1, volunteer.firstName)
-        s.setString(2, volunteer.lastName)
-        val rs = s.executeQuery() 
-        rs.next()
-        rs.getLong(1)
-      }
-      volunteer.interests.toList.foreach { case (_,i) =>
-        DB.prepareStatement(sqlInsertVolunteerInterest, conn) { s =>
-          s.setString(1,i)
-          s.setLong(2,volunteerId)
-          s.executeUpdate()
-        }
-      }
-
     }
   }
 

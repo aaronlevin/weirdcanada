@@ -1,6 +1,5 @@
 BEGIN;
   CREATE OR REPLACE FUNCTION volunteer_upsert(
-    var_id BIGINT, 
     var_first_name TEXT, 
     var_last_name TEXT, 
     var_email TEXT, 
