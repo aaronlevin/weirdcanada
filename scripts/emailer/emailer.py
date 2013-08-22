@@ -157,7 +157,10 @@ class Email():
                 self.sendFailures.append(emailInfo)
             
         self.server.close()
-        self.markEmailSendOutcomes()
+
+        if DEBUG == False:
+            self.markEmailSendOutcomes()
+            
         print("Email sends failed for the following addresses: %s" % 
             self.sendFailures)
             
@@ -192,7 +195,7 @@ class Email():
             
     def markEmailsAsFailed(self):
         for emailInfo in self.sendFailures:
-            self.markEmail(emailInfo, "No")
+            self.markEmail(emailInfo, "Failed")
     
     def markEmail(self, emailInfo, hasBeenEmailed):
         try:
