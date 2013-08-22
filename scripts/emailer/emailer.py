@@ -14,7 +14,7 @@ HAS_BEEN_EMAILED_COL = 14 # O
 EMAIL_ADDRESS_COL = 5
 
 HAS_BEEN_EMAILED = "Yes"
-HAS_NOT_BEEN_EMAILED = "No"
+EMAIL_FAILED = "Fail"
 
 
 def main(argv=None):
@@ -160,7 +160,7 @@ class Email():
 
         if DEBUG == False:
             self.markEmailSendOutcomes()
-            
+
         print("Email sends failed for the following addresses: %s" % 
             self.sendFailures)
             
@@ -191,11 +191,11 @@ class Email():
     
     def markEmailsAsSent(self):
         for emailInfo in self.sendSuccesses:
-            self.markEmail(emailInfo, "Yes")
+            self.markEmail(emailInfo, HAS_BEEN_EMAILED)
             
     def markEmailsAsFailed(self):
         for emailInfo in self.sendFailures:
-            self.markEmail(emailInfo, "Failed")
+            self.markEmail(emailInfo, EMAIL_FAILED)
     
     def markEmail(self, emailInfo, hasBeenEmailed):
         try:
