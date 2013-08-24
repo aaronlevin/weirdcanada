@@ -50,9 +50,11 @@ BEGIN;
         image = var_image
       WHERE id = new_volunteer_id;
 
+      DELETE FROM wc_volunteer_interest WHERE volunteer_id = new_volunteer_id;
+
       FOREACH var_interest IN ARRAY var_interests
       LOOP
-        UPDATE wc_volunteer_interest SET interest = var_interest, volunteer_id = new_volunteer_id;
+        INSERT INTO wc_volunteer_interest VALUES (default, var_interest, new_volunteer_id);
       END LOOP;
     ELSE
       -- insert
