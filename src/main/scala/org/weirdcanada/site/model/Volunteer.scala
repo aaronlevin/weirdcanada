@@ -78,7 +78,7 @@ object Volunteer {
   private def genderSelectRenderer(current: Volunteer)(updateFunc: String => JsCmd): NodeSeq => NodeSeq =
     "name=volunteer-gender-input" #> SHtml.ajaxSelect(genderSelectOptions, Empty, updateFunc)
 
-  private val provinceSelectOptions: Seq[(String,String)] = Seq(("","(select province)"),("bc","British Columbia"),("ab","Alberta"),("sk","Saskatchewan"),("mb","Manitoba"),("on","Ontario"),("qc","Quebec"),("nb","New Brunswick"),("ns","Nova Scotia"),("nl","Newfoundland and Labrador"),("yk","Yukon"),("nt", "Northwest Territories"),("nu", "Nunavut"))
+  val provinceSelectOptions: Seq[(String,String)] = Seq(("","(select province)"),("bc","British Columbia"),("ab","Alberta"),("sk","Saskatchewan"),("mb","Manitoba"),("on","Ontario"),("qc","Quebec"),("nb","New Brunswick"),("ns","Nova Scotia"),("nl","Newfoundland and Labrador"),("yk","Yukon"),("nt", "Northwest Territories"),("nu", "Nunavut"))
 
   private def provinceSelectRenderer(current: Volunteer)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = 
     "name=volunteer-province-input" #> SHtml.ajaxSelect(provinceSelectOptions, Empty, updateFunc)
@@ -162,6 +162,71 @@ object Volunteer {
         Option(rs.getString(17)).getOrElse("")
       )
     )
+
+  private val firstNameClauseString = "lower(wcv.first_name) = lower(%s)"
+  private val lastNameClauseString = "lower(wcv.last_name) = lower(%s)"
+  private val cityClauseString = "lower(wcv.city) ~* %s"
+  private val provinceClauseString = "wcv.province = %s"
+  private val interestsClauseString = "lower(wcvi.interest) IN (%s)"
+
+  private val sqlSearchVolunteers = """
+    SELECT 
+      wcv.first_name,
+      wcv.last_name,
+      wcv.email,
+      wcv.phone,
+      wcv.city,
+      wcv.province,
+      wcv.availability,
+      wcv.why,
+      wcv.gender,
+      wcv.address,
+      wcv.birthday,
+      wcv.bio_english,
+      wcv.bio_francais,
+      wcv.byline_english,
+      wcv.byline_francais,
+      wcv.website,
+      wcv.image,
+      wcvi.interest
+    FROM
+      wc_volunteer_interest AS wcvi
+      INNER JOIN wc_volunteer AS wcv ON (wcv.id = wcvi.volunteer_id)
+    %s
+  """
+
+  def searchVolunteers(
+    db: DB
+  )(
+    firstName: Option[String], 
+    lastName: Option[String], 
+    city: Option[String], 
+    province: Option[String],
+    interests: Iterable[String]
+  ): Iterable[Volunteer] = {
+    import DBHelpers.{createClauseString, constructClause, setStatement}
+
+    val firstNameClause: Option[String] = createClauseString(firstNameClauseString, firstName)
+    val lastNameClause: Option[String] = createClauseString(lastNameClauseString, lastName)
+    val cityClause: Option[String] = createClauseString(cityClauseString, city)
+    val provinceClause: Option[String] = createClauseString(provinceClauseString, province)
+    val interestsClause: Option[String] = createClauseString(interestsClauseString, interests)
+
+    val clause: String = constructClause(Some("WHERE"), firstNameClause, lastNameClause, cityClause, provinceClause, interestsClause)
+
+    val sql: String = sqlSearchVolunteers.format(clause)
+
+    val collections: List[Iterable[String]] = List(firstName, lastName, city, province, interests)
+
+    DB.use(DefaultConnectionIdentifier) { conn =>
+      DB.prepareStatement(sql, conn) { s =>
+
+        setStatement(s, 1, collections)
+
+        DBHelpers.executeQuery(s){ getVolunteerFromRs }
+      }
+    }
+  }
 
   private val sqlGetVolunteerByName = """
     SELECT 

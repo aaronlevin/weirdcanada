@@ -36,7 +36,7 @@ object VolunteerInterest {
 
   val volunteerInterestInterestLens: Lens[VolunteerInterest, String] = Lens.lensu( (vi, i) => vi.copy(interest = i), (vi) => vi.interest)
  
-   private val interestsSelectOptions: Seq[(String,String)] = Seq(
+  val interestsSelectOptions: Seq[(String,String)] = Seq(
      ("","(select interest)"),
      ("photography","Photography"),
      ("video", "Video"),

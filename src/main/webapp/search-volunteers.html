@@ -1,0 +1,79 @@
+<div id="main" class="lift:surround?with=default;at=content">
+
+  <div data-lift="SearchVolunteerSnippet.searchForm">
+    
+    <div class="row">
+
+      <div class="span4 offset2">
+        <select name="select-province">
+          <option>Edmonton</option>
+        </select>
+      </div>
+
+      <div class="span4">
+        <select name="select-interest">
+          <option>design</option>
+        </select>
+      </div>
+
+    </div>
+
+    <div class="row">
+
+      <div class="span4 offset2">
+        <input name="search-first-name" type="text" placeholder="first name" />
+      </div>
+
+      <div class="span4">
+        <input name="search-last-name" type="text" placeholder="lastname name" />
+      </div>
+
+    </div>
+
+    <div class="row">
+      <div class="span4 offset4">
+        <input name="search-city" type="text" placeholder="city" />
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row" style="margin-top: 1em; margin-bottom: 1em;"></div>
+
+  <div class="row" data-lift="SearchVolunteerSnippet.searchButton">
+    <div class="span4 offset5">
+      <button name="search-button" class="btn btn-large btn-primary">search</button>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top: 1em; margin-bottom: 1em;"></div>
+
+
+  <div class="row">
+    <div class="span4 offset4">
+      <input type="text" id="volunteer-emails" placeholder="email results">
+    </div>
+  </div>
+
+  <div class="row" style="margin-top: 1em; margin-bottom: 1em;"></div>
+
+
+
+
+  <div class="row">
+    <div class="span6 offset3">
+
+      <ul name="search-results" id="search-results" data-lift="SearchVolunteerSnippet.searchResults">
+
+        <li name="volunteer">
+          <p><span name="volunteer-first-name">aaron</span> <span name="volunteer-last-name">levin</span> (<span name="volunteer-email">vilevin@gmail.com</span>)</p>
+        </li>
+
+      </ul>
+
+    </div>
+  </div>
+        
+
+
+</div>

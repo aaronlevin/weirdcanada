@@ -14,7 +14,7 @@ import mapper._
 import org.weirdcanada.site.lib.{EditVolunteerUrl, VolunteerUrlData}
 import org.weirdcanada.site.lib.RequestVars.ReqVolunteer
 import org.weirdcanada.site.model._
-import org.weirdcanada.site.snippet.AddVolunteerSnippet
+import org.weirdcanada.site.snippet.{AddVolunteerSnippet, SearchVolunteerSnippet}
 import net.liftmodules.JQueryModule
 
 
@@ -50,7 +50,8 @@ class Boot {
       Menu.i("Home") / "index" >> User.AddUserMenusAfter, // the simple way to declare a menu
 
       Menu.i("Add") / "add" >> If( () => true , "dude"), 
-      Menu.i("Add Volunteer") / "add-volunteer" >> If( () => User.loggedIn_? , "dude, login, yo!")
+      Menu.i("Add Volunteer") / "add-volunteer" >> If( () => User.loggedIn_? , "dude, login, yo!"),
+      Menu.i("Search Volunteers") / "search-volunteers"// >> If( () => User.loggedIn_? , "dude, login, yo!")
 
       // more complex because this menu allows anything in the
       // /static path to be visible
@@ -62,6 +63,7 @@ class Boot {
 
     LiftRules.snippetDispatch.append {
       case "AddVolunteerSnippet" => new AddVolunteerSnippet(DB, ReqVolunteer.currentValue)
+      case "SearchVolunteerSnippet" => new SearchVolunteerSnippet(DB)
     }
 
     // set the sitemap.  Note if you don't want access control for
