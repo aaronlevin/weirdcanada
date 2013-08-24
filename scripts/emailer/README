@@ -1,0 +1,5 @@
+- The script was tested in python2.7
+- Debug mode is turned off by going into the script and changing DEBUG from True to False.
+- To run the script you have to pip install gspread (or
+    whatever the package is called in the requirements.txt file)
+- Then you do a ./emailScript.py -u user@gmail.com -p password -s <spreadsheet key>
