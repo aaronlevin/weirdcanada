@@ -104,11 +104,6 @@ object Volunteer {
     )
   }
 
-  private val sqlSelectVolunteerId = 
-    """
-    SELECT id FROM wc_volunteer WHERE first_name = ? AND last_name = ?;
-    """
-
   private val sqlInsertVolunteer: String = 
     """
     SELECT volunteer_upsert(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?::text[])
@@ -192,8 +187,8 @@ object Volunteer {
       wc_volunteer_interest AS wcvi
       INNER JOIN wc_volunteer AS wcv ON (wcv.id = wcvi.volunteer_id)
     WHERE
-      wcv.first_name = ?
-      AND wcv.last_name = ?
+          lower(wcv.first_name) = lower(?)
+      AND lower(wcv.last_name) = (?)
   """
 
   def getVolunteerByName(db: DB)(firstName: String, lastName: String): Option[Volunteer] = {

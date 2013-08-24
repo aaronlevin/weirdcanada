@@ -21,6 +21,10 @@ BEGIN;
     UNIQUE (first_name, last_name, email)
   );
 
+  CREATE INDEX wc_volunteer_first_name_idx ON wc_volunteer (lower(first_name));
+  CREATE INDEX wc_volunteer_last_name_idx ON wc_volunteer (lower(last_name));
+  CREATE INDEX wc_volunteer_email_idx ON wc_volunteer (lower(email));
+
   CREATE TABLE wc_volunteer_interest (
     id SERIAL PRIMARY KEY,
     interest TEXT NOT NULL,
