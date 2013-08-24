@@ -41,7 +41,7 @@ case class Volunteer(
   phone: String,
   city: String,
   province: String,
-  interests: Map[Int, String],
+  interests: Map[Int, VolunteerInterest],
   availability: String,
   whyWorkWithUs: String,
   gender: String,
@@ -59,7 +59,7 @@ object Volunteer {
   val volunteerPhoneLens: Lens[Volunteer, String] = Lens.lensu( (v, s) => v.copy(phone = s), (v) => v.phone)
   val volunteerCityLens: Lens[Volunteer, String] = Lens.lensu( (v, s) => v.copy(city = s), (v) => v.city)
   val volunteerProvinceLens: Lens[Volunteer, String] = Lens.lensu( (v, s) => v.copy(province = s), (v) => v.province)
-  val volunteerInterestsLens: Lens[Volunteer, Map[Int, String]] = Lens.lensu( (v, s) => v.copy(interests = s), (v) => v.interests)
+  val volunteerInterestsLens: Lens[Volunteer, Map[Int, VolunteerInterest]] = Lens.lensu( (v, s) => v.copy(interests = s), (v) => v.interests)
   val volunteerAvailabilityLens: Lens[Volunteer, String] = Lens.lensu( (v, s) => v.copy(availability = s), (v) => v.availability)
   val volunteerWhyWorkWithUsLens: Lens[Volunteer, String] = Lens.lensu( (v, s) => v.copy(whyWorkWithUs = s), (v) => v.whyWorkWithUs)
   val volunteerGenderLens: Lens[Volunteer, String] = Lens.lensu( (v, s) => v.copy(gender = s), (v) => v.gender)
@@ -70,17 +70,17 @@ object Volunteer {
   // Helper function to create text areas
   import DynamicFormFieldRenderHelpers.textAreaRender
 
-  private def birthdayRenderer(updateFunc: String => JsCmd): NodeSeq => NodeSeq = 
+  private def birthdayRenderer(current: Volunteer)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = 
     "name=volunteer-birthday-input" #> SHtml.ajaxText((new DateTime).toString("yyyy-MM-dd"), updateFunc, "id" -> "birthday")
 
   private val genderSelectOptions: Seq[(String, String)] = Seq(("", "(select gender)"),("male", "Male"), ("female", "Female"), ("other", "Other"))
 
-  private def genderSelectRenderer(updateFunc: String => JsCmd): NodeSeq => NodeSeq =
+  private def genderSelectRenderer(current: Volunteer)(updateFunc: String => JsCmd): NodeSeq => NodeSeq =
     "name=volunteer-gender-input" #> SHtml.ajaxSelect(genderSelectOptions, Empty, updateFunc)
 
   private val provinceSelectOptions: Seq[(String,String)] = Seq(("","(select province)"),("bc","British Columbia"),("ab","Alberta"),("sk","Saskatchewan"),("mb","Manitoba"),("on","Ontario"),("qc","Quebec"),("nb","New Brunswick"),("ns","Nova Scotia"),("nl","Newfoundland and Labrador"),("yk","Yukon"),("nt", "Northwest Territories"),("nu", "Nunavut"))
 
-  private def provinceSelectRenderer(updateFunc: String => JsCmd): NodeSeq => NodeSeq = 
+  private def provinceSelectRenderer(current: Volunteer)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = 
     "name=volunteer-province-input" #> SHtml.ajaxSelect(provinceSelectOptions, Empty, updateFunc)
 
   private val addressArea = textAreaRender("name=volunteer-address-input")("Address") _
@@ -94,7 +94,7 @@ object Volunteer {
       BasicField[Volunteer]("volunteer-phone", volunteerPhoneLens),
       BasicField[Volunteer]("volunteer-city", volunteerCityLens),
       BasicField[Volunteer]("volunteer-province", volunteerProvinceLens, Some(provinceSelectRenderer)),
-      ManyRecordField[Volunteer, String]("interests", volunteerInterestsLens),
+      ManyRecordField[Volunteer, VolunteerInterest]("volunteer-interests", volunteerInterestsLens),
       BasicField[Volunteer]("volunteer-availability", volunteerAvailabilityLens),
       BasicField[Volunteer]("volunteer-whyworkwithus", volunteerWhyWorkWithUsLens, Some(whyWorkWithUsArea)),
       BasicField[Volunteer]("volunteer-gender", volunteerGenderLens, Some(genderSelectRenderer)),
@@ -129,7 +129,7 @@ object Volunteer {
         s.setString(15, volunteer.bio.bylineFrancais)
         s.setString(16, volunteer.bio.website)
         s.setString(17, volunteer.bio.image)
-        s.setArray(18, conn.createArrayOf("varchar", volunteer.interests.values.toArray))
+        s.setArray(18, conn.createArrayOf("varchar", volunteer.interests.values.map{_.interest}.toArray))
         
         s.execute()
       }
@@ -147,7 +147,7 @@ object Volunteer {
       rs.getString(4),
       rs.getString(5),
       rs.getString(6),
-      Map(rs.getRow -> rs.getString(18)),
+      Map(rs.getRow -> VolunteerInterest(rs.getString(18))),
       Option(rs.getString(7)).getOrElse(""),
       Option(rs.getString(8)).getOrElse(""),
       Option(rs.getString(9)).getOrElse(""),

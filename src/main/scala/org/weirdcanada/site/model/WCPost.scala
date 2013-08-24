@@ -4,7 +4,7 @@ package org.weirdcanada.site.model
 import scala.xml.{Elem, NodeSeq, Text, Unparsed}
 
 // weirdcanada
-import org.weirdcanada.dynamicform.{BasicField, DynamicField, HasEmpty, HasFields, ManyRecordField, RecordField}
+import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasEmpty, HasFields, ManyRecordField, RecordField}
 
 // scalaz
 import scalaz.Lens
@@ -30,6 +30,9 @@ case class Post(
 )
 
 object Post {
+
+  import DynamicFormFieldRenderHelpers.textAreaRender
+
   val postReleaseLens: Lens[Post,Release] = Lens.lensu( (p,r) => p.copy(release = r), (p) => p.release)
   val postAuthorsMapLens: Lens[Post, Map[Int, Author]] = Lens.lensu(
     set = (p: Post, am: Map[Int,Author]) => p.copy(authors = am.toList.sortBy { _._1 }.map { _._2})
@@ -52,9 +55,6 @@ object Post {
   val postContentEnglishLens: Lens[Post, String] = Lens.lensu( (p,ce) => p.copy(contentEnglish = ce), (p) => p.contentEnglish)
   val postDeLaLens: Lens[Post, String] = Lens.lensu( (p,dl) => p.copy(deLa = dl), (p) => p.deLa)
   val postContentFrenchLens: Lens[Post, String] = Lens.lensu( (p,cf) => p.copy(contentFrench = cf), (p) => p.contentFrench)
-
-  private def textAreaRender(selector: String)(filler: String)(updateFunc: String => JsCmd): NodeSeq => NodeSeq =
-    selector #> SHtml.ajaxTextarea("", updateFunc, "placeholder" -> filler)
 
   private val englishRender = textAreaRender("name=content-english-input")("English Content") _
   private val frenchRender = textAreaRender("name=content-french-input")("French Content") _

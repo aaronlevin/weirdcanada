@@ -88,6 +88,6 @@ trait DynamicFormHelpers {
 
 object DynamicFormFieldRenderHelpers {
 
-  def textAreaRender(selector: String)(filler: String)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = 
+  def textAreaRender[A](selector: String)(filler: String)(current: A)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = 
     selector #> SHtml.ajaxTextarea("", updateFunc, "placeholder" -> filler)
 }

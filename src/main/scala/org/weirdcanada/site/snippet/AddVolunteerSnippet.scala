@@ -2,7 +2,7 @@ package org.weirdcanada.site.snippet
 
 // weirdcanada
 import org.weirdcanada.dynamicform.DynamicFormCreator
-import org.weirdcanada.site.model.{Volunteer, VolunteerBio}
+import org.weirdcanada.site.model.{Volunteer, VolunteerBio, VolunteerInterest}
 
 // Lift
 import net.liftweb._
@@ -34,7 +34,7 @@ class AddVolunteerSnippet(db: DB, volunteer: Box[Volunteer]) extends DynamicForm
   private object volunteerState extends RequestVar[Volunteer](
     volunteer openOr {
       Volunteer(
-      "","","","","","",Map.empty[Int,String],"","","","",new DateTime,VolunteerBio("","","","","","")
+      "","","","","","",Map.empty[Int,VolunteerInterest],"","","","",new DateTime,VolunteerBio("","","","","","")
       )
     }
   )

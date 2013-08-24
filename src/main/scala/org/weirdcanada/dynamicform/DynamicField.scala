@@ -43,7 +43,7 @@ sealed trait DynamicField[A] {
  * @param name The name of the field
  * @param lens a lens from the field type `A` to String (for updating the field from string input)
  */
-case class BasicField[A](name: String, lens: Lens[A,String], transformer: Option[(String => JsCmd) => (NodeSeq => NodeSeq)] = None) extends DynamicField[A] {
+case class BasicField[A](name: String, lens: Lens[A,String], transformer: Option[A => (String => JsCmd) => (NodeSeq => NodeSeq)] = None) extends DynamicField[A] {
   import DynamicField.{makeName,makeNameAdd,makeInput, FormStateUpdate, label}
 
   /*
@@ -78,7 +78,7 @@ case class BasicField[A](name: String, lens: Lens[A,String], transformer: Option
     val fieldUpdateFunc: String => JsCmd = formStateUpdater(updateFunc)(jsCmd)
     transformer match {
       case None => BasicField.defaultTransformer(name, fieldUpdateFunc, getFunc(state))
-      case Some(transformer) => transformer(fieldUpdateFunc)
+      case Some(transformer) => transformer(outerLens.get(state))(fieldUpdateFunc)
     }
   }
 }
