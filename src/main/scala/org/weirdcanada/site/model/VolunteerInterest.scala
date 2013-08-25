@@ -44,6 +44,7 @@ object VolunteerInterest {
      ("write-music", "Write (Music)"),
      ("write-books", "Write (Books)"),
      ("write-grants", "Write (Grants)"),
+     ("write-general", "Write (General Communications)"),
      ("write-art", "Write (Art)"),
      ("translation-french", "Translation (French)"),
      ("translation-syllabics","Translation (Syllabics)"),
@@ -61,6 +62,7 @@ object VolunteerInterest {
      ("printing-screenprinting", "Printing / Screenprinting"),
      ("driving", "Driving"),
      ("show-promoting", "Show Promoting"),
+     ("volunteer-sourcing", "Volunteer Sourcing"),
      ("music-sourcing", "Music Sourcing")
    )
   
