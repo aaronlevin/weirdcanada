@@ -5,12 +5,14 @@ env.hosts = ['ec2-weirdcanada-admin']
 
 def install_python():
     sudo("apt-get install python2.7")
+    sudo("apt-get install python-dev")
 
 def install_java():
     sudo('apt-get install openjdk-7-jdk')
 
 def install_postgres():
     sudo('apt-get install postgresql')
+    sudo('apt-get install postgresql-server-9.1')
 
 def install_nginx():
     sudo('apt-get install nginx')
