@@ -1,0 +1,5 @@
+#!/bin/bash
+
+source bash_variables
+
+python volunteer-transfer/volunteer_transfer.py -u "$GDOCUSERNAME" -p "$GDOCPASSWORD" -s "$GDOCVOLUNTEERKEY" -d "$PGDATABASE" -z "$PGUSER"
