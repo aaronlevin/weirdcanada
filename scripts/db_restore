@@ -1,5 +1,14 @@
 #!/bin/bash
 
-source bash_variables
+# get current directory of script
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+source "$DIR"/bash_variables
 
 PGPASSWORD="$PGPASSWORD" pg_dump -Fc weirdcanada -U weirdcanada > weirdcanada-db.dump
