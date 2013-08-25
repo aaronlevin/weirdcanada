@@ -16,6 +16,9 @@ object DBHelpers {
     iterateOverResultSet(f, rs, Nil)
   }
 
+  def executeQueryWithReducer[T](st: PreparedStatement)(reducer: Iterable[T] => Iterable[T])(f: ResultSet => T): Iterable[T] =
+    reducer( executeQuery(st) { f } )
+
   /**
    * Small helpe rmethod to create clauses from collections of things (including options). It puts the ?,?,? in your queries.
    *

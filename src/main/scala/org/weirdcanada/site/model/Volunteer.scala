@@ -35,6 +35,7 @@ import org.joda.time.DateTime
 import java.sql.{PreparedStatement, ResultSet, Timestamp}
 
 case class Volunteer(
+  id: Option[Long],
   firstName: String,
   lastName: String,
   email: String,
@@ -141,27 +142,50 @@ object Volunteer {
    */
   private def getVolunteerFromRs(rs: ResultSet): Volunteer = 
     Volunteer(
-      rs.getString(1),
+      Option(rs.getLong(1)),
       rs.getString(2),
       rs.getString(3),
       rs.getString(4),
       rs.getString(5),
       rs.getString(6),
-      Map(rs.getRow -> VolunteerInterest(rs.getString(18))),
-      Option(rs.getString(7)).getOrElse(""),
+      rs.getString(7),
+      Map(rs.getRow -> VolunteerInterest(rs.getString(19))),
       Option(rs.getString(8)).getOrElse(""),
       Option(rs.getString(9)).getOrElse(""),
       Option(rs.getString(10)).getOrElse(""),
-      Option(new DateTime(rs.getTimestamp(11))).getOrElse(new DateTime()),
+      Option(rs.getString(11)).getOrElse(""),
+      Option(new DateTime(rs.getTimestamp(12))).getOrElse(new DateTime()),
       VolunteerBio(
-        Option(rs.getString(12)).getOrElse(""),
         Option(rs.getString(13)).getOrElse(""),
         Option(rs.getString(14)).getOrElse(""),
         Option(rs.getString(15)).getOrElse(""),
         Option(rs.getString(16)).getOrElse(""),
-        Option(rs.getString(17)).getOrElse("")
+        Option(rs.getString(17)).getOrElse(""),
+        Option(rs.getString(18)).getOrElse("")
       )
     )
+
+  /**
+   * Take a list of volunteers, group them by id, then merge their maps.
+   */
+  private def reduceVolunteers(volunteers: Iterable[Volunteer]): Iterable[Volunteer] = {
+    volunteers
+      .groupBy { _.id }
+      .flatMap { case (_, vs) => 
+        vs match {
+          case head::_ => 
+            val newMap: Map[Int, VolunteerInterest] = 
+              vs
+              .flatMap { volunteerInterestsLens.get(_).values }
+              .zipWithIndex
+              .map { case (v, i) => i -> v }
+              .toMap
+
+            Some(volunteerInterestsLens.set(head, newMap))
+          case _ => None
+        }
+      }
+  }
 
   private val firstNameClauseString = "lower(wcv.first_name) = lower(%s)"
   private val lastNameClauseString = "lower(wcv.last_name) = lower(%s)"
@@ -171,6 +195,7 @@ object Volunteer {
 
   private val sqlSearchVolunteers = """
     SELECT 
+      wcv.id,
       wcv.first_name,
       wcv.last_name,
       wcv.email,
@@ -223,13 +248,14 @@ object Volunteer {
 
         setStatement(s, 1, collections)
 
-        DBHelpers.executeQuery(s){ getVolunteerFromRs }
+        DBHelpers.executeQueryWithReducer(s)( reduceVolunteers ){ getVolunteerFromRs }
       }
     }
   }
 
   private val sqlGetVolunteerByName = """
     SELECT 
+      wcv.id,
       wcv.first_name,
       wcv.last_name,
       wcv.email,

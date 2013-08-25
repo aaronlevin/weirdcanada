@@ -34,7 +34,7 @@ class AddVolunteerSnippet(db: DB, volunteer: Box[Volunteer]) extends DynamicForm
   private object volunteerState extends RequestVar[Volunteer](
     volunteer openOr {
       Volunteer(
-      "","","","","","",Map.empty[Int,VolunteerInterest],"","","","",new DateTime,VolunteerBio("","","","","","")
+      None,"","","","","","",Map.empty[Int,VolunteerInterest],"","","","",new DateTime,VolunteerBio("","","","","","")
       )
     }
   )
