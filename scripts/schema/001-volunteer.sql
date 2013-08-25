@@ -4,7 +4,7 @@ BEGIN;
     first_name TEXT NOT NULL, -- 2
     last_name TEXT NOT NULL, -- 3
     email TEXT NOT NULL, -- 4
-    phone VARCHAR(12) NOT NULL, -- 5
+    phone TEXT NOT NULL, -- 5
     city TEXT NOT NULL, -- 6
     province varchar(2) NOT NULL, -- 7
     availability TEXT, -- 8
