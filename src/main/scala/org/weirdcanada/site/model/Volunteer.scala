@@ -326,7 +326,7 @@ object Volunteer {
       wc_volunteer_interest AS wcvi
       INNER JOIN wc_volunteer AS wcv ON (wcv.id = wcvi.volunteer_id)
     WHERE
-      lower wcv.id = ?
+      wcv.id = ?
   """
 
   def getVolunteerById(db: DB)(id: Long): Option[Volunteer] = {

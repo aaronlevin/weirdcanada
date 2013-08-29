@@ -55,7 +55,4 @@ class AddVolunteerSnippet(db: DB, volunteer: Box[Volunteer]) extends DynamicForm
       case e: Exception => Alert("Issue inserting: %s".format(e))
     }
   }
-
-
-
 }

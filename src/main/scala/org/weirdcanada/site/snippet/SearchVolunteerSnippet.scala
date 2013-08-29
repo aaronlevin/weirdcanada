@@ -56,6 +56,7 @@ class SearchVolunteerSnippet(db: DB) extends DispatchSnippet {
 
   private def searchResults: NodeSeq => NodeSeq = 
     "name=volunteer" #> search(_firstName, _lastName, _city, _province, _interests).map { volunteer =>
+      "name=volunteer-url [href]" #> volunteer.id.map { i => "/edit-volunteer/%s".format(i) } &
       "name=volunteer-first-name" #> volunteer.firstName &
       "name=volunteer-last-name" #> volunteer.lastName &
       "name=volunteer-email" #> volunteer.email

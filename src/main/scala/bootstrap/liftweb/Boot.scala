@@ -47,11 +47,11 @@ class Boot {
 
     // Build SiteMap
     def sitemap = SiteMap(
-      Menu.i("Home") / "index" >> User.AddUserMenusAfter, // the simple way to declare a menu
+      Menu.i("Home") / "index", // >> User.AddUserMenusAfter, // the simple way to declare a menu
 
-      Menu.i("Add") / "add" >> If( () => true , "dude"), 
+      Menu.i("Add") / "add" >> If( () => User.loggedIn_? , "dude, login, yo!"), 
       Menu.i("Add Volunteer") / "add-volunteer" >> If( () => User.loggedIn_? , "dude, login, yo!"),
-      Menu.i("Search Volunteers") / "search-volunteers"// >> If( () => User.loggedIn_? , "dude, login, yo!")
+      Menu.i("Search Volunteers") / "search-volunteers" >> If( () => User.loggedIn_? , "dude, login, yo!")
 
       // more complex because this menu allows anything in the
       // /static path to be visible
