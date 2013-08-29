@@ -62,6 +62,7 @@ def restart_admin_app():
 def deploy():
     put_props()
     fetch_changes()
+    update_cronjobs()
     build()
     restart_admin_app()
 
