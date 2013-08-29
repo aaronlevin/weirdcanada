@@ -300,4 +300,50 @@ object Volunteer {
       }
     }
   }
+
+  private val sqlGetVolunteerById = """
+    SELECT 
+      wcv.id,
+      wcv.first_name,
+      wcv.last_name,
+      wcv.email,
+      wcv.phone,
+      wcv.city,
+      wcv.province,
+      wcv.availability,
+      wcv.why,
+      wcv.gender,
+      wcv.address,
+      wcv.birthday,
+      wcv.bio_english,
+      wcv.bio_francais,
+      wcv.byline_english,
+      wcv.byline_francais,
+      wcv.website,
+      wcv.image,
+      wcvi.interest
+    FROM
+      wc_volunteer_interest AS wcvi
+      INNER JOIN wc_volunteer AS wcv ON (wcv.id = wcvi.volunteer_id)
+    WHERE
+      lower wcv.id = ?
+  """
+
+  def getVolunteerById(db: DB)(id: Long): Option[Volunteer] = {
+    DB.use(DefaultConnectionIdentifier) { conn =>
+      DB.prepareStatement(sqlGetVolunteerById, conn) { s =>
+        s.setLong(1, id)
+
+        val volunteers: List[Volunteer] = DBHelpers.executeQuery(s){ getVolunteerFromRs }
+
+        volunteers.headOption.map { v =>
+          volunteers.foldLeft(v){ (acc, newV) => 
+            val accMap = acc.interests
+            val newMap = newV.interests
+            acc.copy(interests = (accMap ++ newMap))
+          }
+        }
+      }
+    }
+  }
 }

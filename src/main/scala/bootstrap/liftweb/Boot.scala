@@ -11,7 +11,7 @@ import sitemap._
 import Loc._
 import mapper._
 
-import org.weirdcanada.site.lib.{EditVolunteerUrl, VolunteerUrlData}
+import org.weirdcanada.site.lib.{EditVolunteerUrl, EditVolunteerByIdUrl, VolunteerUrlData}
 import org.weirdcanada.site.lib.RequestVars.ReqVolunteer
 import org.weirdcanada.site.model._
 import org.weirdcanada.site.snippet.{AddVolunteerSnippet, SearchVolunteerSnippet}
@@ -97,6 +97,7 @@ class Boot {
      * Rewrite rules
      */
     val adminRewriteRules: LiftRules.RewritePF = {
+
       /**
        * This rewrite rule matches on:
        * /edit-volunteer/firstName/lastName
@@ -107,6 +108,20 @@ class Boot {
             ReqVolunteer.setCurrentValue(Full(volunteer))
             RewriteResponse(List("add-volunteer"))
           case None => 
+            RewriteResponse(List("add-volunteer"))
+        }
+
+
+      /**
+       * This rewrite rule matches on:
+       * /edit-volunteer/123
+       */
+      case RewriteRequest(ParsePath(EditVolunteerByIdUrl(volunteerId), _, _, _), GetRequest, _) => 
+        Volunteer.getVolunteerById(DB)(volunteerId) match {
+          case Some(volunteer) => 
+            ReqVolunteer.setCurrentValue(Full(volunteer))
+            RewriteResponse(List("add-volunteer"))
+          case None =>
             RewriteResponse(List("add-volunteer"))
         }
     }
