@@ -36,8 +36,8 @@ object VolunteerBio {
   // generate text areas!
   import DynamicFormFieldRenderHelpers.textAreaRender
 
-  private val descriptionEnglishArea = textAreaRender("name=volunteerbio-description-english-input")("English Bio") _
-  private val descriptionFrancaisArea = textAreaRender("name=volunteerbio-description-francais-input")("Francais Bio") _
+  private val descriptionEnglishArea = textAreaRender(volunteerBioDescriptionEnglishLens.get)("name=volunteerbio-description-english-input")("English Bio") _
+  private val descriptionFrancaisArea = textAreaRender(volunteerBioDescriptionFrancaisLens.get)("name=volunteerbio-description-francais-input")("Francais Bio") _
 
   implicit object VolunteerBioRecord extends HasFields[VolunteerBio] {
     val fields: List[DynamicField[VolunteerBio]] = List(

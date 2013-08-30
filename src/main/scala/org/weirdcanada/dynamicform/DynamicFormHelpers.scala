@@ -3,7 +3,7 @@ package org.weirdcanada.dynamicform
 // Lift
 import net.liftweb.util.Helpers._
 import net.liftweb.http._
-import net.liftweb.common.{Full,Box}
+import net.liftweb.common.{Empty,Full,Box}
 import js.{JsCmd, JsCmds}
 
 // scala
@@ -20,7 +20,7 @@ trait DynamicFormHelpers {
       .map { validator => validator(newData) }
       .foldLeft(ValidationResponse(true,JsCmds.Noop))( (b,a) => ValidationResponse(b.validity && a.validity, b.response & a.response) )
 
-    private def validationLogic[T](currentData: T, newData: T, validation: ValidationResponse, successCmd: () => JsCmd, stateChanger: T => T): JsCmd = {
+  private def validationLogic[T](currentData: T, newData: T, validation: ValidationResponse, successCmd: () => JsCmd, stateChanger: T => T): JsCmd = {
 
     // Ensure validations pass before updating new data
     if( validation.validity ) {
@@ -88,6 +88,17 @@ trait DynamicFormHelpers {
 
 object DynamicFormFieldRenderHelpers {
 
-  def textAreaRender[A](selector: String)(filler: String)(current: A)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = 
-    selector #> SHtml.ajaxTextarea("", updateFunc, "placeholder" -> filler)
+  def textAreaRender[A](accessor: A => String)(selector: String)(filler: String)(current: A)(updateFunc: String => JsCmd): NodeSeq => NodeSeq =
+    selector #> SHtml.ajaxTextarea(accessor(current), updateFunc, "placeholder" -> filler)
+
+  def selectRender[A](accessor: A => String)(selector: String)(selectOptions: Seq[(String,String)])(current: A)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = {
+    val currentValue: Box[String] = accessor(current) match {
+      case "" => Empty
+      case value @ _ => Full(value)
+    }
+    selector #> SHtml.ajaxSelect(selectOptions, currentValue, updateFunc)
+  }
+
+
+    
 }

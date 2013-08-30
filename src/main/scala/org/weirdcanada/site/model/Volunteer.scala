@@ -69,23 +69,23 @@ object Volunteer {
   val volunteerBioLens: Lens[Volunteer, VolunteerBio] = Lens.lensu( (v, s) => v.copy(bio = s), (v) => v.bio)
 
   // Helper function to create text areas
-  import DynamicFormFieldRenderHelpers.textAreaRender
+  import DynamicFormFieldRenderHelpers.{textAreaRender, selectRender}
 
   private def birthdayRenderer(current: Volunteer)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = 
-    "name=volunteer-birthday-input" #> SHtml.ajaxText((new DateTime).toString("yyyy-MM-dd"), updateFunc, "id" -> "birthday")
+    "name=volunteer-birthday-input" #> SHtml.ajaxText(
+      (new DateTime).toString("yyyy-MM-dd"), updateFunc, "id" -> "birthday", "value" -> volunteerBirthdayLens.get(current)
+    )
 
   private val genderSelectOptions: Seq[(String, String)] = Seq(("", "(select gender)"),("male", "Male"), ("female", "Female"), ("other", "Other"))
-
-  private def genderSelectRenderer(current: Volunteer)(updateFunc: String => JsCmd): NodeSeq => NodeSeq =
-    "name=volunteer-gender-input" #> SHtml.ajaxSelect(genderSelectOptions, Empty, updateFunc)
+  private def genderSelectRenderer: Volunteer => (String => JsCmd) => (NodeSeq => NodeSeq) = 
+    selectRender(volunteerGenderLens.get)("name=volunteer-gender-input")(genderSelectOptions) _
 
   val provinceSelectOptions: Seq[(String,String)] = Seq(("","(select province)"),("bc","British Columbia"),("ab","Alberta"),("sk","Saskatchewan"),("mb","Manitoba"),("on","Ontario"),("qc","Quebec"),("nb","New Brunswick"),("ns","Nova Scotia"),("nl","Newfoundland and Labrador"),("yk","Yukon"),("nt", "Northwest Territories"),("nu", "Nunavut"))
+  private def provinceSelectRenderer: Volunteer => (String => JsCmd) => (NodeSeq => NodeSeq) = 
+    selectRender(volunteerProvinceLens.get)("name=volunteer-province-input")(provinceSelectOptions) _
 
-  private def provinceSelectRenderer(current: Volunteer)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = 
-    "name=volunteer-province-input" #> SHtml.ajaxSelect(provinceSelectOptions, Empty, updateFunc)
-
-  private val addressArea = textAreaRender("name=volunteer-address-input")("Address") _
-  private val whyWorkWithUsArea = textAreaRender("name=volunteer-whyworkwithus-input")("Why Work With Us") _
+  private val addressArea = textAreaRender(volunteerAddressLens.get)("name=volunteer-address-input")("Address") _
+  private val whyWorkWithUsArea = textAreaRender(volunteerWhyWorkWithUsLens.get)("name=volunteer-whyworkwithus-input")("Why Work With Us") _
 
   implicit object VolunteerRecord extends HasFields[Volunteer] { 
     val fields: List[DynamicField[Volunteer]] = List(
@@ -131,7 +131,7 @@ object Volunteer {
         s.setString(16, volunteer.bio.website)
         s.setString(17, volunteer.bio.image)
         s.setArray(18, conn.createArrayOf("varchar", volunteer.interests.values.map{_.interest}.toArray))
-        
+
         s.execute()
       }
     }
@@ -267,11 +267,11 @@ object Volunteer {
       wcv.gender,
       wcv.address,
       wcv.birthday,
-      wcv.bio_english,
-      wcv.bio_francais,
       wcv.byline_english,
       wcv.byline_francais,
       wcv.website,
+      wcv.bio_english,
+      wcv.bio_francais,
       wcv.image,
       wcvi.interest
     FROM
@@ -315,11 +315,11 @@ object Volunteer {
       wcv.gender,
       wcv.address,
       wcv.birthday,
-      wcv.bio_english,
-      wcv.bio_francais,
       wcv.byline_english,
       wcv.byline_francais,
       wcv.website,
+      wcv.bio_english,
+      wcv.bio_francais,
       wcv.image,
       wcvi.interest
     FROM

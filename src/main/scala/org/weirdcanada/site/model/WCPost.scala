@@ -56,8 +56,8 @@ object Post {
   val postDeLaLens: Lens[Post, String] = Lens.lensu( (p,dl) => p.copy(deLa = dl), (p) => p.deLa)
   val postContentFrenchLens: Lens[Post, String] = Lens.lensu( (p,cf) => p.copy(contentFrench = cf), (p) => p.contentFrench)
 
-  private val englishRender = textAreaRender("name=content-english-input")("English Content") _
-  private val frenchRender = textAreaRender("name=content-french-input")("French Content") _
+  private val englishRender = textAreaRender(postContentEnglishLens.get)("name=content-english-input")("English Content") _
+  private val frenchRender = textAreaRender(postContentFrenchLens.get)("name=content-french-input")("French Content") _
 
   implicit object PostRecord extends HasFields[Post] {
     val fields: List[DynamicField[Post]] = List(
