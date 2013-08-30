@@ -6,20 +6,25 @@ import psycopg2
 
 DEBUG = True
 
+alphabet = {}
+for i,a in enumerate(xrange(ord('A'), ord('Z')+1)):
+    alphabet[chr(a)] = i
+
 # Note that gspread begins indexing at 1, 
 # while the rest of computers start at 0
-col_name = 1        # B
-col_email = 2       # C
-col_phone = 3       # D
-col_city = 4        # E
-col_interests = 5   # F
-col_availability = 6 # G
-col_word = 7        # H
-col_why = 8         # I
-col_gender = 9     # J
-col_address = 10    # K
-col_notes = 14      # O
-col_inserted = 16   # Q
+col_first_name = alphabet['B']
+col_last_name = alphabet['C']
+col_email = alphabet['D']
+col_phone = alphabet['E']
+col_city = alphabet['G']
+col_interests = alphabet['H']
+col_availability = alphabet['I']
+col_word = alphabet['J']
+col_why = alphabet['K']
+col_gender = alphabet['N']
+col_address = alphabet['F']
+col_notes = alphabet['P']
+col_inserted = alphabet['W']
 
 flag_inserted = "yes"
 
@@ -96,7 +101,8 @@ def main(argv=None):
 
     for row, volunteer_row in enumerate(worksheet.get_all_values()):
         if volunteer_row[0] != "" and row != 0 and volunteer_row[col_inserted] != flag_inserted:
-            name = volunteer_row[col_name]
+            first_name = volunteer_row[col_first_name]
+            last_name = volunteer_row[col_last_name]
             email = volunteer_row[col_email]
             phone = volunteer_row[col_phone]
             city = volunteer_row[col_city]
@@ -107,9 +113,6 @@ def main(argv=None):
             gender = volunteer_row[col_gender]
             address = volunteer_row[col_address]
             notes = volunteer_row[col_notes]
-
-            name_list = name.split(None, 1)
-            first_name, last_name = name_list[0], " ".join(name_list[1:])
 
             interests = [ interests_dict[x.strip()] for x in interests_string.split(",") if x.strip() in interests_dict ]
 
