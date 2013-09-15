@@ -139,7 +139,6 @@ case class RecordField[A, B : HasFields](name: String, lens: Lens[A,B]) extends 
 case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens[A, Map[Int,B]]) extends DynamicField[A] {
   import DynamicField.{makeAdd, makeName, makeNameAdd, label, FormStateUpdate,optionLens}
   val bRecord = implicitly[HasFields[B]]
-  val bEmpty = implicitly[HasEmpty[B]]
 
   /*
    * Render a `ManyRecordField` by creating some chrome to allow us to, recursively, add additional copies of this field,

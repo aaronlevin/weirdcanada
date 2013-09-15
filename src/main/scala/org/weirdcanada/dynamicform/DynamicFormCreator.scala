@@ -28,7 +28,7 @@ trait DynamicFormCreator extends DynamicFormHelpers {
     val initialState = formState.is
     record
       .fields
-      .foldLeft( (ns: NodeSeq) => ns){ (acc, field) => 
+      .foldLeft( identity[NodeSeq]_ ){ (acc, field) => 
         acc andThen field.render(updateStateFunction, initialState)(lensId[A], None)
       }
   }
