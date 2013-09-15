@@ -122,7 +122,7 @@ case class RecordField[A, B : HasFields](name: String, lens: Lens[A,B]) extends 
     makeNameAdd(None, name) #>
       bRecord
         .fields
-        .foldLeft( (ns: NodeSeq) => ns ){ (acc, field) => acc andThen field.render(formStateUpdater, state)(outerLens >=> lens, Some(label(outerName,name))) }
+        .foldLeft( identity[NodeSeq]_ ){ (acc, field) => acc andThen field.render(formStateUpdater, state)(outerLens >=> lens, Some(label(outerName,name))) }
   }
 }
 
@@ -135,8 +135,9 @@ case class RecordField[A, B : HasFields](name: String, lens: Lens[A,B]) extends 
  * @constructor create a `ManyRecordField` from type `A` to type `B`
  * @param name the name of the field
  * @param lens a lens from `A` to `Map[Int,B]`
+ * @param indexedChromeRendering a function to render the visual data surrounding the many record field (updates for each entry)
  */
-case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens[A, Map[Int,B]]) extends DynamicField[A] {
+case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens[A, Map[Int,B]], indexedChromeRendering: Option[Int => (NodeSeq => NodeSeq)] = None) extends DynamicField[A] {
   import DynamicField.{makeAdd, makeName, makeNameAdd, label, FormStateUpdate,optionLens}
   val bRecord = implicitly[HasFields[B]]
 
@@ -204,10 +205,10 @@ case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens
      */
     def renderAtIndex(index: Int): NodeSeq => NodeSeq = {
       "%s [id]".format(makeNameAdd(None, name)) #> "%s-%s".format(makeAdd(outerName, name), index) andThen
-      makeName(None, "%s-number *".format(name)) #>  (index+1) andThen
+      indexedChromeRendering.map { _(index+1) }.getOrElse { makeName(None, "%s-number *".format(name)) #> (index+1) } andThen
       bRecord
         .fields
-        .foldLeft( (ns: NodeSeq) => ns ){ (acc, field) =>
+        .foldLeft( identity[NodeSeq]_ ){ (acc, field) =>
            val newLens: Lens[C, B] = lensAtIndex(index)
            acc andThen field.render(formStateUpdater, state)(newLens, Some(label(outerName,name)))
          } andThen

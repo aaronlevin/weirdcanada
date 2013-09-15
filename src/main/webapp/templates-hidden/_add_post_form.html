@@ -3,12 +3,19 @@
 
   <!-- Release info -->
   <div class="well">
-    <span data-lift="embed?what=_add_release_form"></span>
+    <div name="add-release">
+      <span data-lift="embed?what=_add_release_form"></span>
+    </div>
   </div>
 
   <!-- Author Data -->
   <div class="well">
-    <span data-lift="embed?what=_add_author_form"></span>
+
+    <div name="add-author">
+      <h3>Author #<span name="author-number">1</span></h3>
+      <span data-lift="embed?what=_add_author_form"></span>
+      <p>[ <span class="add-on" style="cursor:pointer;" name="author-add">+</span> | <span class="add-on" style="cursor:pointer;" name="author-remove">-</span> ]</p>
+    </div>
 
     <div id="author-elements"></div>
   </div>
@@ -16,7 +23,14 @@
   <!-- Translator Data -->
 
   <div class="well">
-    <span data-lift="embed?what=_add_translator_form"></span>
+
+    <div name="add-translator">
+
+      <h3>Translator #<span name="translator-number">1</span></h3>
+
+      <span data-lift="embed?what=_add_translator_form"></span>
+      <p>[ <span class="add-on" style="cursor:pointer;" name="translator-add">+</span> | <span class="add-on" style="cursor:pointer;" name="translator-remove">-</span> ]</p>
+    </div>
 
     <div id="translator-elements"></div>
   </div>

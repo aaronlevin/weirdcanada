@@ -1,5 +1,4 @@
-<div name="add-release">
-
+<div>
   <h3 id="release-header">Release Info</h3>
 
   <div name="add-release-title">
@@ -29,14 +28,28 @@
 
   <!-- Artist Data -->
   <div class="well">
-    <span data-lift="embed?what=_add_artist_form"></span>
+
+    <div name="add-artist">
+      <h3>Artist #<span name="artist-number">1</span></h3>
+      <span data-lift="embed?what=_add_artist_form"></span>
+
+  <p>[ <span class="add-on" style="cursor:pointer;" name="artist-add">+</span> | <span class="add-on" style="cursor:pointer;" name="artist-remove">-</span> ]</p>
+
+    </div>
 
     <div id="artist-elements"></div>
   </div>
 
   <!-- Publisher Data -->
   <div class="well">
-    <span data-lift="embed?what=_add_publisher_form"></span>
+
+    <div name="add-publisher">
+      <h3>Publisher #<span name="publisher-number">0</span></h3>
+
+      <span data-lift="embed?what=_add_publisher_form"></span>
+
+      <p>[ <span class="add-on" style="cursor:pointer;" name="publisher-add">+</span> | <span class="add-on" style="cursor:pointer;" name="publisher-remove">-</span> ]</p>
+    </div>
 
     <div id="publisher-elements"></div>
   </div>
