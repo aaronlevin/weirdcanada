@@ -1,4 +1,4 @@
-package org.weirdcanada.util
+package org.weirdcanada.common.util
 
 object EmailUtil {
 

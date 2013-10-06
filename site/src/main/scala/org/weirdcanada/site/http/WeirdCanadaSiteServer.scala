@@ -1,0 +1,12 @@
+package org.weirdcanada.site.http
+
+import org.weirdcanada.common.http.WeirdCanadaServer
+import bootstrap.liftweb.{Boot => BootClass}
+
+object WeirdCanadaSiteServer {
+
+  private val server: WeirdCanadaServer[BootClass] = WeirdCanadaServer("site/src/main/webapp")
+
+  def main(args: Array[String]) = server.main(args)
+
+}

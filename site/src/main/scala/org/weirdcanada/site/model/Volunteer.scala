@@ -13,7 +13,7 @@ import org.weirdcanada.dynamicform.{
 }
 import DynamicFieldPrimitives.{StringPrimitive,StringPrimitiveEmpty}
 import org.weirdcanada.site.lib.DBHelpers
-import org.weirdcanada.util.EmailUtil
+import org.weirdcanada.common.util.EmailUtil
 
 // Lift
 import net.liftweb.common.{Empty, Full}
