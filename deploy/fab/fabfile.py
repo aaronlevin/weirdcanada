@@ -26,18 +26,18 @@ def setup_db():
     sudo("psql -u postgres psql postgres -c \"grant all privileges on database weirdcanada to weirdcanada;\"")
 
 def put_props():
-    put('src/main/resources/props/production.default.props', '/home/ubuntu/weirdcanada/src/main/resources/props/production.default.props')
-    put('src/main/resources/props/default.props', '/home/ubuntu/weirdcanada/src/main/resources/props/default.props')
-    put('scripts/bash_variables', '/home/ubuntu/weirdcanada/scripts/bash_variables')
+    put('src/main/resources/props/production.default.props', '~/weirdcanada/src/main/resources/props/production.default.props')
+    put('src/main/resources/props/default.props', '~/weirdcanada/src/main/resources/props/default.props')
+    put('scripts/bash_variables', '~/weirdcanada/scripts/bash_variables')
 
 def fetch_changes():
-    with cd('/home/ubuntu/weirdcanada'):
+    with cd('~/weirdcanada'):
         run('git fetch origin')
         run('git merge origin/master --ff-only')
 
 def update_cronjobs():
     fetch_changes()
-    with cd('/home/ubuntu/weirdcanada'):
+    with cd('~/weirdcanada'):
         run('touch cron.tmp')
         run('crontab -l > cron.tmp || true')
         run('cat deploy/cronjobs >> cron.tmp')
@@ -46,14 +46,14 @@ def update_cronjobs():
         run('rm cron.tmp cron2.tmp')
 
 def build():
-    with cd('/home/ubuntu/weirdcanada'):
+    with cd('~/weirdcanada'):
         run('./sbt compile')
         run('./sbt assembly')
-        run('cp target/scala-2.10/weirdcanada-assembly-0.0.1.jar deploy/jars/weirdcanada-admin.jar')
+        run('cp site/target/scala-2.10/weirdcanada-assembly-0.0.1.jar deploy/jars/weirdcanada-admin.jar')
 
 def start_admin_app():
-    with cd('/home/ubuntu/weirdcanada'):
-        run('dtach -n /tmp/weirdcanada-admin-session /home/ubuntu/weirdcanada/deploy/weirdcanada-admin')
+    with cd('~/weirdcanada'):
+        run('dtach -n /tmp/weirdcanada-admin-session ~/weirdcanada/deploy/weirdcanada-admin')
 
 def restart_admin_app():
     run('jps | grep \'weirdcanada-admin\.jar\' | grep -oP \'^\d+\' | while read line; do kill -9 "$line"; done')
