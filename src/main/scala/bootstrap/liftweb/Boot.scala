@@ -14,7 +14,7 @@ import mapper._
 import org.weirdcanada.site.lib.{EditVolunteerUrl, EditVolunteerByIdUrl, VolunteerUrlData}
 import org.weirdcanada.site.lib.RequestVars.ReqVolunteer
 import org.weirdcanada.site.model._
-import org.weirdcanada.site.snippet.{AddVolunteerSnippet, SearchVolunteerSnippet}
+import org.weirdcanada.site.snippet.{AddVolunteerSnippet, SearchVolunteerSnippet, VolunteerBioGenSnippet}
 import net.liftmodules.JQueryModule
 
 
@@ -22,7 +22,7 @@ import net.liftmodules.JQueryModule
  * A class that's instantiated early and run.  It allows the application
  * to modify lift's environment
  */
-class Boot {
+class Boot extends Bootable {
   def boot {
     if (!DB.jndiJdbcConnAvailable_?) {
       val vendor = 
@@ -51,7 +51,8 @@ class Boot {
 
       Menu.i("Add") / "add" >> If( () => User.loggedIn_? , "dude, login, yo!"), 
       Menu.i("Add Volunteer") / "add-volunteer" >> If( () => User.loggedIn_? , "dude, login, yo!"),
-      Menu.i("Search Volunteers") / "search-volunteers" >> If( () => User.loggedIn_? , "dude, login, yo!")
+      Menu.i("Search Volunteers") / "search-volunteers" >> If( () => User.loggedIn_? , "dude, login, yo!"),
+      Menu.i("Volunteer Bios") / "volunteer-bios" >> If( () => User.loggedIn_?, "dude, login, yo!")
 
       // more complex because this menu allows anything in the
       // /static path to be visible
@@ -64,6 +65,7 @@ class Boot {
     LiftRules.snippetDispatch.append {
       case "AddVolunteerSnippet" => new AddVolunteerSnippet(DB, ReqVolunteer.currentValue)
       case "SearchVolunteerSnippet" => new SearchVolunteerSnippet(DB)
+      case "VolunteerBioGenSnippet" => new VolunteerBioGenSnippet(DB)
     }
 
     // set the sitemap.  Note if you don't want access control for

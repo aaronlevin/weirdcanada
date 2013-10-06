@@ -54,11 +54,10 @@ object WeirdCanadaServer {
     context.setWar("src/main/webapp")
 
     // Use lift to filter all requests
-    //val filter = new FilterHolder(classOf[net.liftweb.http.LiftFilter])
-    //filter.setInitParameter("bootloader", classOf[BootClass].getName)
-
-    //context.addFilter(filter, "/*", EnumSet.of(DispatcherType.REQUEST))
-    //context.addServlet(classOf[DefaultServlet], "/")
+    val filter = new FilterHolder(classOf[net.liftweb.http.LiftFilter])
+    filter.setInitParameter("bootloader", classOf[BootClass].getName)
+    context.addFilter(filter, "/*", EnumSet.of(DispatcherType.REQUEST))
+    context.addServlet(classOf[DefaultServlet], "/")
 
     val contextHandler: ContextHandler = new ContextHandler();
     contextHandler.setHandler(context)
