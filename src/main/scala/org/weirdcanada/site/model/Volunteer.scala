@@ -13,6 +13,7 @@ import org.weirdcanada.dynamicform.{
 }
 import DynamicFieldPrimitives.{StringPrimitive,StringPrimitiveEmpty}
 import org.weirdcanada.site.lib.DBHelpers
+import org.weirdcanada.util.EmailUtil
 
 // Lift
 import net.liftweb.common.{Empty, Full}
@@ -86,6 +87,28 @@ object Volunteer {
 
   private val addressArea = textAreaRender(volunteerAddressLens.get)("name=volunteer-address-input")("Address") _
   private val whyWorkWithUsArea = textAreaRender(volunteerWhyWorkWithUsLens.get)("name=volunteer-whyworkwithus-input")("Why Work With Us") _
+
+  /**
+   * Method to render a volunteer given the template in: `_volunteer_bio.html`
+   *
+   * @param volunteer the volunteer whose bio we're rendinger
+   * @return a nodeseq -> nodeseq transformation
+   */
+  def renderVolunteerBio(volunteer: Volunteer, isEnglishBio: Boolean): NodeSeq => NodeSeq = {
+    import EmailUtil.parseEmail
+
+    val parsedEmail: Option[(String, String, String)] = parseEmail(volunteer.email)
+
+    "name=volunteer-bio-image [src]" #> volunteer.bio.image &
+    "name=volunteer-bio-name *" #> "%s %s".format(volunteer.firstName, volunteer.lastName) &
+    "name=volunteer-bio-tagline *" #> { if(isEnglishBio) volunteer.bio.bylineEnglish else volunteer.bio.bylineFrancais } &
+    "name=volunteer-bio-geo *" #> "%s, %s".format(volunteer.city, volunteer.province) &
+    "name=volunteer-bio-website [href]" #> volunteer.bio.website &
+    "name=volunteer-bio-website *" #> volunteer.bio.website &
+    "name=volunteer-bio-email *" #> parsedEmail.map { case (e, h, t) => "%s [at] %s [dot] %s".format(e,h,t) } &
+    "name=volunteer-bio-words *" #> { if(isEnglishBio) volunteer.bio.descriptionEnglish else volunteer.bio.descriptionFrancais }
+  }
+
 
   implicit object VolunteerRecord extends HasFields[Volunteer] { 
     val fields: List[DynamicField[Volunteer]] = List(
