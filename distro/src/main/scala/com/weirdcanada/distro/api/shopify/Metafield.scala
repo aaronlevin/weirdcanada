@@ -1,4 +1,4 @@
-package com.weirdcanada.distro.api.shopify
+package org.weirdcanada.distro.api.shopify
 
 import net.liftweb.json._
 import org.joda.time.DateTime

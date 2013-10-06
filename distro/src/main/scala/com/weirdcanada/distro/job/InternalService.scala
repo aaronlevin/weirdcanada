@@ -1,10 +1,10 @@
-package com.weirdcanada.distro.job
+package org.weirdcanada.distro.job
 
 import net.liftweb.actor.LiftActor
 import net.liftweb.util.Schedule
 import org.joda.time.DateTime
-import com.weirdcanada.distro.util.RollingWindow
-import com.weirdcanada.distro.util.StringExtensions._
+import org.weirdcanada.distro.util.RollingWindow
+import org.weirdcanada.distro.util.StringExtensions._
 
 object InternalService {
   sealed trait Status

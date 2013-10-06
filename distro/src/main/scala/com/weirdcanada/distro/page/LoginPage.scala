@@ -1,11 +1,11 @@
-package com.weirdcanada.distro.page
+package org.weirdcanada.distro.page
 
 import net.liftweb.http.DispatchSnippet
 import net.liftweb.util.Helpers._
-import com.weirdcanada.distro.service.Service
+import org.weirdcanada.distro.service.Service
 import net.liftweb.http.{SHtml, S}
 import net.liftweb.http.js.JsCmds.FocusOnLoad
-import com.weirdcanada.distro.data.Account
+import org.weirdcanada.distro.data.Account
 import net.liftweb.common.Full
 import net.liftweb.http.provider.HTTPCookie
 import net.liftweb.common.Empty

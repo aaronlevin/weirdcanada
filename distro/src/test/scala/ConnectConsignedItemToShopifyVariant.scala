@@ -1,10 +1,10 @@
 import net.liftweb.json._
 import net.liftweb.common.Loggable
-import com.weirdcanada.distro.Config
-import com.weirdcanada.distro.api.shopify.{Shopify, Metafield, Product}
-import com.weirdcanada.distro.service.DatabaseManager
-import com.weirdcanada.distro.util.NullEmailFactory
-import com.weirdcanada.distro.data.ConsignedItem
+import org.weirdcanada.distro.Config
+import org.weirdcanada.distro.api.shopify.{Shopify, Metafield, Product}
+import org.weirdcanada.distro.service.DatabaseManager
+import org.weirdcanada.distro.util.NullEmailFactory
+import org.weirdcanada.distro.data.ConsignedItem
 
 object ConnectConsignedItemToShopifyVariant extends App with Loggable {
 

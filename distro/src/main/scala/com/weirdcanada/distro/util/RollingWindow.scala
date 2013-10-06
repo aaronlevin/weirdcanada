@@ -1,4 +1,4 @@
-package com.weirdcanada.distro.util
+package org.weirdcanada.distro.util
 
 class RollingWindow[T](capacity: Int, empty: => T = null) {
   private var head = 0

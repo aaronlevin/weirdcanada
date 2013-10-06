@@ -1,10 +1,10 @@
-package com.weirdcanada.distro.snippet
+package org.weirdcanada.distro.snippet
 
 import net.liftweb.util.Helpers._
-import com.weirdcanada.distro.data.ConsignedItem
+import org.weirdcanada.distro.data.ConsignedItem
 import net.liftweb.http.SHtml
-import com.weirdcanada.distro.data.Account
-import com.weirdcanada.distro.data.Album
+import org.weirdcanada.distro.data.Account
+import org.weirdcanada.distro.data.Album
 import scala.xml.Text
 import net.liftweb.http.js.JsCmds
 import net.liftweb.http.js.JsCmd

@@ -1,9 +1,9 @@
-package com.weirdcanada.distro.data
+package org.weirdcanada.distro.data
 
 import net.liftweb.mapper._
-import com.weirdcanada.distro.data._
+import org.weirdcanada.distro.data._
 import java.math.MathContext
-import com.weirdcanada.distro.api.shopify.Order
+import org.weirdcanada.distro.api.shopify.Order
 
 class Sale extends LongKeyedMapper[Sale] with IdPK with Address {
   def getSingleton = Sale

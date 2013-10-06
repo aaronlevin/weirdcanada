@@ -9,13 +9,13 @@ import net.liftweb.sitemap._
 import net.liftweb.sitemap.Loc._
 import net.liftweb.mapper._
 import net.liftmodules.JQueryModule
-import com.weirdcanada.distro.page._
-import com.weirdcanada.distro.data._
-import com.weirdcanada.distro.snippet._
-import com.weirdcanada.distro.{DistroSiteMapBuilder, SnippetDispatch, Config}
-import com.weirdcanada.distro.service.Service
-import com.weirdcanada.distro.job.ShopifyClient
-import com.weirdcanada.distro.util.EmailFactory
+import org.weirdcanada.distro.page._
+import org.weirdcanada.distro.data._
+import org.weirdcanada.distro.snippet._
+import org.weirdcanada.distro.{DistroSiteMapBuilder, SnippetDispatch, Config}
+import org.weirdcanada.distro.service.Service
+import org.weirdcanada.distro.job.ShopifyClient
+import org.weirdcanada.distro.util.EmailFactory
 import java.io.FileInputStream
 
 
@@ -51,8 +51,8 @@ class Boot extends Loggable {
     service.DatabaseManager.createSchema
     
     // where to search snippet
-    LiftRules.addToPackages("com.weirdcanada.distro.snippet")
-    LiftRules.addToPackages("com.weirdcanada.distro.page")
+    LiftRules.addToPackages("org.weirdcanada.distro.snippet")
+    LiftRules.addToPackages("org.weirdcanada.distro.page")
 
     // Snippets
     LiftRules.snippetDispatch.append(SnippetDispatch(service, shopifyClient))

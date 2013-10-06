@@ -1,10 +1,10 @@
-package com.weirdcanada.distro.util
+package org.weirdcanada.distro.util
 
 import java.util.Properties
 import javax.mail.{Message, MessagingException, PasswordAuthentication, Session, Transport, Authenticator}
 import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
-import com.weirdcanada.distro.Config
+import org.weirdcanada.distro.Config
 import scala.xml.NodeSeq
 import net.liftweb.util.Props
 

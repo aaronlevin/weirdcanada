@@ -1,9 +1,9 @@
-package com.weirdcanada.distro.charting
+package org.weirdcanada.distro.charting
 
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
-import com.weirdcanada.distro.data.Sale
-import com.weirdcanada.distro.charting.ChartBuilder._
+import org.weirdcanada.distro.data.Sale
+import org.weirdcanada.distro.charting.ChartBuilder._
 import scala.xml.{NodeSeq, Unparsed}
 import net.liftweb.util.Helpers.{encJs, randomString}
 

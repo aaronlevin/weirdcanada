@@ -1,7 +1,7 @@
-package com.weirdcanada.distro.service
+package org.weirdcanada.distro.service
 
-import com.weirdcanada.distro.util.EmailFactory
-import com.weirdcanada.distro.Config
+import org.weirdcanada.distro.util.EmailFactory
+import org.weirdcanada.distro.Config
 
 
 class Service(val config: Config, emailFactory: EmailFactory) {

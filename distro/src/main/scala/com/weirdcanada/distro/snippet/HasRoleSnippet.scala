@@ -1,9 +1,9 @@
-package com.weirdcanada.distro.snippet
+package org.weirdcanada.distro.snippet
 
 import net.liftweb.http.DispatchSnippet
 import net.liftweb.util.Helpers._
 import net.liftweb.util.ClearNodes
-import com.weirdcanada.distro.service.Service
+import org.weirdcanada.distro.service.Service
 import net.liftweb.http.S
 import net.liftweb.util.PassThru
 

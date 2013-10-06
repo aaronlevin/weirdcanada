@@ -1,4 +1,4 @@
-package com.weirdcanada.distro.service
+package org.weirdcanada.distro.service
 
 import net.liftweb.db.DB1.db1ToDb
 import net.liftweb.http.LiftRules
@@ -6,10 +6,10 @@ import net.liftweb.util.Props
 import net.liftweb.common.{Box, Full}
 import net.liftweb.db.{DB, DefaultConnectionIdentifier}
 import net.liftweb.mapper.{StandardDBVendor, Schemifier}
-import com.weirdcanada.distro.util.{RollingWindow, EmailFactory}
-import com.weirdcanada.distro.data._
-import com.weirdcanada.distro.Config
-import com.weirdcanada.distro.DistroSession
+import org.weirdcanada.distro.util.{RollingWindow, EmailFactory}
+import org.weirdcanada.distro.data._
+import org.weirdcanada.distro.Config
+import org.weirdcanada.distro.DistroSession
 
 class DatabaseManager(config: Config) {
   def connect = {    

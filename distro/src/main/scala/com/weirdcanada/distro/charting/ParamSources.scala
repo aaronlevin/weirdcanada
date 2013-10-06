@@ -1,8 +1,8 @@
-package com.weirdcanada.distro.charting
+package org.weirdcanada.distro.charting
 
-import com.weirdcanada.distro.charting.ChartBuilder._
+import org.weirdcanada.distro.charting.ChartBuilder._
 import org.joda.time.DateTime
-import com.weirdcanada.distro.data.Account
+import org.weirdcanada.distro.data.Account
 
 object ParamSources {
   def trailing30Days(account: Option[Account]): ParamSource = params => {

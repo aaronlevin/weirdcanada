@@ -1,7 +1,7 @@
-package com.weirdcanada.distro.service
+package org.weirdcanada.distro.service
 
-import com.weirdcanada.distro.Config
-import com.weirdcanada.distro.util.RollingWindow
+import org.weirdcanada.distro.Config
+import org.weirdcanada.distro.util.RollingWindow
 import net.liftweb.http.Req
 import net.liftweb.common.Box
 import net.liftweb.http.LiftResponse

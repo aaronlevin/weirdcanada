@@ -1,9 +1,9 @@
-package com.weirdcanada.distro.page
+package org.weirdcanada.distro.page
 import net.liftweb.util.Helpers._
-import com.weirdcanada.distro.service.Service
+import org.weirdcanada.distro.service.Service
 import scala.xml.NodeSeq
 import org.joda.time.Duration
-import com.weirdcanada.distro.job.ShopifyClient
+import org.weirdcanada.distro.job.ShopifyClient
 import net.liftweb.http.SHtml
 import scala.xml.Text
 
@@ -12,7 +12,7 @@ class DashboardPage(service: Service, shopifyClient: ShopifyClient) extends Dist
   // Note: Most of this class is temporary.  None of the markup belongs here.
   
   val renderShopifyClientActions = SHtml.idMemoize(memo => {
-    import com.weirdcanada.distro.job.InternalService._
+    import org.weirdcanada.distro.job.InternalService._
 
     "*" #> ((ns: NodeSeq) => shopifyClient.getStatus match {
       case Idle => <b>Idle</b> ++ SHtml.a(() => { shopifyClient.stop; memo.setHtml }, Text("Stop"))

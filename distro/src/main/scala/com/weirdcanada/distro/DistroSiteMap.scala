@@ -1,10 +1,10 @@
-package com.weirdcanada.distro
+package org.weirdcanada.distro
 
 import net.liftweb.sitemap.{Loc, SiteMap, Menu}
 import net.liftweb.common._
 import net.liftweb.http._
-import com.weirdcanada.distro.page.AccountPage
-import com.weirdcanada.distro.service.Service
+import org.weirdcanada.distro.page.AccountPage
+import org.weirdcanada.distro.service.Service
 
 class DistroSiteMapBuilder(service: Service) {
   implicit def svc = service

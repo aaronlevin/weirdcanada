@@ -1,10 +1,10 @@
-package com.weirdcanada.distro.snippet
+package org.weirdcanada.distro.snippet
 
 import net.liftweb.util.Helpers._
 import net.liftweb.http.SHtml
 import net.liftweb.http.js.JsCmds
-import com.weirdcanada.distro.data.Account
-import com.weirdcanada.distro.page.AccountPage
+import org.weirdcanada.distro.data.Account
+import org.weirdcanada.distro.page.AccountPage
 
 trait AccountRenderer {
   def renderAccount(account: Account) = {

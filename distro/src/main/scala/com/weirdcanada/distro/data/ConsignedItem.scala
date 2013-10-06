@@ -1,4 +1,4 @@
-package com.weirdcanada.distro.data
+package org.weirdcanada.distro.data
 
 import net.liftweb.mapper._
 import java.math.MathContext

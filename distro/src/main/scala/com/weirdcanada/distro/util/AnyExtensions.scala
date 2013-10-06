@@ -1,4 +1,4 @@
-package com.weirdcanada.distro.util
+package org.weirdcanada.distro.util
 
 object AnyExtensions {
   class AnyExtensions[T](t: T) {

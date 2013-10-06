@@ -1,9 +1,9 @@
-package com.weirdcanada.distro.charting
+package org.weirdcanada.distro.charting
 
-import com.weirdcanada.distro.charting.ChartBuilder._
+import org.weirdcanada.distro.charting.ChartBuilder._
 import org.joda.time.DateTime
-import com.weirdcanada.distro.data.Sale
-import com.weirdcanada.distro.data.Album
+import org.weirdcanada.distro.data.Sale
+import org.weirdcanada.distro.data.Album
 import org.joda.time.format.DateTimeFormat
 
 object Aggregators {

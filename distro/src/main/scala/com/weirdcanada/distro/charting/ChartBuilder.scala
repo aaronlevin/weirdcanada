@@ -1,10 +1,10 @@
-package com.weirdcanada.distro.charting
+package org.weirdcanada.distro.charting
 
 import org.joda.time.DateTime
-import com.weirdcanada.distro.data.Sale
+import org.weirdcanada.distro.data.Sale
 import scala.xml.{NodeSeq, Unparsed}
 import org.joda.time.format.DateTimeFormat
-import com.weirdcanada.distro.data.Account
+import org.weirdcanada.distro.data.Account
 
 
 class ChartBuilder[A](val state: A) {

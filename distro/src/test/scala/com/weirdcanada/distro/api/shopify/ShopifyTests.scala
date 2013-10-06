@@ -1,7 +1,7 @@
-package com.weirdcanada.distro.api.shopify
+package org.weirdcanada.distro.api.shopify
 
-import com.weirdcanada.distro.Config
-import com.weirdcanada.distro.api.shopify
+import org.weirdcanada.distro.Config
+import org.weirdcanada.distro.api.shopify
 
 import org.specs2.mutable.Specification
 import org.specs2.specification.AroundExample

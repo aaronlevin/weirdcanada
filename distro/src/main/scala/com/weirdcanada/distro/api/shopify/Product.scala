@@ -1,10 +1,10 @@
-package com.weirdcanada.distro.api.shopify
+package org.weirdcanada.distro.api.shopify
 
 import net.liftweb.json._
 import org.joda.time.DateTime
 
 object Product {
-  import com.weirdcanada.distro.util.StringExtensions._
+  import org.weirdcanada.distro.util.StringExtensions._
   implicit private val formats = DefaultFormats
 
   def unapply(jsonString: String): Option[PersistentProduct] = {

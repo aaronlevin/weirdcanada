@@ -1,9 +1,9 @@
-package com.weirdcanada.distro.service
+package org.weirdcanada.distro.service
 
-import com.weirdcanada.distro.DistroSession
+import org.weirdcanada.distro.DistroSession
 import net.liftweb.http.{LiftSession, Req, S}
 import net.liftweb.common.{Full, Empty}
-import com.weirdcanada.distro.data.Account
+import org.weirdcanada.distro.data.Account
 import net.liftweb.http.provider.HTTPCookie
 import net.liftweb.util.Props
 

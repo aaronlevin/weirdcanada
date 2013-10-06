@@ -1,6 +1,6 @@
-package com.weirdcanada.distro.page
+package org.weirdcanada.distro.page
 
-import com.weirdcanada.distro.service.Service
+import org.weirdcanada.distro.service.Service
 import net.liftweb.util.Helpers._
 import net.liftweb.util.PassThru
 

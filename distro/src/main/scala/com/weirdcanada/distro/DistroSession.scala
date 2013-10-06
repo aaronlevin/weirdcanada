@@ -1,12 +1,12 @@
-package com.weirdcanada.distro
+package org.weirdcanada.distro
 
 import net.liftweb.http.LiftSession
 import net.liftweb.http.Req
 import net.liftweb.http.SessionVar
 import net.liftweb.http.S
-import com.weirdcanada.distro.data.UserRole
-import com.weirdcanada.distro.data.UserRole.{Value => UserRoleEnum}
-import com.weirdcanada.distro.data.Account
+import org.weirdcanada.distro.data.UserRole
+import org.weirdcanada.distro.data.UserRole.{Value => UserRoleEnum}
+import org.weirdcanada.distro.data.Account
 import net.liftweb.http.provider.HTTPCookie
 import net.liftweb.common.{Full, Empty}
 import net.liftweb.util.Props

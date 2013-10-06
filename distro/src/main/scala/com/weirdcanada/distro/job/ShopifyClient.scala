@@ -1,8 +1,8 @@
-package com.weirdcanada.distro.job
+package org.weirdcanada.distro.job
 
-import com.weirdcanada.distro.Config
-import com.weirdcanada.distro.api.shopify.Shopify
-import com.weirdcanada.distro.data.{Sale, ConsignedItem, Account}
+import org.weirdcanada.distro.Config
+import org.weirdcanada.distro.api.shopify.Shopify
+import org.weirdcanada.distro.data.{Sale, ConsignedItem, Account}
 
 /**
  * ShopifyClient does the work of connecting to Shopify and downloading new orders

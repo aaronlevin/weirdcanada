@@ -1,4 +1,4 @@
-package com.weirdcanada.distro.service
+package org.weirdcanada.distro.service
 
 import scala.xml.NodeSeq
 import org.specs2.mutable.Specification
@@ -11,10 +11,10 @@ import net.liftweb.http.{S, LiftSession}
 import net.liftweb.util.Helpers.randomString
 import net.liftweb.util.Helpers.tryo
 import net.liftweb.common.Empty
-import com.weirdcanada.distro.util.{EmailFactory, NullEmailFactory}
-import com.weirdcanada.distro.data.Account
-import com.weirdcanada.distro.Config
-import com.weirdcanada.distro.api.shopify
+import org.weirdcanada.distro.util.{EmailFactory, NullEmailFactory}
+import org.weirdcanada.distro.data.Account
+import org.weirdcanada.distro.Config
+import org.weirdcanada.distro.api.shopify
 
 object AccountManager_createAccountTests extends Specification with AroundExample with Mockito {
   val config = Config.fromLiftProps

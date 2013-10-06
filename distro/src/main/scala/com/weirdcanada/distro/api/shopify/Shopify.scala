@@ -1,9 +1,9 @@
-package com.weirdcanada.distro.api.shopify
+package org.weirdcanada.distro.api.shopify
 
 import java.io.{BufferedReader, InputStreamReader}
 import java.net.{URL, HttpURLConnection}
 import net.liftweb.util.Helpers.{base64Encode, urlEncode}
-import com.weirdcanada.distro.Config
+import org.weirdcanada.distro.Config
 import java.io.BufferedWriter
 import java.io.OutputStreamWriter
 import java.io.DataOutputStream

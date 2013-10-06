@@ -1,8 +1,8 @@
-package com.weirdcanada.distro.service
+package org.weirdcanada.distro.service
 
 import net.liftweb.util.Helpers._
-import com.weirdcanada.distro.util.EmailFactory
-import com.weirdcanada.distro.Config
+import org.weirdcanada.distro.util.EmailFactory
+import org.weirdcanada.distro.Config
 import net.liftweb.http.Templates
 
 

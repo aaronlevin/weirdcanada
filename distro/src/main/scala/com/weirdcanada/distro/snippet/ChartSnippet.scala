@@ -1,18 +1,18 @@
-package com.weirdcanada.distro.snippet
+package org.weirdcanada.distro.snippet
 
 import net.liftweb.http.DispatchSnippet
-import com.weirdcanada.distro.service.Service
-import com.weirdcanada.distro.charting.ChartBuilder
-import com.weirdcanada.distro.charting.ParamSources._
-import com.weirdcanada.distro.charting.DataSources._
-import com.weirdcanada.distro.charting.Aggregators._
-import com.weirdcanada.distro.charting.Generators._
+import org.weirdcanada.distro.service.Service
+import org.weirdcanada.distro.charting.ChartBuilder
+import org.weirdcanada.distro.charting.ParamSources._
+import org.weirdcanada.distro.charting.DataSources._
+import org.weirdcanada.distro.charting.Aggregators._
+import org.weirdcanada.distro.charting.Generators._
 import scala.xml.NodeSeq
 import net.liftweb.http.S
 import net.liftweb.util.Helpers._
 import net.liftweb.util.Props
-import com.weirdcanada.distro.charting.ChartBuilder._
-import com.weirdcanada.distro.data.Sale
+import org.weirdcanada.distro.charting.ChartBuilder._
+import org.weirdcanada.distro.data.Sale
 import org.joda.time.DateTime
 
 class ChartSnippet(service: Service) extends DispatchSnippet {

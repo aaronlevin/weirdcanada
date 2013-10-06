@@ -1,11 +1,11 @@
-package com.weirdcanada.distro
+package org.weirdcanada.distro
 
-import com.weirdcanada.distro.page._
-import com.weirdcanada.distro.snippet._
+import org.weirdcanada.distro.page._
+import org.weirdcanada.distro.snippet._
 import net.liftweb.http.DispatchSnippet
-import com.weirdcanada.distro.page._
-import com.weirdcanada.distro.job.ShopifyClient
-import com.weirdcanada.distro.service.Service
+import org.weirdcanada.distro.page._
+import org.weirdcanada.distro.job.ShopifyClient
+import org.weirdcanada.distro.service.Service
 
 object SnippetDispatch {
   def apply(service: Service, shopifyClient: ShopifyClient): PartialFunction[String, DispatchSnippet] = {

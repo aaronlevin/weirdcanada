@@ -1,14 +1,14 @@
-package com.weirdcanada.distro.service
+package org.weirdcanada.distro.service
 
 import scala.xml.NodeSeq
 import org.specs2.mutable.Specification
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mock._
 import org.mockito.Matchers.{eq => _eq, _}
-import com.weirdcanada.distro.util.{EmailFactory, NullEmailFactory}
-import com.weirdcanada.distro.data.Account
-import com.weirdcanada.distro.Config
-import com.weirdcanada.distro.service._
+import org.weirdcanada.distro.util.{EmailFactory, NullEmailFactory}
+import org.weirdcanada.distro.data.Account
+import org.weirdcanada.distro.Config
+import org.weirdcanada.distro.service._
 import org.specs2.matcher.Matcher
 import org.mockito.ArgumentMatcher
 

@@ -1,15 +1,15 @@
-package com.weirdcanada.distro.page
+package org.weirdcanada.distro.page
 
 import net.liftweb.util.Helpers._
-import com.weirdcanada.distro.service.Service
-import com.weirdcanada.distro.data.Account
+import org.weirdcanada.distro.service.Service
+import org.weirdcanada.distro.data.Account
 import net.liftweb.sitemap.Menu
 import net.liftweb.sitemap.Loc
-import com.weirdcanada.distro.DistroSiteMapBuilder
+import org.weirdcanada.distro.DistroSiteMapBuilder
 import net.liftweb.sitemap.Menu.ParamMenuable
 import net.liftweb.sitemap.LocPath.stringToLocPath
-import com.weirdcanada.distro.snippet.{EditableAccountRenderer, ConsignedItemListRenderer}
-import com.weirdcanada.distro.snippet.AddConsignedItemRenderer
+import org.weirdcanada.distro.snippet.{EditableAccountRenderer, ConsignedItemListRenderer}
+import org.weirdcanada.distro.snippet.AddConsignedItemRenderer
 
 class AccountPage(service: Service, account: Account)
   extends DistroPage

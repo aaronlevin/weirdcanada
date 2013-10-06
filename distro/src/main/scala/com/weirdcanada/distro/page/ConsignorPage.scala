@@ -1,16 +1,16 @@
-package com.weirdcanada.distro.page
+package org.weirdcanada.distro.page
 
 import net.liftweb.util.Helpers._
 import net.liftweb.http.DispatchSnippet
 import net.liftweb.util.PassThru
-import com.weirdcanada.distro.service.Service
-import com.weirdcanada.distro.data.Account
+import org.weirdcanada.distro.service.Service
+import org.weirdcanada.distro.data.Account
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import net.liftweb.http.S
 import net.liftweb.common.Full
 import scala.xml.NodeSeq
-import com.weirdcanada.distro.service.{EmailNotValidated, BalanceTooLow, PaymentAllowed}
+import org.weirdcanada.distro.service.{EmailNotValidated, BalanceTooLow, PaymentAllowed}
 import scala.xml.Text
 
 class ConsignorPage(service: Service) extends DistroPage {

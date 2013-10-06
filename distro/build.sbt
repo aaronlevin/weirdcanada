@@ -2,7 +2,7 @@ name := "Weird Canada Distro"
 
 version := "1.0"
 
-organization := "net.liftweb"
+organization := "org.weirdcanada.distro"
 
 scalaVersion := "2.10.0"
 

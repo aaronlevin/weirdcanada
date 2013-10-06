@@ -1,4 +1,4 @@
-package com.weirdcanada.distro.page
+package org.weirdcanada.distro.page
 
 import net.liftweb.util.Helpers._
 import net.liftweb.http.DispatchSnippet

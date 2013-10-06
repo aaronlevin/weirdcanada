@@ -1,4 +1,4 @@
-package com.weirdcanada.distro
+package org.weirdcanada.distro
 
 import net.liftweb.util.Props
 import net.liftweb.common.Full

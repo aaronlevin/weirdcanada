@@ -1,13 +1,13 @@
-package com.weirdcanada.distro.page
+package org.weirdcanada.distro.page
 
 import net.liftweb.http.{DispatchSnippet, SHtml}
 import net.liftweb.util.Helpers._
-import com.weirdcanada.distro.service.Service
+import org.weirdcanada.distro.service.Service
 import net.liftweb.http.js._
 import net.liftweb.http.js.JsCmds.FocusOnLoad
-import com.weirdcanada.distro.data.Account
+import org.weirdcanada.distro.data.Account
 import net.liftweb.util.Props
-import com.weirdcanada.distro.data.UserRole
+import org.weirdcanada.distro.data.UserRole
 import net.liftweb.http.S
 import scala.xml.Text
 import net.liftweb.common.{Full, Failure}
