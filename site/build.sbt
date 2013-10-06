@@ -20,7 +20,7 @@ scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 
 assemblySettings
 
-mainClass in assembly := Some("org.weirdcanada.http.WeirdCanadaServer")
+mainClass in assembly := Some("org.weirdcanada.site.http.WeirdCanadaSiteServer")
 
 mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
   {
