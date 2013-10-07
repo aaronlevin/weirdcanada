@@ -1,7 +1,7 @@
 from fabric.api import run, sudo, env, put, cd
 
 env.use_ssh_config = True
-env.hosts = ['ec2-weirdcanada-admin']
+#env.hosts = ['ec2-weirdcanada-admin']
 
 def install_python():
     sudo("apt-get install python2.7")
@@ -26,9 +26,12 @@ def setup_db():
     sudo("psql -u postgres psql postgres -c \"grant all privileges on database weirdcanada to weirdcanada;\"")
 
 def put_props():
-    put('src/main/resources/props/production.default.props', '~/weirdcanada/src/main/resources/props/production.default.props')
-    put('src/main/resources/props/default.props', '~/weirdcanada/src/main/resources/props/default.props')
+    put('site/src/main/resources/props/production.default.props', '~/weirdcanada/site/src/main/resources/props/production.default.props')
+    put('site/src/main/resources/props/default.props', '~/weirdcanada/src/main/resources/props/default.props')
     put('scripts/bash_variables', '~/weirdcanada/scripts/bash_variables')
+
+def put_distro_props():
+    put('distro/src/main/resources/props/production.default.props', '~/weirdcanada/distro/src/main/resources/props/production.default.props')
 
 def fetch_changes():
     with cd('~/weirdcanada'):
@@ -45,26 +48,46 @@ def update_cronjobs():
         run('crontab cron2.tmp')
         run('rm cron.tmp cron2.tmp')
 
-def build():
+def build_admin():
     with cd('~/weirdcanada'):
         run('./sbt compile')
         run('./sbt assembly')
         run('cp site/target/scala-2.10/weirdcanada-assembly-0.0.1.jar deploy/jars/weirdcanada-admin.jar')
 
+def build_distro():
+    with cd('~/weirdcanada'):
+        run('./sbt distro/compile')
+        run('./sbt distro/assembly')
+        run('cp distro/target/scala-2.10/weirdcanada-assembly-0.0.1.jar deploy/jars/weirdcanada-distro.jar')
+
 def start_admin_app():
     with cd('~/weirdcanada'):
         run('dtach -n /tmp/weirdcanada-admin-session ~/weirdcanada/deploy/weirdcanada-admin')
+
+def start_distro_app():
+    with cd('~/weirdcanada'):
+        run('dtach -n /tmp/weirdcanada-distro-session ~/weirdcanada/deploy/weirdcanada-distro')
 
 def restart_admin_app():
     run('jps | grep \'weirdcanada-admin\.jar\' | grep -oP \'^\d+\' | while read line; do kill -9 "$line"; done')
     start_admin_app()
 
-def deploy():
-    put_props()
+def restart_distro_app():
+    run('jps | grep \'weirdcanada-distro\.jar\' | grep -oP \'^\d+\' | while read line; do kill -9 "$line"; done')
+    start_distro_app()
+
+def deploy_admin():
     fetch_changes()
+    put_props()
     update_cronjobs()
-    build()
+    build_admin()
     restart_admin_app()
+
+def deploy_distro():
+    fetch_changes()
+    put_distro_props()
+    build_distro()
+    restart_distro_app()
 
 def configure_box():
     install_pyton()
