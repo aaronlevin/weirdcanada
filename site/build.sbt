@@ -1,6 +1,6 @@
 import AssemblyKeys._
 
-name := "weirdcanada"
+name := "weirdcanada-admin"
 
 version := "0.0.1"
 

@@ -1,6 +1,6 @@
 import AssemblyKeys._
 
-name := "Weird Canada Distro"
+name := "weirdcanada-distro"
 
 version := "1.0"
 
@@ -22,6 +22,15 @@ scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 assemblySettings
 
 mainClass in assembly := Some("org.weirdcanada.distro.server.WeirdCanadaDistroServer")
+
+test in assembly := {}
+
+mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
+  {
+    case "about.html" => MergeStrategy.discard
+    case x => old(x)
+  }
+}
 
 libraryDependencies ++= {
   val liftVersion = "2.5"

@@ -17,8 +17,8 @@ case class PaymentRequestEmail(name: String, accountUrl: String, unofficialBalan
 class EmailManager(config: Config, emailFactory: EmailFactory) {
   private def get(template: String) = Templates(template.split('/').toList).openOr(sys.error("Couldn't open %s template".format(template)))
     
-  private val confirmRegistrationTemplate = get("email-hidden/confirm-registration-email")
-  private val paymentRequestTemplate = get("email-hidden/payment-request-email")
+  private val confirmRegistrationTemplate = get("distro/email-hidden/confirm-registration-email")
+  private val paymentRequestTemplate = get("distro/email-hidden/payment-request-email")
 
   
   def send(to: String, emailTemplate: EmailTemplate) = {

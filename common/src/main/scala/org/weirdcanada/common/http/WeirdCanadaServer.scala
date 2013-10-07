@@ -63,7 +63,7 @@ abstract class WeirdCanadaServer[A : ClassTag] {
 
     // Use lift to filter all requests
     val filter = new FilterHolder(classOf[net.liftweb.http.LiftFilter])
-    filter.setInitParameter("bootloader", classTag.runtimeClass.getName) //classOf[A].getName)
+    filter.setInitParameter("bootloader", classTag.runtimeClass.getName)
     context.addFilter(filter, "/*", EnumSet.of(DispatcherType.REQUEST))
     context.addServlet(classOf[DefaultServlet], "/")
 

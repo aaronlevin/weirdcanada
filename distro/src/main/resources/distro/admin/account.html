@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+  <title>Accounts</title>
+</head>
+<body class="lift:content_id=main">
+  <div id="main" class="lift:surround?with=default;at=content">
+
+<div class="lift:AccountPage">
+
+<h1><span id="name"></span></h1>
+
+<table class="account"><tr><td style="vertical-align: top;">
+
+<table>
+  <tbody>
+    <tr>
+      <th>First Name</th>
+      <td><span id="edit-first-name"></span></td>
+    </tr>
+    <tr>
+      <th>Last Name</th>
+      <td><span id="edit-last-name"></span></td>
+    </tr>
+    <tr>
+      <th>Email Address</th>
+      <td><span id="edit-email-address"></span></td>
+    </tr>
+    <tr>
+      <th>Role</th>
+      <td><span id="edit-role"></span></td>
+    </tr>
+    <tr>
+      <th>Phone Number</th>
+      <td><span id="edit-phone-number"></span></td>
+    </tr>
+    <tr>
+      <th>PayPal Email Address</th>
+      <td><span id="edit-paypal-email"></span></td>
+    </tr>
+  </tbody>
+</table>
+
+</td><td style="vertical-align: top;">
+
+<table>
+  <tbody>
+    <tr>
+      <th>Organization</th>
+      <td><span id="edit-organization"></span></td>
+    </tr>
+    <tr>
+      <th>Address Line 1</th>
+      <td><span id="edit-address1"></span></td>
+    </tr>
+    <tr>
+      <th>Address Line 2</th>
+      <td><span id="edit-address2"></span></td>
+    </tr>
+    <tr>
+      <th>City</th>
+      <td><span id="edit-city"></span></td>
+    </tr>
+    <tr>
+      <th>Province</th>
+      <td><span id="edit-province"></span></td>
+    </tr>
+    <tr>
+      <th>Postal Code</th>
+      <td><span id="edit-postal-code"></span></td>
+    </tr>
+    <tr>
+      <th>Country</th>
+      <td><span id="edit-country"></span></td>
+    </tr>
+  </tbody>
+</table>
+
+</td></tr></table>
+
+
+<h2>Consigned items</h2>
+<table class="consigned-item-list">
+  <thead>
+    <tr>
+      <th>Status</th>
+      <th>Album</th>
+      <th>Condition</th>
+      <th>Notes</th>
+      <th>Cost</th>
+    </tr>
+<lift:HasRole role="admin">
+    <tr>
+      <td style="text-align: center;" colspan="5">
+        <a class="add-consignment-item" href="#">Add an item for consignment</a>
+      </td>
+    </tr>
+</lift:HasRole>
+  </thead>
+  <tbody>
+<lift:HasRole role="admin">
+    <tr class="edit-consigned-item" style="display: none;">
+      <td colspan="5">
+      
+        <table>
+          <tr>
+            <th>Album</th><td><span id="edit-album"></span></td>
+          </tr>
+          <tr>
+            <th>Condition</th><td><span id="edit-cover-condition"></span> / <span id="edit-media-condition"></span></td>
+          </tr>
+          <tr>
+            <th>Notes</th><td><span id="edit-notes"></span></td>
+          </tr>
+          <tr>
+            <th>Cost</th><td><span id="edit-customer-cost"></span> / <span id="edit-wholesale-cost"></span></td>
+          </tr>
+          <tr>
+            <th>Album</th><td><span id="edit-save"></span><span id="edit-cancel"></span></td>
+          </tr>
+        </table>
+        
+      </td>
+    </tr>
+</lift:HasRole>
+    <tr class="consigned-item">
+      <td><span id="album"></span></td>
+      <td><span id="cover-condition"></span> / <span id="media-condition"></span></td>
+      <td><span id="notes"></span></td>
+      <td><span id="customer-cost"></span> / <span id="wholesale-cost"></span></td>
+      <td><span id="status"></span></td>
+    </tr>
+  </tbody>
+</table>
+
+
+  </div>
+</div>
+</body>
+</html>

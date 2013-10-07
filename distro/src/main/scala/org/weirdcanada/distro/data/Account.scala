@@ -36,7 +36,8 @@ class Account extends LongKeyedMapper[Account] with IdPK with OneToMany[Long, Ac
   
   object role extends MappedEnum(this, UserRole)
   
-  def displayName = List(firstName.is, lastName.is).filterNot(_.isEmpty).mkString(" ") match { case "" => "[No Name]" case name => name }
+  def displayName = 
+    List(firstName.is, lastName.is).filterNot(_.isEmpty).mkString(" ") match { case "" => "[No Name]" case name => name }
 }
 
 
