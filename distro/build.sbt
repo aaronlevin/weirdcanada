@@ -1,3 +1,5 @@
+import AssemblyKeys._
+
 name := "Weird Canada Distro"
 
 version := "1.0"
@@ -15,7 +17,11 @@ seq(com.github.siasia.WebPlugin.webSettings :_*)
 
 unmanagedResourceDirectories in Test <+= (baseDirectory) { _ / "src/main/webapp" }
 
-scalacOptions ++= Seq("-deprecation", "-unchecked")
+scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
+
+assemblySettings
+
+mainClass in assembly := Some("org.weirdcanada.distro.server.WeirdCanadaDistroServer")
 
 libraryDependencies ++= {
   val liftVersion = "2.5"

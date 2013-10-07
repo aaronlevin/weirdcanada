@@ -18,13 +18,11 @@ import org.weirdcanada.distro.job.ShopifyClient
 import org.weirdcanada.distro.util.EmailFactory
 import java.io.FileInputStream
 
-
-
 /**
  * A class that's instantiated early and run.  It allows the application
  * to modify lift's environment
  */
-class Boot extends Loggable {
+class Boot extends Bootable with Loggable {
   def boot {
     try {
       internalBoot
