@@ -58,7 +58,7 @@ def build_distro():
     with cd('~/weirdcanada'):
         run('./sbt distro/compile')
         run('./sbt distro/assembly')
-        run('cp distro/target/scala-2.10/weirdcanada-assembly-0.0.1.jar deploy/jars/weirdcanada-distro.jar')
+        run('cp distro/target/scala-2.10/weirdcanada-distro-assembly-1.0.jar deploy/jars/weirdcanada-distro.jar')
 
 def start_admin_app():
     with cd('~/weirdcanada'):
