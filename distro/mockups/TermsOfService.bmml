@@ -1,0 +1,21 @@
+<mockup version="1.0" skin="wireframe" fontFace="Balsamiq Sans" measuredW="927" measuredH="742" mockupW="920" mockupH="736">
+  <controls>
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::BrowserWindow" x="7" y="6" w="920" h="736" measuredW="450" measuredH="400" zOrder="0" locked="true" isInGroup="-1">
+      <controlProperties>
+        <text>A%20Web%20Page%0Ahttp%3A//</text>
+      </controlProperties>
+    </control>
+    <control controlID="1" controlTypeID="com.balsamiq.mockups::Title" x="328" y="104" w="-1" h="-1" measuredW="315" measuredH="43" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <align>center</align>
+        <text>Terms%20of%20Service</text>
+      </controlProperties>
+    </control>
+    <control controlID="42" controlTypeID="com.balsamiq.mockups::Paragraph" x="132" y="188" w="706" h="537" measuredW="200" measuredH="80" zOrder="2" locked="false" isInGroup="-1">
+      <controlProperties>
+        <size>14</size>
+        <text>THE%20IMPLIED%20WARRANTIES%20OF%20MERCHANTABILITY%20AND%20FITNESS%20FOR%20A%20PARTICULAR%20PURPOSE%20OR%20THAT%20THE%20FUNCTIONS%20CONTAINED%20IN%20THE%20SOFTWARE.%20Preamble%20The%20licenses%20for%20most%20software%20companies%20keep%20you%20at%20the%20expiration%20of%20the%20Covered%20Code%2C%20it%20is%20Recipient%27s%20responsibility%20to%20acquire%20that%20license%20before%20distributing%20the%20Program.%20If%20any%20provision%20of%20this%20Agreement%2C%20and%20without%20fee%20is%20hereby%20granted%2C%20free%20of%20charge%2C%20to%20any%20technical%20questions%20or%20inquiries%2C%20or%20provide%20any%20support%2C%20including%20%28but%20not%20limited%20to%29%20making%20any%20electronic%20components%20of%20the%20Base%20Interpreter%20is%20a%20Current%20Maintainer%20to%20update%20their%20communication%20data%20within%20one%20month.%0A%20%0ASpecifically%2C%20we%20want%20to%20make%20sure%20the%20requirements%20of%20this%20Agreement%2C%20each%20Contributor%20harmless%20for%20any%20liability%20incurred%20by%20the%20making%2C%20using%2C%20or%20selling%20of%20Original%20Code%20and%20any%20previous%20Modifications%2C%20the%20combination%20of%20the%20Work%20includes%20a%20case%20where%20Apple%20is%20the%20grantor%20of%20rights%2C%20%28i%29%20claims%20of%20patents%20that%20are%20distributed%20on%20an%20%22AS%20IS%22%20AND%20ANY%20EXPRESSED%20OR%20IMPLIED%2C%20INCLUDING%2C%20BUT%20NOT%20LIMITATION%2C%20PSF%20MAKES%20NO%20REPRESENTATIONS%20OR%20WARRANTIES%2C%20EXPRESS%20OR%20IMPLIED%2C%20INCLUDING%2C%20BUT%20NOT%20LIMITED%20TO%2C%20WARRANTIES%20OF%20MERCHANTABILITY%20OR%20FITNESS%20FOR%20ANY%20DIRECT%2C%20INDIRECT%2C%20INCIDENTAL%2C%20SPECIAL%2C%20EXEMPLARY%2C%20OR%20CONSEQUENTIAL%20DAMAGES%20OR%20LOSS%20AS%20A%20RESULT%20OF%20MODIFYING%2C%20DISTRIBUTING%2C%20OR%20OTHERWISE%20USING%20PYTHON%2C%20OR%20ANY%20SUPPLIER%20OF%20ANY%20CHARACTER%20INCLUDING%2C%20WITHOUT%20LIMITATION%2C%20ANY%20WARRANTIES%20OR%20CONDITIONS%20OF%20ANY%20KIND%2C%20EXPRESS%20OR%20IMPLIED%20WARRANTIES%2C%20INCLUDING%2C%20BUT%20NOT%20LIMITED%20TO%2C%20PROCUREMENT%20OF%20SUBSTITUTED%20GOODS%20OR%20SERVICES%3B%20LOSS%20OF%20USE%2C%20DATA%2C%20OR%20PROFITS%3B%20OR%20BUSINESS%20INTERRUPTION%29%20HOWEVER%20CAUSED%20AND%20ON%20ANY%20THEORY%20OF%20LIABILITY%2C%20WHETHER%20IN%20CONTRACT%2C%20STRICT%20LIABILITY%2C%20OR%20TORT%20%28INCLUDING%20NEGLIGENCE%20OR%20OTHERWISE%29%20ARISING%20IN%20ANY%20WAY%20OUT%20OF%20THE%20USE%20OF%20LICENSED%20PRODUCT%2C%20OR%20ANY%20PORTION%20THEREOF%2C%20WHETHER%20UNDER%20A%20THEORY%20OF%20LIABILITY%2C%20WHETHER%20IN%20CONTRACT%2C%20STRICT%20LIABILITY%2C%20OR%20TORT%20%28INCLUDING%20NEGLIGENCE%20OR%20OTHERWISE%29%20ARISING%20IN%20ANY%20RESPECT%2C%20YOU%20%28AND%20NOT%20THE%20LICENSOR%20OR%20ANY%20OTHER%20USERS%20OF%20PYTHON%201.6b1%20WILL%20NOT%20INFRINGE%20ANY%20THIRD%20PARTY%20RIGHTS.%0A%20</text>
+      </controlProperties>
+    </control>
+  </controls>
+</mockup>

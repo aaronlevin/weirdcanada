@@ -1,0 +1,39 @@
+<mockup version="1.0" skin="wireframe" fontFace="Balsamiq Sans" measuredW="927" measuredH="742" mockupW="920" mockupH="736">
+  <controls>
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::BrowserWindow" x="7" y="6" w="920" h="736" measuredW="450" measuredH="400" zOrder="0" locked="true" isInGroup="-1">
+      <controlProperties>
+        <text>A%20Web%20Page%0Ahttp%3A//</text>
+      </controlProperties>
+    </control>
+    <control controlID="1" controlTypeID="com.balsamiq.mockups::Title" x="309" y="186" w="-1" h="-1" measuredW="317" measuredH="43" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <align>center</align>
+        <text>Check%20your%20Inbox</text>
+      </controlProperties>
+    </control>
+    <control controlID="46" controlTypeID="__group__" x="245" y="284" w="444" h="208" measuredW="444" measuredH="208" zOrder="2" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::Paragraph" x="0" y="0" w="444" h="208" measuredW="200" measuredH="80" zOrder="0" locked="false" isInGroup="46">
+          <controlProperties>
+            <align>center</align>
+            <size>20</size>
+            <text>We%20sent%20a%20confirmation%20email%20to%20%0A%20%0A%20%0A%20%0A%20%0AComplete%20your%20registration%20by%0A*clicking%20the%20activation%20link*%0Ain%20the%20email</text>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::TextInput" x="94" y="29" w="272" h="-1" measuredW="206" measuredH="27" zOrder="1" locked="false" isInGroup="46">
+          <controlProperties>
+            <size>16</size>
+            <text>your.address@provider.com</text>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Link" x="270" y="56" w="-1" h="-1" measuredW="96" measuredH="19" zOrder="2" locked="false" isInGroup="46">
+          <controlProperties>
+            <href>CheckYourInboxMistake%26bm%3BCheckYourInboxMistake.bmml%26bm%3BCheckYourInboxMistake.bmml%26bm%3BCheckYourInboxMistake.bmml</href>
+            <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22508%2C334%2C604%2C353%22%20href%3D%22CheckYourInboxMistake.bmml%22%20alt%3D%22CheckYourInboxMistake%22%20id%3D%222%22/%3E</map>
+            <text>wrong%20address%3F</text>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+  </controls>
+</mockup>

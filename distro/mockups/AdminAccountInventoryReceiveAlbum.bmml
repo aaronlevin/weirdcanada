@@ -1,0 +1,163 @@
+<mockup version="1.0" skin="wireframe" fontFace="Balsamiq Sans" measuredW="958" measuredH="742" mockupW="951" mockupH="736">
+  <controls>
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::BrowserWindow" x="7" y="6" w="920" h="736" measuredW="450" measuredH="400" zOrder="0" locked="true" isInGroup="-1">
+      <controlProperties>
+        <text>A%20Web%20Page%0Ahttp%3A//</text>
+      </controlProperties>
+    </control>
+    <control controlID="10" controlTypeID="com.balsamiq.mockups::SubTitle" x="46" y="136" w="-1" h="-1" measuredW="124" measuredH="27" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Philip%20Davis</text>
+      </controlProperties>
+    </control>
+    <control controlID="11" controlTypeID="com.balsamiq.mockups::TabBar" x="46" y="200" w="842" h="521" measuredW="439" measuredH="100" zOrder="2" locked="false" isInGroup="-1">
+      <controlProperties>
+        <hrefs/>
+        <selectedIndex>1</selectedIndex>
+        <text>Dashboard%2C%20Inventory%2C%20Account%2C%20Request%20and%20Payment%20History</text>
+      </controlProperties>
+    </control>
+    <control controlID="13" controlTypeID="com.balsamiq.mockups::SubTitle" x="428" y="136" w="-1" h="-1" measuredW="88" measuredH="27" zOrder="4" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>10066329</color>
+        <text>Balance</text>
+      </controlProperties>
+    </control>
+    <control controlID="14" controlTypeID="com.balsamiq.mockups::SubTitle" x="531" y="136" w="-1" h="-1" measuredW="79" measuredH="27" zOrder="5" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>0</color>
+        <text>%2450.00</text>
+      </controlProperties>
+    </control>
+    <control controlID="16" controlTypeID="com.balsamiq.mockups::DataGrid" x="73" y="537" w="788" h="159" measuredW="623" measuredH="48" zOrder="6" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Remaining%2CConsigned%2CAlbum%2CCost%2CYear%2CCondition%2CNotes%0A0%2C1%2CLove%20Junk%20-%20The%20Pursuit%20of%20Happiness%2C%2450%20/%20%2450%2C1988%2CMint%20/%20Mint%2C</text>
+      </controlProperties>
+    </control>
+    <control controlID="22" controlTypeID="com.balsamiq.mockups::Label" x="169" y="269" w="-1" h="-1" measuredW="26" measuredH="21" zOrder="7" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Title</text>
+      </controlProperties>
+    </control>
+    <control controlID="29" controlTypeID="com.balsamiq.mockups::Label" x="169" y="344" w="-1" h="-1" measuredW="67" measuredH="21" zOrder="8" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Description</text>
+      </controlProperties>
+    </control>
+    <control controlID="30" controlTypeID="com.balsamiq.mockups::TextArea" x="252" y="346" w="589" h="52" measuredW="200" measuredH="140" zOrder="9" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text/>
+        <verticalScrollbar>true</verticalScrollbar>
+      </controlProperties>
+    </control>
+    <control controlID="31" controlTypeID="com.balsamiq.mockups::Label" x="323" y="481" w="-1" h="-1" measuredW="63" measuredH="21" zOrder="10" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Date%20Rcvd</text>
+      </controlProperties>
+    </control>
+    <control controlID="32" controlTypeID="com.balsamiq.mockups::DateChooser" x="404" y="479" w="141" h="-1" measuredW="128" measuredH="24" zOrder="11" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Aug%2002%2C%202013</text>
+      </controlProperties>
+    </control>
+    <control controlID="33" controlTypeID="com.balsamiq.mockups::Button" x="597" y="479" w="197" h="24" measuredW="153" measuredH="24" zOrder="12" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>16767334</color>
+        <text>Receive%20into%20Inventory</text>
+      </controlProperties>
+    </control>
+    <control controlID="34" controlTypeID="com.balsamiq.mockups::Link" x="813" y="482" w="-1" h="-1" measuredW="31" measuredH="19" zOrder="13" locked="false" isInGroup="-1">
+      <controlProperties>
+        <href>AccountInventory%26bm%3BAccountInventory.bmml%26bm%3BAccountInventory.bmml%26bm%3BAccountInventory.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22806%2C476%2C837%2C495%22%20href%3D%22AccountInventory.bmml%22%20alt%3D%22AccountInventory%22%20id%3D%2234%22/%3E</map>
+        <text>close</text>
+      </controlProperties>
+    </control>
+    <control controlID="41" controlTypeID="com.balsamiq.mockups::Canvas" x="252" y="269" w="373" h="21" measuredW="100" measuredH="70" zOrder="14" locked="false" isInGroup="-1">
+      <controlProperties/>
+    </control>
+    <control controlID="42" controlTypeID="com.balsamiq.mockups::Canvas" x="9" y="79" w="918" h="29" measuredW="100" measuredH="70" zOrder="15" locked="false" isInGroup="-1">
+      <controlProperties>
+        <borderStyle>none</borderStyle>
+        <color>0</color>
+      </controlProperties>
+    </control>
+    <control controlID="43" controlTypeID="com.balsamiq.mockups::Label" x="22" y="83" w="-1" h="-1" measuredW="70" measuredH="21" zOrder="16" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>16777215</color>
+        <text>Aaron%20Levin</text>
+      </controlProperties>
+    </control>
+    <control controlID="44" controlTypeID="com.balsamiq.mockups::LinkBar" x="273" y="86" w="-1" h="-1" measuredW="389" measuredH="19" zOrder="17" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>16777215</color>
+        <text>Admin%20Dashboard%2CAccounts%2CConsigned%20Items%2CMy%20Account</text>
+      </controlProperties>
+    </control>
+    <control controlID="45" controlTypeID="com.balsamiq.mockups::Label" x="105" y="81" w="-1" h="-1" measuredW="33" measuredH="20" zOrder="18" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>13421772</color>
+        <href>Login%26bm%3BLogin.bmml%26bm%3BLogin.bmml%26bm%3BLogin.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%2298%2C75%2C131%2C95%22%20href%3D%22Login.bmml%22%20alt%3D%22Login%22%20id%3D%2245%22/%3E</map>
+        <size>12</size>
+        <text>logout</text>
+        <underline>true</underline>
+      </controlProperties>
+    </control>
+    <control controlID="46" controlTypeID="com.balsamiq.mockups::Label" x="169" y="305" w="-1" h="-1" measuredW="26" measuredH="21" zOrder="19" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>URL</text>
+      </controlProperties>
+    </control>
+    <control controlID="47" controlTypeID="com.balsamiq.mockups::Canvas" x="252" y="305" w="527" h="21" measuredW="100" measuredH="70" zOrder="20" locked="false" isInGroup="-1">
+      <controlProperties/>
+    </control>
+    <control controlID="48" controlTypeID="com.balsamiq.mockups::VerticalTabBar" x="73" y="254" w="788" h="212" measuredW="200" measuredH="236" zOrder="3" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Album%0AArtists%0ATracks%0AImages%0APublisher%0AMedia</text>
+      </controlProperties>
+    </control>
+    <control controlID="49" controlTypeID="com.balsamiq.mockups::Label" x="667" y="269" w="-1" h="-1" measuredW="27" measuredH="21" zOrder="21" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>SKU</text>
+      </controlProperties>
+    </control>
+    <control controlID="50" controlTypeID="com.balsamiq.mockups::Canvas" x="708" y="269" w="133" h="21" measuredW="100" measuredH="70" zOrder="22" locked="false" isInGroup="-1">
+      <controlProperties/>
+    </control>
+    <control controlID="51" controlTypeID="com.balsamiq.mockups::Button" x="794" y="303" w="-1" h="-1" measuredW="46" measuredH="24" zOrder="23" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>visit</text>
+      </controlProperties>
+    </control>
+    <control controlID="52" controlTypeID="com.balsamiq.mockups::Label" x="170" y="413" w="-1" h="-1" measuredW="41" measuredH="21" zOrder="24" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Format</text>
+      </controlProperties>
+    </control>
+    <control controlID="53" controlTypeID="com.balsamiq.mockups::ComboBox" x="252" y="413" w="116" h="-1" measuredW="49" measuredH="24" zOrder="25" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>CD</text>
+      </controlProperties>
+    </control>
+    <control controlID="54" controlTypeID="com.balsamiq.mockups::CheckBox" x="725" y="412" w="-1" h="-1" measuredW="99" measuredH="22" zOrder="26" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>First%20Pressing</text>
+      </controlProperties>
+    </control>
+    <control controlID="55" controlTypeID="com.balsamiq.mockups::StickyNote" x="814" y="127" w="144" h="84" measuredW="109" measuredH="123" zOrder="27" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>13369344</color>
+        <text>Work%20in%20progress</text>
+      </controlProperties>
+    </control>
+    <control controlID="56" controlTypeID="com.balsamiq.mockups::Label" x="451" y="413" w="-1" h="-1" measuredW="80" measuredH="21" zOrder="28" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Release%20Year</text>
+      </controlProperties>
+    </control>
+    <control controlID="57" controlTypeID="com.balsamiq.mockups::Canvas" x="545" y="413" w="80" h="21" measuredW="100" measuredH="70" zOrder="29" locked="false" isInGroup="-1">
+      <controlProperties/>
+    </control>
+  </controls>
+</mockup>

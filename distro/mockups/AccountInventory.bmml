@@ -1,0 +1,53 @@
+<mockup version="1.0" skin="wireframe" fontFace="Balsamiq Sans" measuredW="927" measuredH="742" mockupW="920" mockupH="736">
+  <controls>
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::BrowserWindow" x="7" y="6" w="920" h="736" measuredW="450" measuredH="400" zOrder="0" locked="true" isInGroup="-1">
+      <controlProperties>
+        <text>A%20Web%20Page%0Ahttp%3A//</text>
+      </controlProperties>
+    </control>
+    <control controlID="10" controlTypeID="com.balsamiq.mockups::SubTitle" x="46" y="116" w="-1" h="-1" measuredW="124" measuredH="27" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Philip%20Davis</text>
+      </controlProperties>
+    </control>
+    <control controlID="11" controlTypeID="com.balsamiq.mockups::TabBar" x="46" y="180" w="842" h="521" measuredW="284" measuredH="100" zOrder="2" locked="false" isInGroup="-1">
+      <controlProperties>
+        <hrefs>AccountDashboard%26bm%3BAccountDashboard.bmml%26bm%3BAccountDashboard.bmml%26bm%3BAccountDashboard.bmml%2C%2CAccountMyAccount%26bm%3BAccountMyAccount.bmml%26bm%3BAccountMyAccount.bmml%26bm%3BAccountMyAccount.bmml</hrefs>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%2259%2C174%2C134%2C201%22%20href%3D%22AccountDashboard.bmml%22%20alt%3D%22AccountDashboard%22%20id%3D%2211%22/%3E%0A%3Carea%20shape%3D%22rect%22%20coords%3D%22201%2C174%2C282%2C201%22%20href%3D%22AccountMyAccount.bmml%22%20alt%3D%22AccountMyAccount%22%20id%3D%2211%22/%3E%0A</map>
+        <selectedIndex>1</selectedIndex>
+        <text>Dashboard%2C%20Inventory%2C%20My%20Account</text>
+      </controlProperties>
+    </control>
+    <control controlID="12" controlTypeID="com.balsamiq.mockups::Link" x="185" y="120" w="-1" h="-1" measuredW="36" measuredH="19" zOrder="3" locked="false" isInGroup="-1">
+      <controlProperties>
+        <href>Login%26bm%3BLogin.bmml%26bm%3BLogin.bmml%26bm%3BLogin.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22178%2C114%2C214%2C133%22%20href%3D%22Login.bmml%22%20alt%3D%22Login%22%20id%3D%2212%22/%3E</map>
+        <text>logout</text>
+      </controlProperties>
+    </control>
+    <control controlID="13" controlTypeID="com.balsamiq.mockups::SubTitle" x="428" y="116" w="-1" h="-1" measuredW="88" measuredH="27" zOrder="4" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>10066329</color>
+        <text>Balance</text>
+      </controlProperties>
+    </control>
+    <control controlID="14" controlTypeID="com.balsamiq.mockups::SubTitle" x="531" y="116" w="-1" h="-1" measuredW="79" measuredH="27" zOrder="5" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>0</color>
+        <text>%2450.00</text>
+      </controlProperties>
+    </control>
+    <control controlID="15" controlTypeID="com.balsamiq.mockups::Button" x="657" y="101" w="231" h="57" measuredW="214" measuredH="33" zOrder="6" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>40463</color>
+        <size>24</size>
+        <text>Request%20Payment</text>
+      </controlProperties>
+    </control>
+    <control controlID="16" controlTypeID="com.balsamiq.mockups::DataGrid" x="73" y="233" w="788" h="443" measuredW="623" measuredH="48" zOrder="7" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Remaining%2CConsigned%2CAlbum%2CCost%2CYear%2CCondition%2CNotes%0A0%2C1%2CLove%20Junk%20-%20The%20Pursuit%20of%20Happiness%2C%2450%20/%20%2450%2C1988%2CMint%20/%20Mint%2C</text>
+      </controlProperties>
+    </control>
+  </controls>
+</mockup>

@@ -1,0 +1,43 @@
+<mockup version="1.0" skin="wireframe" fontFace="Balsamiq Sans" measuredW="927" measuredH="742" mockupW="920" mockupH="736">
+  <controls>
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::BrowserWindow" x="7" y="6" w="920" h="736" measuredW="450" measuredH="400" zOrder="0" locked="true" isInGroup="-1">
+      <controlProperties>
+        <text>A%20Web%20Page%0Ahttp%3A//</text>
+      </controlProperties>
+    </control>
+    <control controlID="1" controlTypeID="com.balsamiq.mockups::Title" x="309" y="186" w="-1" h="-1" measuredW="317" measuredH="43" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <align>center</align>
+        <text>Check%20your%20Inbox</text>
+      </controlProperties>
+    </control>
+    <control controlID="47" controlTypeID="com.balsamiq.mockups::Paragraph" x="245" y="284" w="444" h="29" measuredW="200" measuredH="80" zOrder="2" locked="false" isInGroup="-1">
+      <controlProperties>
+        <align>center</align>
+        <size>20</size>
+        <text>Update%20your%20email%20address</text>
+      </controlProperties>
+    </control>
+    <control controlID="48" controlTypeID="com.balsamiq.mockups::TextInput" x="339" y="313" w="272" h="-1" measuredW="206" measuredH="27" zOrder="3" locked="false" isInGroup="-1">
+      <controlProperties>
+        <size>16</size>
+        <text>your.address@provider.com</text>
+      </controlProperties>
+    </control>
+    <control controlID="49" controlTypeID="com.balsamiq.mockups::Link" x="527" y="427" w="-1" h="-1" measuredW="40" measuredH="19" zOrder="4" locked="false" isInGroup="-1">
+      <controlProperties>
+        <href>CheckYourInbox%26bm%3BCheckYourInbox.bmml%26bm%3BCheckYourInbox.bmml%26bm%3BCheckYourInbox.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22520%2C421%2C560%2C440%22%20href%3D%22CheckYourInbox.bmml%22%20alt%3D%22CheckYourInbox%22%20id%3D%2249%22/%3E</map>
+        <text>cancel</text>
+      </controlProperties>
+    </control>
+    <control controlID="50" controlTypeID="com.balsamiq.mockups::Button" x="383" y="374" w="184" h="47" measuredW="173" measuredH="25" zOrder="5" locked="false" isInGroup="-1">
+      <controlProperties>
+        <href>CheckYourInbox%26bm%3BCheckYourInbox.bmml%26bm%3BCheckYourInbox.bmml%26bm%3BCheckYourInbox.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22376%2C368%2C560%2C415%22%20href%3D%22CheckYourInbox.bmml%22%20alt%3D%22CheckYourInbox%22%20id%3D%2250%22/%3E</map>
+        <size>16</size>
+        <text>Resend%20Confirmation</text>
+      </controlProperties>
+    </control>
+  </controls>
+</mockup>
