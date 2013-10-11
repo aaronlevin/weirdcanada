@@ -20,6 +20,7 @@ import net.liftweb.common.{Empty, Full}
 import net.liftweb.db.{DB, DefaultConnectionIdentifier}
 import net.liftweb.http.SHtml
 import net.liftweb.http.js.JsCmd
+import net.liftweb.util.{ClearNodes,PassThru}
 import net.liftweb.util.Helpers._
 
 // scalaz
@@ -27,9 +28,10 @@ import scalaz.Lens
 
 // Scala
 import scala.annotation.tailrec
-import scala.xml.NodeSeq
+import scala.xml.{NodeSeq, Unparsed}
 
 // 3rd party
+import org.clapper.markwrap.{MarkupType, MarkWrap}
 import org.joda.time.DateTime
 
 // Java
@@ -88,6 +90,8 @@ object Volunteer {
   private val addressArea = textAreaRender(volunteerAddressLens.get)("name=volunteer-address-input")("Address") _
   private val whyWorkWithUsArea = textAreaRender(volunteerWhyWorkWithUsLens.get)("name=volunteer-whyworkwithus-input")("Why Work With Us") _
 
+  val markdown = MarkWrap.parserFor(MarkupType.Markdown)
+
   /**
    * Method to render a volunteer given the template in: `_volunteer_bio.html`
    *
@@ -99,14 +103,15 @@ object Volunteer {
 
     val parsedEmail: Option[(String, String, String)] = parseEmail(volunteer.email)
 
-    "name=volunteer-bio-image [src]" #> volunteer.bio.image &
+    "name=volunteer-bio-image [src]" #> {if(volunteer.bio.image.isEmpty) "https://s3.amazonaws.com/weird-canada-images/weird_canada_100px.jpg" else volunteer.bio.image} &
     "name=volunteer-bio-name *" #> "%s %s".format(volunteer.firstName, volunteer.lastName) &
     "name=volunteer-bio-tagline *" #> { if(isEnglishBio) volunteer.bio.bylineEnglish else volunteer.bio.bylineFrancais } &
     "name=volunteer-bio-geo *" #> "%s, %s".format(volunteer.city, volunteer.province) &
-    "name=volunteer-bio-website [href]" #> volunteer.bio.website &
-    "name=volunteer-bio-website *" #> volunteer.bio.website &
-    "name=volunteer-bio-email *" #> parsedEmail.map { case (e, h, t) => "%s [at] %s [dot] %s".format(e,h,t) } &
-    "name=volunteer-bio-words *" #> { if(isEnglishBio) volunteer.bio.descriptionEnglish else volunteer.bio.descriptionFrancais }
+    "name=volunteer-bio-contact" #> { if(volunteer.bio.website.isEmpty && parsedEmail.isEmpty) ClearNodes else PassThru } &
+    "name=volunteer-bio-website-url [href]" #> volunteer.bio.website &
+    "name=volunteer-bio-website-url *" #> { if( volunteer.bio.website.isEmpty ) "" else "w: %s".format(volunteer.bio.website) } &
+    "name=volunteer-bio-email *" #> parsedEmail.map { case (e, h, t) => "e: %s [at] %s [dot] %s".format(e,h,t) }.getOrElse { "" }  &
+    "name=volunteer-bio-words *" #> { if(isEnglishBio) Unparsed(markdown.parseToHTML(volunteer.bio.descriptionEnglish)) else Unparsed(markdown.parseToHTML(volunteer.bio.descriptionFrancais)) }
   }
 
 
@@ -230,11 +235,11 @@ object Volunteer {
       wcv.gender,
       wcv.address,
       wcv.birthday,
-      wcv.bio_english,
-      wcv.bio_francais,
       wcv.byline_english,
       wcv.byline_francais,
       wcv.website,
+      wcv.bio_english,
+      wcv.bio_francais,
       wcv.image,
       wcvi.interest
     FROM

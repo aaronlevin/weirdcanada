@@ -43,7 +43,7 @@ class VolunteerBioGenSnippet(db: DB) extends DispatchSnippet {
 
   private def getAndSetBios: () => JsCmd = () => {
 
-    val volunteers: Iterable[Volunteer] = getVolunteers(None, None, None, None, Nil)
+    val volunteers: Iterable[Volunteer] = getVolunteers(None, None, None, None, Nil).filter { !_.bio.descriptionEnglish.isEmpty }
 
     val html: NodeSeq = 
       volunteers
