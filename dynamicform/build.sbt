@@ -26,7 +26,7 @@ libraryDependencies ++= {
     "org.specs2"        %% "specs2"             % "1.13"           % "test",
     "com.h2database"    % "h2"                  % "1.3.167",
     "postgresql"        % "postgresql"          % "9.1-901.jdbc4",
-    "org.scalaz"        %% "scalaz-core" % "7.0.0",
+    "org.scalaz"        %% "scalaz-core" % "7.0.3",
     "org.eclipse.jetty" % "jetty-server"        % "8.1.7.v20120910" % "container",
     "org.eclipse.jetty" % "jetty-servlet"        % "8.1.7.v20120910" % "container",
     "org.eclipse.jetty" % "jetty-webapp"        % "8.1.7.v20120910"  % "container,test",
