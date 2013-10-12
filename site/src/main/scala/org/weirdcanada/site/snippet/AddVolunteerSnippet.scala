@@ -19,16 +19,19 @@ import scalaz.Lens
 // 3rd party
 import org.joda.time.DateTime
 
+import scala.xml.NodeSeq
+
 class AddVolunteerSnippet(db: DB, volunteer: Box[Volunteer]) extends DynamicFormCreator with DispatchSnippet {
 
   // import volunteer helper methods
-  import Volunteer.insertIntoDB
+  import Volunteer.{insertIntoDB, renderVolunteerBio}
 
   // insertion function
   val insertVolunteerDB = insertIntoDB(db) _
 
   def dispatch = {
     case "render" => render
+    case "bio" => bio(volunteer) 
   }
 
   private object volunteerState extends RequestVar[Volunteer](
@@ -54,5 +57,9 @@ class AddVolunteerSnippet(db: DB, volunteer: Box[Volunteer]) extends DynamicForm
     } catch {
       case e: Exception => Alert("Issue inserting: %s".format(e))
     }
+  }
+
+  private def bio(volunteer: Box[Volunteer]): NodeSeq => NodeSeq = {
+    volunteer.map { v => renderVolunteerBio(v, true) } openOr { (ns: NodeSeq) => <p>Bio not available</p> }
   }
 }
