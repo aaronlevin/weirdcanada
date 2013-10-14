@@ -10,6 +10,7 @@ import net.liftweb.common.Full
 import scala.io.Source
 import org.weirdcanada.distro.util.AnyExtensions._
 import net.liftweb.common.Box
+import org.weirdcanada.distro.util.IdList
 
 object UploadAlbumToShopify extends App with Loggable {
   val config = Config.fromLiftProps
@@ -17,13 +18,8 @@ object UploadAlbumToShopify extends App with Loggable {
   val shopify = new Shopify(config)
 
   dbManager.connect
-  dbManager.createSchema
+  //dbManager.createSchema
 
-  object IdList {
-    def unapply(commaJoinedIds: String): Option[Seq[Long]] = {
-      Some(commaJoinedIds.split(',').map(_.toLong).toSeq)
-    }
-  }
   
   val ids =
     args.toList match {
