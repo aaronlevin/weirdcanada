@@ -50,9 +50,9 @@ def update_cronjobs():
 
 def build_admin():
     with cd('~/weirdcanada'):
-        run('./sbt compile')
-        run('./sbt assembly')
-        run('cp site/target/scala-2.10/weirdcanada-assembly-0.0.1.jar deploy/jars/weirdcanada-admin.jar')
+        run('./sbt site/compile')
+        run('./sbt site/assembly')
+        run('cp site/target/scala-2.10/weirdcanada-admin-assembly-0.0.1.jar deploy/jars/weirdcanada-admin.jar')
 
 def build_distro():
     with cd('~/weirdcanada'):
