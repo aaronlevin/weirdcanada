@@ -38,6 +38,19 @@ class Account extends LongKeyedMapper[Account] with IdPK with OneToMany[Long, Ac
   
   def displayName = 
     List(firstName.is, lastName.is).filterNot(_.isEmpty).mkString(" ") match { case "" => "[No Name]" case name => name }
+  
+  
+  override def toString =
+    "Account(id=%s, name=%s, email=%s, role=%s, city=%s, province=%s, balance=%s)"
+      .format(
+        id.is,
+        displayName,
+        email.is,
+        role.is.toString,
+        city.is,
+        province.is,
+        unofficialBalance.is
+      )
 }
 
 
