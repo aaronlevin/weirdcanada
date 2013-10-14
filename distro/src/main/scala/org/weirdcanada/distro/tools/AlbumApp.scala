@@ -50,18 +50,15 @@ object AlbumApp extends App with Loggable {
           
         case "-a" :: tail =>
           parseArgs(tail, args.copy(mode = Add))
-        case "-u" :: tail =>
-          parseArgs(tail, args.copy(mode = Update))
-        case "-d" :: tail =>
-          parseArgs(tail, args.copy(mode = Delete))
-        case "-s" :: tail =>
-          parseArgs(tail, args.copy(mode = Show))
+        case "-u" :: id :: tail =>
+          parseArgs(tail, args.copy(mode = Update, id = Some(id.toLong)))
+        case "-d" :: id :: tail =>
+          parseArgs(tail, args.copy(mode = Delete, id = Some(id.toLong)))
+        case "-s" :: id :: tail =>
+          parseArgs(tail, args.copy(mode = Show, id = Some(id.toLong)))
         
         //case "-v" :: tail =>
         //  parseArgs(tail, args.copy(verbose = true))
-
-        case "-id" :: id :: tail =>
-          parseArgs(tail, args.copy(id = Some(id.toLong)))
         
         case "-title" :: title :: tail =>
           parseArgs(tail, args.copy(title = Some(title)))
