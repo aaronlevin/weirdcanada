@@ -20,7 +20,7 @@ class Account extends LongKeyedMapper[Account] with IdPK with OneToMany[Long, Ac
   object wcdid extends MappedString(this, 32) with DBIndexed
   object firstName extends MappedString(this, 64)
   object lastName extends MappedString(this, 64)
-  object email extends MappedString(this, 128) with DBIndexed
+  object email extends MappedString(this, 128) //with DBIndexed
   object password extends MappedPassword(this)
   object emailConfirmationKey extends MappedString(this, 16) with DBIndexed
   object emailValidated extends MappedBoolean(this) // True if we've verified their primary address
