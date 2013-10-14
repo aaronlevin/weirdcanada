@@ -1,9 +1,10 @@
+package org.weirdcanada.distro.tools
+
 import net.liftweb.json._
 import net.liftweb.common.Loggable
 import org.weirdcanada.distro.Config
-import org.weirdcanada.distro.api.shopify.{Shopify, Metafield, Product}
+import org.weirdcanada.distro.api.shopify.{Shopify, Metafield}
 import org.weirdcanada.distro.service.DatabaseManager
-import org.weirdcanada.distro.util.NullEmailFactory
 import org.weirdcanada.distro.data.ConsignedItem
 import scala.io.Source
 import net.liftweb.common.Full

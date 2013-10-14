@@ -1,21 +1,17 @@
+package org.weirdcanada.distro.tools
+
 import net.liftweb.json._
 import net.liftweb.common.Loggable
 import net.liftweb.json.{pretty, render}
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
 import org.weirdcanada.distro.Config
-import org.weirdcanada.distro.api.shopify.{Shopify, Metafield, Product}
 import org.weirdcanada.distro.service.DatabaseManager
-import org.weirdcanada.distro.util.NullEmailFactory
-import org.weirdcanada.distro.data.{Sale, ConsignedItem}
-import scala.io.Source
-import net.liftweb.common.Full
-import org.weirdcanada.distro.api.shopify.Variant
 import org.weirdcanada.distro.util.AnyExtensions._
 import scala.annotation.tailrec
-import org.weirdcanada.distro.util.IdList
 import org.weirdcanada.distro.util.Parse._
 import org.weirdcanada.distro.data.Album
+import net.liftweb.common.Box.box2Option
 
 object AlbumApp extends App with Loggable {
   val config = Config.fromLiftProps
