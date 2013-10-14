@@ -106,7 +106,7 @@ object Volunteer {
     "name=volunteer-bio-image [src]" #> {if(volunteer.bio.image.isEmpty) "https://s3.amazonaws.com/weird-canada-images/weird_canada_100px.jpg" else volunteer.bio.image} &
     "name=volunteer-bio-name *" #> "%s %s".format(volunteer.firstName, volunteer.lastName) &
     "name=volunteer-bio-tagline *" #> { if(isEnglishBio) volunteer.bio.bylineEnglish else volunteer.bio.bylineFrancais } &
-    "name=volunteer-bio-geo *" #> "%s, %s".format(volunteer.city, volunteer.province) &
+    "name=volunteer-bio-geo *" #> "%s, %s".format(volunteer.city, volunteer.province.toUpperCase) &
     "name=volunteer-bio-contact" #> { if(volunteer.bio.website.isEmpty && parsedEmail.isEmpty) ClearNodes else PassThru } &
     "name=volunteer-bio-website-url [href]" #> volunteer.bio.website &
     "name=volunteer-bio-website-url *" #> { if( volunteer.bio.website.isEmpty ) "" else "w: %s".format(volunteer.bio.website) } &
