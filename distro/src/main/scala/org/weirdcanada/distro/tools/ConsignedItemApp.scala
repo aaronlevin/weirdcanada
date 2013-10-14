@@ -57,17 +57,14 @@ object ConsignedItemApp extends App with Loggable {
           
         case "-a" :: tail =>
           parseArgs(tail, args.copy(mode = Add))
-        case "-u" :: tail =>
-          parseArgs(tail, args.copy(mode = Update))
-        case "-d" :: tail =>
-          parseArgs(tail, args.copy(mode = Delete))
-        case "-s" :: tail =>
-          parseArgs(tail, args.copy(mode = Show))
+        case "-u" :: id :: tail =>
+          parseArgs(tail, args.copy(mode = Update, id = Some(id.toLong)))
+        case "-d" :: id :: tail =>
+          parseArgs(tail, args.copy(mode = Delete, id = Some(id.toLong)))
+        case "-s" :: id :: tail =>
+          parseArgs(tail, args.copy(mode = Show, id = Some(id.toLong)))
         
 
-        case "-id" :: id :: tail =>
-          parseArgs(tail, args.copy(id = Some(id.toLong)))
-          
         case "-guid" :: guid :: tail =>
           parseArgs(tail, args.copy(guid = Some(guid)))
           
@@ -123,9 +120,6 @@ class ConsignedItemApp(args: Args) {
         case (Add, None) =>
           ConsignedItem.create
 
-        case (Add, _) =>
-          exit(1, "Don't specify a ConsignedItem ID in add mode. (Options -a and -i are incompatible)")
-        
         case (Show | Update, Some(id)) =>
           ConsignedItem.findByKey(id)
             .getOrElse(exit(1, "ConsignedItem with id %s does not exist".format(id)))
@@ -135,8 +129,8 @@ class ConsignedItemApp(args: Args) {
           ConsignedItem.findByKey(id).map(ConsignedItem.delete_!)
           exit(0, "Deleted ConsignedItem %d".format(id))
         
-        case (_, None) =>
-          exit(1, "Expected a ConsignedItem ID. (Option -i)")
+        case _ =>
+          exit(1, "Invalid options")
       }
     
     if (args.mode == Add || args.mode == Update) {

@@ -106,9 +106,6 @@ class AlbumApp(args: Args) {
         case (Add, None) =>
           Album.create
 
-        case (Add, _) =>
-          exit(1, "Don't specify an Album ID in add mode. (Options -a and -i are incompatible)")
-        
         case (Show | Update, Some(id)) =>
           Album.findByKey(id)
             .getOrElse(exit(1, "Album with id %s does not exist".format(id)))
@@ -119,8 +116,8 @@ class AlbumApp(args: Args) {
           Album.findByKey(id).map(Album.delete_!)
           exit(0, "Deleted album %d".format(id))
         
-        case (_, None) =>
-          exit(1, "Expected an Album ID. (Option -i)")
+        case _ =>
+          exit(1, "Invalid options")
       }
     
     if (args.mode == Add || args.mode == Update) {
