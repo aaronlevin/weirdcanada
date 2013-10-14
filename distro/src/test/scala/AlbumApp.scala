@@ -121,8 +121,10 @@ class AlbumApp(args: Args) {
             .getOrElse(exit(1, "Album with id %s does not exist".format(id)))
         
         case (Delete, Some(id)) =>
+          // TODO: disallow this in production -- especially if other rows depend on this.
+          //       Use an ON DELETE RESTRICT type constraint on the foreign key relation
           Album.findByKey(id).map(Album.delete_!)
-          exit(0, "Deleted order %d".format(id))
+          exit(0, "Deleted album %d".format(id))
         
         case (_, None) =>
           exit(1, "Expected an Album ID. (Option -i)")
