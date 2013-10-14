@@ -25,6 +25,18 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
   object tracks extends MappedOneToMany(Track, Track.album, OrderBy(Track.number, Ascending))
 
   object consignedItems extends MappedManyToMany(AlbumsConsignedItems, AlbumsConsignedItems.album, AlbumsConsignedItems.consignedItem, ConsignedItem)
+
+  override def toString =
+    "Album(id=%s, title=%s, sku=%s, format=%s, releaseYear=%s, catalogNumber=%s, shopifyId=%s)"
+      .format(
+        id.is,
+        title.is,
+        sku.is,
+        format.is.toString,
+        releaseYear,
+        catalogNumber,
+        shopifyId
+      )
 }
 
 // The companion object to the above Class
