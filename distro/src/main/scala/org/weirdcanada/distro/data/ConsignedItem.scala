@@ -9,21 +9,11 @@ class ConsignedItem extends LongKeyedMapper[ConsignedItem] with IdPK with OneToM
 
   override def createdAtIndexed_? = true
 
-  object Condition extends Enumeration {
-    type Type = Value
-    val NotApplicable, Excellent, VeryGood, Good, Bad, VeryBad = Value // TODO: these are placeholders... what values should I be using?
-  }
-  
-  object Age extends Enumeration {
-    type Type = Value
-    val New, Vintage = Value // TODO: anything between new and vintage? perhaps just used/preowned
-  }
-
   object consignor extends MappedLongForeignKey(this, Account)
   object album extends MappedLongForeignKey(this, Album)
 
-  object coverCondition extends MappedEnum(this, Condition)
-  object mediaCondition extends MappedEnum(this, Condition)
+  object coverCondition extends MappedEnum(this, ConsignedItem.Condition)
+  object mediaCondition extends MappedEnum(this, ConsignedItem.Condition)
   object additionalNotes extends MappedText(this)
   // TODO: object age 
   object customerCost extends MappedDecimal(this, MathContext.DECIMAL32, 2)
@@ -35,6 +25,16 @@ class ConsignedItem extends LongKeyedMapper[ConsignedItem] with IdPK with OneToM
 
 // The companion object to the above Class
 object ConsignedItem extends ConsignedItem with LongKeyedMetaMapper[ConsignedItem] {
+  object Condition extends Enumeration {
+    type Type = Value
+    val NotApplicable, Excellent, VeryGood, Good, Bad, VeryBad = Value // TODO: these are placeholders... what values should I be using?
+  }
+  
+  object Age extends Enumeration {
+    type Type = Value
+    val New, Vintage = Value // TODO: anything between new and vintage? perhaps just used/preowned
+  }
+
   def findByGuid(guid: String): Box[ConsignedItem] = {
     find(By(ConsignedItem.guid, guid), PreCache(ConsignedItem.consignor))
   }
