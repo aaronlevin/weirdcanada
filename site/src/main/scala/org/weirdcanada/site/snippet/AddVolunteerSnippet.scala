@@ -19,7 +19,7 @@ import scalaz.Lens
 // 3rd party
 import org.joda.time.DateTime
 
-import scala.xml.NodeSeq
+import scala.xml.{NodeSeq, Unparsed}
 
 class AddVolunteerSnippet(db: DB, volunteer: Box[Volunteer]) extends DynamicFormCreator with DispatchSnippet {
 
@@ -29,9 +29,13 @@ class AddVolunteerSnippet(db: DB, volunteer: Box[Volunteer]) extends DynamicForm
   // insertion function
   val insertVolunteerDB = insertIntoDB(db) _
 
+  // memoize volunteer bio snippet
+  private val volunteerBioMemoize: MemoizeTransform = SHtml.memoize(bio(volunteer))
+
   def dispatch = {
     case "render" => render
-    case "bio" => bio(volunteer) 
+    case "bio" => volunteerBioMemoize 
+    case "bioText" => bioText
   }
 
   private object volunteerState extends RequestVar[Volunteer](
@@ -62,4 +66,7 @@ class AddVolunteerSnippet(db: DB, volunteer: Box[Volunteer]) extends DynamicForm
   private def bio(volunteer: Box[Volunteer]): NodeSeq => NodeSeq = {
     volunteer.map { v => renderVolunteerBio(v, true) } openOr { (ns: NodeSeq) => <p>Bio not available</p> }
   }
+
+  private def bioText: NodeSeq => NodeSeq = 
+    "name=get-bio-text" #> SHtml.ajaxButton("Get Bio Text", () => JsCmds.SetValById("bio-textarea", volunteerBioMemoize.applyAgain().toString))
 }
