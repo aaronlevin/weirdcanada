@@ -3,33 +3,53 @@ package org.weirdcanada.common.query
 import scalaz.{Free, FreeInstances, Functor}
 import Free._
 
-import java.sql.PreparedStatement
+import java.sql.{PreparedStatement, Types}
 
 sealed trait JDBCValue[A] {
   def set(st: PreparedStatement, i: Int, a: A): Unit
+  val sqlType: Int
 }
 object JDBCValue {
 
   implicit object jdbcString extends JDBCValue[String] {
     def set(st: PreparedStatement, i: Int, a: String): Unit =
       st.setString(i,a)
+    val sqlType: Int = Types.VARCHAR
   }
 
   implicit object jdbcInt extends JDBCValue[Int] {
     def set(st: PreparedStatement, i: Int, a: Int): Unit = 
       st.setInt(i,a)
+    val sqlType: Int = Types.INTEGER
+  }
+
+  implicit object jdbcBigInt extends JDBCValue[Long] {
+    def set(st: PreparedStatement, i: Int, a: Long): Unit = 
+      st.setLong(i,a)
+    val sqlType: Int = Types.BIGINT
   }
 
 }
 
-abstract class Conditional[A : JDBCValue] { 
+sealed abstract class Conditional[A : JDBCValue] { 
   def getSetter: JDBCValue[A] = implicitly[JDBCValue[A]]
 }
 
 case class Eq[A : JDBCValue](column: String, value: A) extends Conditional[A]
+case class DoesNotEqual[A : JDBCValue](column: String, value: A) extends Conditional[A]
 case class LessThan[A : JDBCValue](column: String, value: A) extends Conditional[A]
 case class LessThanOrEqualTo[A : JDBCValue](column: String, value: A) extends Conditional[A]
 case class In[A : JDBCValue](column: String, values: Iterable[A]) extends Conditional[A]
+
+object Conditional {
+  implicit class ConditionalSyntax(string: String) {  
+    def ===[A : JDBCValue](a: A): Conditional[A] = Eq(string, a)
+    def =!=[A : JDBCValue](a: A): Conditional[A] = DoesNotEqual(string, a)
+    def <[A : JDBCValue](a: A): Conditional[A] = LessThan(string, a)
+    def <=[A : JDBCValue](a: A): Conditional[A] = LessThanOrEqualTo(string, a)
+    def in[A : JDBCValue](as: Iterable[A]): Conditional[A] = In(string, as)
+  }
+}
 
 sealed trait Query[+A] 
 
@@ -71,6 +91,7 @@ object Query {
 
   private def renderConditional[A](conditional: Conditional[A]): String = conditional match {
     case Eq(column, _) => "%s = ?".format(column)
+    case DoesNotEqual(column, _) => "%s <> ?".format(column)
     case LessThan(column, _) => "%s < ?".format(column)
     case LessThanOrEqualTo(column, _) =>  "%s <= ?".format(column)
     case In(column, values) => "%s IN (%s)".format( column, values.map {_ => "?" }.mkString(",") ) 
@@ -109,6 +130,7 @@ object Query {
     case Suspend(Where(logics, a)) => 
       val (newStatement, newCounter): (PreparedStatement, Int) = logics.foldLeft( (st, counter) ){ (acc, logic) => logic match {
         case conditional @ Eq(_, value) => conditional.getSetter.set(st, counter, value); (st, counter + 1)
+        case conditional @ DoesNotEqual(_, value) => conditional.getSetter.set(st, counter, value); (st, counter + 1)
         case conditional @ LessThan(_, value) => conditional.getSetter.set(st, counter, value); (st, counter + 1)
         case conditional @ LessThanOrEqualTo(_, value) => conditional.getSetter.set(st, counter, value); (st, counter + 1)
         case conditional @ In(_, values) => 
@@ -134,6 +156,7 @@ object Query {
     }
   }
 
+  import Conditional._
  
   val sub: Free[Query, Unit] = 
     for {
@@ -147,7 +170,7 @@ object Query {
       y <- select("column1" :: "column2" :: Nil)
       _ <- from("cool" :: Nil) 
       _ <- fromQ(sub)
-      _ <- where( Eq("levin", "cool") :: Nil )
+      _ <- where( ("levin" === "cool") :: Nil )
       _ <- done
     } yield ()
 
