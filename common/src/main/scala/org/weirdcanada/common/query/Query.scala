@@ -30,6 +30,16 @@ object JDBCValue {
   }
 
 }
+/**
+ * SELECT c.id FROM cool AS c
+ */
+
+
+case class SQLTable(name: String, as: Option[String])
+object SQLTable {
+  implicit def string2Table(tableName: String): SQLTable = SQLTable(tableName, None)
+}
+case class SQLColumn(name: String, table: SQLTable)
 
 sealed abstract class Conditional[A : JDBCValue] { 
   def getSetter: JDBCValue[A] = implicitly[JDBCValue[A]]
@@ -54,7 +64,7 @@ object Conditional {
 sealed trait Query[+A] 
 
 case class Select[A](columns: List[String], next: A) extends Query[A]
-case class From[A](tables: List[String], next: A) extends Query[A]
+case class From[A](table: SQLTable, next: A) extends Query[A] 
 case class FromQ[A](subQuery: Free[Query,Unit], next: A) extends Query[A]
 case class Where[A,B](logics: List[Conditional[B]], next: A) extends Query[A] {
   def and(newLogic: Conditional[B]): Where[A,B] = Where(this.logics ::: newLogic :: Nil, next)
@@ -77,8 +87,8 @@ object Query {
   def select(columns: List[String]): Free[Query, Unit] =
     Suspend(Select(columns, Return(())))
 
-  def from(tables: List[String]): Free[Query, Unit] =
-    Suspend(From(tables, Return(())))
+  def from(table: SQLTable): Free[Query, Unit] =
+    Suspend(From(table, Return(())))
 
   def fromQ(subQuery: Free[Query,Unit]): Free[Query, Unit] = 
     Suspend(FromQ(subQuery, Return(())))
@@ -99,7 +109,12 @@ object Query {
 
   def sqlInterpreter[A](query: Free[Query, A], statements: List[String]): String = query match {
     case Suspend(Select(columns, a)) => sqlInterpreter(a, statements :::  "select %s".format(columns.mkString(",")) :: Nil)
-    case Suspend(From(tables, a)) => sqlInterpreter(a, statements ::: "from %s".format(tables.mkString(",")) :: Nil)
+    case Suspend(From(table, a)) => 
+      val sqlString: String = table.as match {
+        case None => "from %s".format(table.name)
+        case Some(as) => "FROM %s AS %s".format(table.name, as)
+      }
+      sqlInterpreter(a, statements ::: sqlString :: Nil)
     case Suspend(FromQ(subquery, a)) => sqlInterpreter(a, statements ::: "from ( %s )".format(sqlInterpreter(subquery,Nil)) :: Nil)
     case Suspend(Where(logics, a)) => 
       val whereStatement: String = logics.map { renderConditional }.mkString(" AND ") match {
@@ -113,19 +128,12 @@ object Query {
       val freeA = a()
       val value = sqlInterpreter(freeA, statements)
       sqlInterpreter(f(()), List(value))
-      /*freeA match {
-        case Suspend(Select(columns,_)) => sqlInterpreter(f(()), value)
-        case Suspend(From(tables, _)) => sqlInterpreter(f(()), value)
-        case Suspend(FromQ(_,_)) => sqlInterpreter(f(()), value)
-        case Return(newA) => sqlInterpreter(f(newA), value)
-        case _ => value
-      }*/
     }
   }
 
   def sqlPrepared[A](query: Free[Query, A], st: PreparedStatement, counter: Int = 1): (PreparedStatement, Int) = query match {
     case Suspend(Select(columns, a)) => sqlPrepared(a, st, counter)
-    case Suspend(From(tables, a)) => sqlPrepared(a, st, counter)
+    case Suspend(From(table, a)) => sqlPrepared(a, st, counter)
     case Suspend(FromQ(subquery, a)) => sqlPrepared(a, st, counter)
     case Suspend(Where(logics, a)) => 
       val (newStatement, newCounter): (PreparedStatement, Int) = logics.foldLeft( (st, counter) ){ (acc, logic) => logic match {
@@ -146,13 +154,6 @@ object Query {
       val freeA = a()
       val (value, inc)= sqlPrepared(freeA, st, counter )
       sqlPrepared(f(()), value, inc)
-      /*freeA match {
-        case Suspend(Select(columns,_)) => sqlInterpreter(f(()), value)
-        case Suspend(From(tables, _)) => sqlInterpreter(f(()), value)
-        case Suspend(FromQ(_,_)) => sqlInterpreter(f(()), value)
-        case Return(newA) => sqlInterpreter(f(newA), value)
-        case _ => value
-      }*/
     }
   }
 
