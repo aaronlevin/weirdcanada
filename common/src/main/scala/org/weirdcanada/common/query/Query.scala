@@ -62,20 +62,15 @@ object JDBCValue {
 
 
 /**
- * SQL TABLE
- */
-case class SQLTable(name: String, as: Option[String]) 
-object SQLTable {
-  implicit class SQLTableSyntax(tableName: String) {
-    def as(alias: String): SQLTable = SQLTable(tableName, Some(alias))
-  }
-  implicit def string2Table(tableName: String): SQLTable = SQLTable(tableName, None)
-}
-
-/**
  * SQL COLUMN
  */
 case class SQLColumn(name: String, table: Option[SQLTable])
+object SQLColumn {
+  implicit class SQLColumnSyntax(columnName: String) {
+    def in(table: SQLTable): SQLColumn = SQLColumn(columnName, Some(table))
+  }
+  implicit def string2Column(columnName: String): SQLColumn = SQLColumn(columnName, None)
+}
 
 /**
  * SQL Conditionals
@@ -105,7 +100,7 @@ object Conditional {
  */
 sealed trait FreeQuery[+A] 
 
-case class Select[A](columns: List[String], next: A) extends FreeQuery[A]
+case class Select[A](columns: List[SQLColumn], next: A) extends FreeQuery[A]
 case class From[A](table: SQLTable, next: A) extends FreeQuery[A] 
 case class FromQ[A](subQuery: Free[FreeQuery,Unit], next: A) extends FreeQuery[A]
 case class Where[A](logics: List[Conditional[_]], next: A) extends FreeQuery[A] {
@@ -130,7 +125,7 @@ object FreeQuery {
     }
   }
 
-  def select(columns: List[String]): Free[FreeQuery, Unit] =
+  def select(columns: List[SQLColumn]): Free[FreeQuery, Unit] =
     Suspend(Select(columns, Return(())))
 
   def from(table: SQLTable): Free[FreeQuery, Unit] =
@@ -158,10 +153,18 @@ object FreeQuery {
 
   def sqlInterpreter[A](query: Free[FreeQuery,A], statements: List[String]): String = query.resume match {
     case -\/(freeValue) => freeValue match {
-      case Select(columns, a) => sqlInterpreter(a, statements :::  "select %s".format(columns.mkString(",")) :: Nil)
+      case Select(columns, a) => 
+        val columnString: List[String] = 
+          columns.map { column => 
+            (for {
+              table <- column.table
+              alias <- table.alias
+            } yield "%s.%s".format(alias, column.name)).getOrElse { column.name }
+          }
+        sqlInterpreter(a, statements :::  "select %s".format(columnString.mkString(",")) :: Nil)
       case From(table, a) => 
-        val sqlString: String = table.as match {
-          case None => "from %s".format(table.name)
+        val sqlString: String = table.alias match {
+          case None => "FROM %s".format(table.name)
           case Some(as) => "FROM %s AS %s".format(table.name, as)
         }
         sqlInterpreter(a, statements ::: sqlString :: Nil)
@@ -179,6 +182,9 @@ object FreeQuery {
     case \/-(endValue) => statements.mkString("\n")
   }
 
+  /**
+   * TODO: Fix to handle `SQLTable` and `SQLColumn`
+   */
   def sqlPrepared[A](query: Free[FreeQuery, A], st: PreparedStatement, counter: Int = 1): (PreparedStatement, Int) = query.resume match {
     case -\/(freeValue) => freeValue match {
       case Select(columns, a) => sqlPrepared(a, st, counter)
@@ -206,10 +212,11 @@ object FreeQuery {
 
   import Conditional._
   import SQLTable._
+  import SQLColumn._
  
   val sub: Free[FreeQuery, Unit] = 
     for {
-      _ <- select("XXXX" :: "YYY" :: Nil)
+      _ <- select( List("XXXX","YYY"))
       _ <- from("sub-table" as "s")
       _ <- where(("neat" in List(1,2,3,4)) :: Nil)
     } yield ()
@@ -217,19 +224,35 @@ object FreeQuery {
   val tmp: Free[FreeQuery, Unit] =
     for {
       t1 <- table("freeTable" as "f")
-      y <- select("column1" :: "column2" :: Nil)
+      column1 <- t1.column("free-column1")
+      y <- select(List(column1, "column1", "column2"))
       _ <- from(t1)
       _ <- from("cool" as "c") 
       _ <- fromQ(sub)
       _ <- fromQ { 
         for {
-          _ <- select("column1" :: "column2" :: Nil)
+          _ <- select(List("column1","column2"))
         } yield ()
       }
       _ <- where( ("levin" === "cool") :: Nil )
       _ <- done
     } yield ()
 
+}
+
+/**
+ * SQL TABLE
+ */
+case class SQLTable(name: String, alias: Option[String]) {
+  import FreeQuery._
+  def column(columnName: String): Free[FreeQuery,SQLColumn] = 
+    Suspend(Column(SQLColumn(columnName, Some(this)), t => Return(t)))
+}
+object SQLTable {
+  implicit class SQLTableSyntax(tableName: String) {
+    def as(alias: String): SQLTable = SQLTable(tableName, Some(alias))
+  }
+  implicit def string2Table(tableName: String): SQLTable = SQLTable(tableName, None)
 }
 
 object QueryMain {
