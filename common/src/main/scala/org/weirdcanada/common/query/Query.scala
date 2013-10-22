@@ -41,7 +41,7 @@ import java.sql.{PreparedStatement, Types}
  *        _ <- column1 =!= "levin"
  *      } yield ()
  *    }
- *  }
+ *  } yield ()
  */
 
 sealed trait JDBCValue[A] {
