@@ -61,15 +61,25 @@ object JDBCValue {
  */
 
 
-case class SQLTable(name: String, as: Option[String])
+/**
+ * SQL TABLE
+ */
+case class SQLTable(name: String, as: Option[String]) 
 object SQLTable {
   implicit class SQLTableSyntax(tableName: String) {
     def as(alias: String): SQLTable = SQLTable(tableName, Some(alias))
   }
   implicit def string2Table(tableName: String): SQLTable = SQLTable(tableName, None)
 }
-case class SQLColumn(name: String, table: SQLTable)
 
+/**
+ * SQL COLUMN
+ */
+case class SQLColumn(name: String, table: Option[SQLTable])
+
+/**
+ * SQL Conditionals
+ */
 sealed abstract class Conditional[A : JDBCValue] { 
   def getSetter: JDBCValue[A] = implicitly[JDBCValue[A]]
 }
@@ -90,22 +100,25 @@ object Conditional {
   }
 }
 
-sealed trait Query[+A] 
+/**
+ * The Free Query Free Monad
+ */
+sealed trait FreeQuery[+A] 
 
-case class Select[A](columns: List[String], next: A) extends Query[A]
-case class From[A](table: SQLTable, next: A) extends Query[A] 
-case class FromQ[A](subQuery: Free[Query,Unit], next: A) extends Query[A]
-case class Where[A](logics: List[Conditional[_]], next: A) extends Query[A] {
+case class Select[A](columns: List[String], next: A) extends FreeQuery[A]
+case class From[A](table: SQLTable, next: A) extends FreeQuery[A] 
+case class FromQ[A](subQuery: Free[FreeQuery,Unit], next: A) extends FreeQuery[A]
+case class Where[A](logics: List[Conditional[_]], next: A) extends FreeQuery[A] {
   def and[B](newLogic: Conditional[B]): Where[A] = Where(this.logics ::: newLogic :: Nil, next)
 }
-case class Table[A](table: SQLTable, func: SQLTable => A) extends Query[A]
-case object Done extends Query[Nothing]
+case class Table[A](table: SQLTable, func: SQLTable => A) extends FreeQuery[A]
+case object Done extends FreeQuery[Nothing]
 
-object Query {
+object FreeQuery {
 
-  implicit object queryFunctor extends Functor[Query] {
+  implicit object queryFunctor extends Functor[FreeQuery] {
 
-    def map[A, B](fa: Query[A])(f: A => B): Query[B] = fa match {
+    def map[A, B](fa: FreeQuery[A])(f: A => B): FreeQuery[B] = fa match {
       case Select(columns, next) => Select(columns, f(next))
       case From(tables, next) => From(tables, f(next) )
       case FromQ(subQuery, next) => FromQ(subQuery, f(next))
@@ -115,22 +128,22 @@ object Query {
     }
   }
 
-  def select(columns: List[String]): Free[Query, Unit] =
+  def select(columns: List[String]): Free[FreeQuery, Unit] =
     Suspend(Select(columns, Return(())))
 
-  def from(table: SQLTable): Free[Query, Unit] =
+  def from(table: SQLTable): Free[FreeQuery, Unit] =
     Suspend(From(table, Return(())))
 
-  def fromQ(subQuery: Free[Query,Unit]): Free[Query, Unit] = 
+  def fromQ(subQuery: Free[FreeQuery,Unit]): Free[FreeQuery, Unit] = 
     Suspend(FromQ(subQuery, Return(())))
  
-  def done: Free[Query, Unit] = 
+  def done: Free[FreeQuery, Unit] = 
     Return(Done)
 
-  def where[A](logics: List[Conditional[A]]): Free[Query, Unit] = 
+  def where[A](logics: List[Conditional[A]]): Free[FreeQuery, Unit] = 
     Suspend(Where(logics, Return(())))
 
-  def table(table: SQLTable): Free[Query, SQLTable] = 
+  def table(table: SQLTable): Free[FreeQuery, SQLTable] = 
     Suspend(Table(table, t => Return(t)))
 
   private def renderConditional(conditional: Conditional[_]): String = conditional match {
@@ -141,7 +154,7 @@ object Query {
     case In(column, values) => "%s IN (%s)".format( column, values.map {_ => "?" }.mkString(",") ) 
   }
 
-  def sqlInterpreter[A](query: Free[Query,A], statements: List[String]): String = query.resume match {
+  def sqlInterpreter[A](query: Free[FreeQuery,A], statements: List[String]): String = query.resume match {
     case -\/(freeValue) => freeValue match {
       case Select(columns, a) => sqlInterpreter(a, statements :::  "select %s".format(columns.mkString(",")) :: Nil)
       case From(table, a) => 
@@ -163,7 +176,7 @@ object Query {
     case \/-(endValue) => statements.mkString("\n")
   }
 
-  def sqlPrepared[A](query: Free[Query, A], st: PreparedStatement, counter: Int = 1): (PreparedStatement, Int) = query.resume match {
+  def sqlPrepared[A](query: Free[FreeQuery, A], st: PreparedStatement, counter: Int = 1): (PreparedStatement, Int) = query.resume match {
     case -\/(freeValue) => freeValue match {
       case Select(columns, a) => sqlPrepared(a, st, counter)
       case From(table, a) => sqlPrepared(a, st, counter)
@@ -190,16 +203,16 @@ object Query {
   import Conditional._
   import SQLTable._
  
-  val sub: Free[Query, Unit] = 
+  val sub: Free[FreeQuery, Unit] = 
     for {
       _ <- select("XXXX" :: "YYY" :: Nil)
       _ <- from("sub-table" as "s")
       _ <- where(("neat" in List(1,2,3,4)) :: Nil)
     } yield ()
 
-  val tmp: Free[Query, Unit] =
+  val tmp: Free[FreeQuery, Unit] =
     for {
-      t1 <- table("freeTable")
+      t1 <- table("freeTable" as "f")
       y <- select("column1" :: "column2" :: Nil)
       _ <- from(t1)
       _ <- from("cool" as "c") 
@@ -219,7 +232,7 @@ object QueryMain {
 
   def main(args: Array[String]) {
 
-    import Query._
+    import FreeQuery._
 
     println("%s".format(sqlInterpreter(tmp,Nil)))
 
