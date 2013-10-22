@@ -6,6 +6,43 @@ import Free._
 import language.implicitConversions
 
 import java.sql.{PreparedStatement, Types}
+/**
+ * Goals: 
+ *
+ * 1. to create composable queries in a monadic form
+ * 2. to create PreparedStatements that know how to iterate over containers
+ * 3. to create PreparedStatements that know how to handle Options
+ * 4. To keep a flexible syntax that allows for type safety whenever, 
+ *    or just cow-boy wild west strings.
+ * 5. To not need an ORM, but be able to easily fix and debug queries.
+ * 6. To hopefully use Shapeless to handle airity constraints.
+ * 7. To learn about Free Monads
+ * 8. To see the performance impact of crazy Free Monad stuff in scalaz
+ *
+ * Ultimatley, to produce queries like this:
+ *
+ *  for {
+ *    table1 <- table("table1-name" as "t1") // supply an alias
+ *    table2 <- table("table2-name") // do not supply an alias
+ *    column1 <- table1.column("column2")  // 'safe way' (will use alias)
+ *    column2 <- column("a column") // not tied to table (sql will assume its form table2-name)
+ *    _ <- select(column1, column2, "column3") // flexibility with adding columns
+ *    _ <- from(table1).innerJoin(table2 on column2 == "randomColumn")
+ *    _ <- fromQ { // for fun, subQuery support!
+ *      for {
+ *        _ <- select("*")
+ *        _ <- from("random-table") // can use proper table or just a string
+ *      } yield ()
+ *    }
+ *    _ <- where{
+ *      for {
+ *        _ <- (table1.column("third-column") === "three") and (column2 === 1)
+ *        _ <- or
+ *        _ <- column1 =!= "levin"
+ *      } yield ()
+ *    }
+ *  }
+ */
 
 sealed trait JDBCValue[A] {
   def set(st: PreparedStatement, i: Int, a: A): Unit
@@ -32,34 +69,13 @@ object JDBCValue {
   }
 
   implicit class JDBCIterable[A : JDBCValue](as: Iterable[A]) extends JDBCValue[Iterable[A]] {
-    val sqlType: Int = Types.BIGINT
+    val sqlType: Int = Types.BIGINT // fix this
     val jdbcVal: JDBCValue[A] = implicitly[JDBCValue[A]]
     def set(st: PreparedStatement, i: Int, as: Iterable[A]): Unit = 
       jdbcVal.set(st, i, as.head)
   }
 
 }
-/**
- * SELECT c.id FROM cool AS c
- *
- * I'd like to get the syntax up to this point perhaps. 
- *
- * for {
- *   table1 <- table1
- *   column2 <- table2.column2
- *   table2 <- table2
- *   _ <- select(table1."column1" :: column2 :: Nil)
- *   _ <- from (table1 inner join table2 on table1."column1" === table2."column2")
- *   _ <- where {
- *     for {
- *       _ <- (table1."one" === "two") and (table2."three" === "two")
- *       _ <- or
- *       _ <- table2."one" === "three"
- *     } yield ()
- *   }
- * } yield ()
- */
-
 
 /**
  * SQL COLUMN
