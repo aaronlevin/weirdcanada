@@ -5,9 +5,8 @@ import Free._
 import State.{get, init, modify, put, state}
 
 import language.implicitConversions
-import scala.reflect.runtime.universe.{TypeTag}
-
 import java.sql.{PreparedStatement, Types}
+
 /**
  * Goals: 
  *
@@ -46,10 +45,16 @@ import java.sql.{PreparedStatement, Types}
  *  } yield ()
  */
 
+/**
+ * A TypeClass for types that can be set in `PreparedStatement`s
+ */
 sealed trait JDBCValue[A] {
   def set(st: PreparedStatement, i: Int, a: A): Unit
   val sqlType: Int
 }
+/**
+ * instances
+ */
 object JDBCValue {
 
   implicit object jdbcString extends JDBCValue[String] {
