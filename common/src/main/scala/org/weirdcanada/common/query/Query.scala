@@ -1,9 +1,11 @@
 package org.weirdcanada.common.query
 
-import scalaz.{Free, FreeInstances, Functor, \/, -\/, \/-}
+import scalaz.{Free, FreeInstances, Functor, \/, -\/, \/-, State, syntax}
 import Free._
+import State.{get, init, modify, put, state}
 
 import language.implicitConversions
+import scala.reflect.runtime.universe.{TypeTag}
 
 import java.sql.{PreparedStatement, Types}
 /**
@@ -38,7 +40,7 @@ import java.sql.{PreparedStatement, Types}
  *      for {
  *        _ <- (table1.column("third-column") === "three") and (column2 === 1)
  *        _ <- or
- *        _ <- column1 =!= "levin"
+ *        _ <- column1 NotEqual "levin"
  *      } yield ()
  *    }
  *  } yield ()
@@ -88,28 +90,6 @@ object SQLColumn {
   implicit def string2Column(columnName: String): SQLColumn = SQLColumn(columnName, None)
 }
 
-/**
- * SQL Conditionals
- */
-sealed abstract class Conditional[A : JDBCValue] { 
-  def getSetter: JDBCValue[A] = implicitly[JDBCValue[A]]
-}
-
-case class Eq[A : JDBCValue](column: String, value: A) extends Conditional[A]
-case class DoesNotEqual[A : JDBCValue](column: String, value: A) extends Conditional[A]
-case class LessThan[A : JDBCValue](column: String, value: A) extends Conditional[A]
-case class LessThanOrEqualTo[A : JDBCValue](column: String, value: A) extends Conditional[A]
-case class In[A : JDBCValue](column: String, values: Iterable[A]) extends Conditional[A]
-
-object Conditional {
-  implicit class ConditionalSyntax(string: String) {  
-    def ===[A : JDBCValue](a: A): Conditional[A] = Eq(string, a)
-    def =!=[A : JDBCValue](a: A): Conditional[A] = DoesNotEqual(string, a)
-    def <[A : JDBCValue](a: A): Conditional[A] = LessThan(string, a)
-    def <=[A : JDBCValue](a: A): Conditional[A] = LessThanOrEqualTo(string, a)
-    def in[A : JDBCValue](as: Iterable[A]): Conditional[A] = In(string, as)
-  }
-}
 
 /**
  * The Free Query Free Monad
@@ -119,13 +99,42 @@ sealed trait FreeQuery[+A]
 case class Select[A](columns: List[SQLColumn], next: A) extends FreeQuery[A]
 case class From[A](table: SQLTable, next: A) extends FreeQuery[A] 
 case class FromQ[A](subQuery: Free[FreeQuery,Unit], next: A) extends FreeQuery[A]
-case class Where[A](logics: List[Conditional[_]], next: A) extends FreeQuery[A] {
-  def and[B](newLogic: Conditional[B]): Where[A] = Where(this.logics ::: newLogic :: Nil, next)
-}
+case class Where[A, B](logicQuery: Free[FreeQuery,B], next: A) extends FreeQuery[A]
 case class Table[A](table: SQLTable, func: SQLTable => A) extends FreeQuery[A]
 case class Column[A](column: SQLColumn, func: SQLColumn => A) extends FreeQuery[A]
-case class And[A,B,C](cond1: Conditional[B], cond2: Conditional[C], next: A) extends FreeQuery[A]
-case class Or[A,B,C](cond1: Conditional[B], cond2: Conditional[C], next: A) extends FreeQuery[A]
+case class And[A,B,C](cond1: Free[FreeQuery, B], cond2: Free[FreeQuery, C], next: A) extends FreeQuery[A]
+case class Or[A,B,C](cond1: Free[FreeQuery, B], cond2: Free[FreeQuery, C], next: A) extends FreeQuery[A]
+case class Equals[A, B : JDBCValue](column: SQLColumn, value: B, next: A) extends FreeQuery[A] {
+  lazy val jdbc: JDBCValue[B] = implicitly[JDBCValue[B]]
+  // Stupid type erasure
+  def mapF[C](f: A => C): Equals[C, B] = Equals(this.column, this.value, f(next))
+  def set: State[(PreparedStatement, Int), Unit] = modify{ s => jdbc.set(s._1, s._2, value); (s._1, s._2 +1) }
+}
+case class NotEqual[A,B : JDBCValue](column: SQLColumn, value: B, next: A) extends FreeQuery[A] {
+  lazy val jdbc: JDBCValue[B] = implicitly[JDBCValue[B]]
+  def mapF[C](f: A => C): NotEqual[C, B] = NotEqual(this.column, this.value, f(next))
+  def set: State[(PreparedStatement, Int), Unit] = modify{ s => jdbc.set(s._1, s._2, value); (s._1, s._2 +1) }
+}
+case class LessThanOrEqual[A, B : JDBCValue](column: SQLColumn, value: B, next: A) extends FreeQuery[A] {
+  lazy val jdbc: JDBCValue[B] = implicitly[JDBCValue[B]]
+  def mapF[C](f: A => C): LessThanOrEqual[C, B] = LessThanOrEqual(this.column, this.value, f(next))
+  def set: State[(PreparedStatement, Int), Unit] = modify{ s => jdbc.set(s._1, s._2, value); (s._1, s._2 +1) }
+}
+case class LessThan[A, B : JDBCValue](column: SQLColumn, value: B, next: A) extends FreeQuery[A] {
+  lazy val jdbc: JDBCValue[B] = implicitly[JDBCValue[B]]
+  def mapF[C](f: A => C): LessThan[C, B] = LessThan(this.column, this.value, f(next))
+  def set: State[(PreparedStatement, Int), Unit] = modify{ s => jdbc.set(s._1, s._2, value); (s._1, s._2 +1) }
+}
+case class In[A, B : JDBCValue](column: SQLColumn, values: Iterable[B], next: A) extends FreeQuery[A] {
+  lazy val jdbc: JDBCValue[B] = implicitly[JDBCValue[B]]
+  def mapF[C](f: A => C): In[C, B] = In(this.column, this.values, f(next))
+  // TODO: don't blow up the stack
+  def set: State[(PreparedStatement, Int), Unit] = 
+    values
+      .foldLeft(state[(PreparedStatement, Int), Unit](())){ (acc, value) => 
+        acc.flatMap { _ => modify { (s: (PreparedStatement, Int)) => jdbc.set(s._1, s._2, value); (s._1, s._2 +1) } } 
+      }
+}
 case object Done extends FreeQuery[Nothing]
 
 object FreeQuery {
@@ -136,7 +145,12 @@ object FreeQuery {
       case Select(columns, next) => Select(columns, f(next))
       case From(tables, next) => From(tables, f(next) )
       case FromQ(subQuery, next) => FromQ(subQuery, f(next))
-      case Where(logics, next) => Where(logics, f(next))
+      case Where(logic, next) => Where(logic, f(next))
+      case eq @ Equals(_, _, _) => eq.mapF(f) 
+      case neq @ NotEqual(_, _, _) => neq.mapF(f) 
+      case lte @ LessThanOrEqual(_, _, _) => lte.mapF(f) 
+      case lt @ LessThan(_, _, _) => lt.mapF(f) 
+      case inQ @ In(_,_,_) => inQ.mapF(f)
       case Table(table, g) => Table(table, f compose g) 
       case Column(column, g) => Column(column, f compose g)
       case And(cond1, cond2, next) => And(cond1, cond2, f(next))
@@ -157,35 +171,30 @@ object FreeQuery {
   def done: Free[FreeQuery, Unit] = 
     Return(Done)
 
-  def where[A](logics: List[Conditional[A]]): Free[FreeQuery, Unit] = 
-    Suspend(Where(logics, Return(())))
+  def where[A](logic: Free[FreeQuery, A]): Free[FreeQuery, Unit] = 
+    Suspend(Where(logic, Return(())))
 
   def table(table: SQLTable): Free[FreeQuery, SQLTable] = 
     Suspend(Table(table, t => Return(t)))
 
-  def and[A,B](cond1: Conditional[A], cond2: Conditional[B]): Free[FreeQuery, Unit] = 
+  def and[A,B](cond1: Free[FreeQuery, A], cond2: Free[FreeQuery, B]): Free[FreeQuery, Unit] = 
     Suspend(And(cond1, cond2, Return(())))
 
-  private def renderConditional(conditional: Conditional[_]): String = conditional match {
-    case Eq(column, _) => "%s = ?".format(column)
-    case DoesNotEqual(column, _) => "%s <> ?".format(column)
-    case LessThan(column, _) => "%s < ?".format(column)
-    case LessThanOrEqualTo(column, _) =>  "%s <= ?".format(column)
-    case In(column, values) => "%s IN (%s)".format( column, values.map {_ => "?" }.mkString(",") ) 
+  import SQLTable._
+  import SQLColumn._
+ 
+  implicit class ConditionalSyntax(string: String) {
+    def ===[A : JDBCValue](a: A): Free[FreeQuery, Unit] = 
+      Suspend( Equals(string, a, Return(())))
+    def =!=[A : JDBCValue](a: A): Free[FreeQuery, Unit] = 
+      Suspend( NotEqual(string, a, Return(())))
+    def <=[A : JDBCValue](a: A): Free[FreeQuery, Unit] = 
+      Suspend( LessThanOrEqual(string, a, Return(())))
+    def <[A : JDBCValue](a: A): Free[FreeQuery, Unit] = 
+      Suspend( LessThan(string, a, Return(())))
+    def in[A : JDBCValue](as: Iterable[A]): Free[FreeQuery, Unit] = 
+      Suspend( In(string, as, Return(())))
   }
-
-  private def setConditional[A](conditional: Conditional[A], st: PreparedStatement, counter: Int): (PreparedStatement, Int) =
-    conditional match {
-      case conditional @ Eq(_, value) => conditional.getSetter.set(st, counter, value); (st, counter + 1)
-      case conditional @ DoesNotEqual(_, value) => conditional.getSetter.set(st, counter, value); (st, counter + 1)
-      case conditional @ LessThan(_, value) => conditional.getSetter.set(st, counter, value); (st, counter + 1)
-      case conditional @ LessThanOrEqualTo(_, value) => conditional.getSetter.set(st, counter, value); (st, counter + 1)
-      case conditional @ In(_, values) => 
-        values.foldLeft( (st, counter) ){ case ( (newSt, newInCounter), value) => 
-          conditional.getSetter.set(newSt, newInCounter, value)
-          (newSt, newInCounter + 1)
-        }
-    }
 
   def sqlInterpreter[A](query: Free[FreeQuery,A], statements: List[String]): String = query.resume match {
     case -\/(freeValue) => freeValue match {
@@ -205,18 +214,26 @@ object FreeQuery {
         }
         sqlInterpreter(a, statements ::: sqlString :: Nil)
       case FromQ(subquery, a) => sqlInterpreter(a, statements ::: "from ( %s )".format(sqlInterpreter(subquery,Nil)) :: Nil)
-      case Where(logics, a) => 
-        val whereStatement: String = logics.map { renderConditional }.mkString(" AND ") match {
-          case "" => ""
-          case string => "WHERE %s".format(string)
-        }
-        sqlInterpreter(a, statements ::: whereStatement :: Nil )
+      case Where(logicQuery, a) => 
+        val whereStatement: String = "WHERE ( %s )".format(sqlInterpreter(logicQuery,Nil))
+        sqlInterpreter(a, statements ::: whereStatement :: Nil)
+      case Equals(column, _, a) => sqlInterpreter(a, statements ::: "%s = ?".format(column.name) :: Nil)
+      case NotEqual(column, _, a) => sqlInterpreter(a, statements ::: "%s <> ?".format(column.name) :: Nil)
+      case LessThanOrEqual(column, _, a) => sqlInterpreter(a, statements ::: "%s LessThanOrEqual ?".format(column.name) :: Nil)
+      case LessThan(column, _, a) => sqlInterpreter(a, statements ::: "%s < ?".format(column.name) :: Nil)
+      case In(column, values, a) => 
+        val inString: String = "%s IN (%s)".format( column.name, values.map {_ => "?" }.mkString(",") )
+        sqlInterpreter(a, statements ::: inString :: Nil)
       case And(cond1, cond2, a) => 
-        val andStatement: String = "(%s) AND (%s)".format(renderConditional(cond1), renderConditional(cond2))
+        val statement1: String = sqlInterpreter(cond1, Nil)
+        val statement2: String = sqlInterpreter(cond2, Nil)
+        val andStatement: String = "(%s) AND (%s)".format(statement1, statement2)
         sqlInterpreter(a, statements ::: andStatement :: Nil )
       case Or(cond1, cond2, a) => 
-        val andStatement: String = "%s OR %s".format(renderConditional(cond1), renderConditional(cond2))
-        sqlInterpreter(a, statements ::: andStatement :: Nil )
+        val statement1: String = sqlInterpreter(cond1, Nil)
+        val statement2: String = sqlInterpreter(cond2, Nil)
+        val orStatement: String = "%s OR %s".format(statement1, statement2)
+        sqlInterpreter(a, statements ::: orStatement :: Nil )
       case Table(table, tableFunc) => sqlInterpreter(tableFunc(table), statements)
       case Column(column, columnFunc) => sqlInterpreter(columnFunc(column), statements)
       case Done => statements.mkString("\n")
@@ -224,43 +241,52 @@ object FreeQuery {
     case \/-(endValue) => statements.mkString("\n")
   }
 
-  /**
-   * TODO: Fix to handle `SQLTable` and `SQLColumn`
-   */
-  def sqlPrepared[A](query: Free[FreeQuery, A], st: PreparedStatement, counter: Int = 1): (PreparedStatement, Int) = query.resume match {
+  type PState = (PreparedStatement, Int)
+
+  def sqlPrepared[A](query: Free[FreeQuery, A], state: State[PState, Unit]): State[PState, Unit] = query.resume match {
     case -\/(freeValue) => freeValue match {
-      case Select(columns, a) => sqlPrepared(a, st, counter)
-      case From(table, a) => sqlPrepared(a, st, counter)
-      case FromQ(subquery, a) => sqlPrepared(a, st, counter)
-      case Where(logics, a) => 
-        val (newStatement, newCounter): (PreparedStatement, Int) = logics.foldLeft( (st, counter) ){ (acc, logic) => 
-          setConditional(logic, acc._1, acc._2)
-        }
-        sqlPrepared(a, newStatement, newCounter)
+      case Select(columns, a) => sqlPrepared(a, state)
+      case From(table, a) => sqlPrepared(a, state)
+      case FromQ(subQuery, a) => 
+        val newState: State[PState, Unit] = sqlPrepared(subQuery, state)
+        sqlPrepared(a, newState)
+      case Where(logic, a) => 
+        val newState: State[PState, Unit] = sqlPrepared(logic, state)
+        sqlPrepared(a, newState)
+      case eq @ Equals(_, value, a) => 
+        val newState: State[PState, Unit] = for { _ <- state; _ <- eq.set } yield ()
+        sqlPrepared(a, newState)
+      case neq @ NotEqual(_, value, a) => 
+        val newState: State[PState, Unit] = for { _ <- state; _ <- neq.set } yield ()
+        sqlPrepared(a, newState)
+      case lte @ LessThanOrEqual(_, value, a) => 
+        val newState: State[PState, Unit] = for { _ <- state; _ <- lte.set } yield ()
+        sqlPrepared(a, newState)
+      case lt @ LessThan(_, value, a) => 
+        val newState: State[PState, Unit] = for { _ <- state; _ <- lt.set } yield ()
+        sqlPrepared(a, newState)
+      case in @ In(_, values, a) => 
+        val newState: State[PState, Unit] = for { _ <- state; _ <- in.set } yield ()
+        sqlPrepared(a, newState)
       case And(cond1, cond2, a) => 
-        val (newStatement, newCounter): (PreparedStatement, Int) = setConditional(cond1, st, counter)
-        val (newStatement2, newCounter2): (PreparedStatement, Int) = setConditional(cond2, newStatement, newCounter)
-        sqlPrepared(a, newStatement2, newCounter2)
+        val newState: State[PState, Unit] = for { _ <- sqlPrepared(cond1, state); _ <- sqlPrepared(cond2, state) } yield ()
+        sqlPrepared(a, newState)
       case Or(cond1, cond2, a) => 
-        val (newStatement, newCounter): (PreparedStatement, Int) = setConditional(cond1, st, counter)
-        val (newStatement2, newCounter2): (PreparedStatement, Int) = setConditional(cond2, newStatement, newCounter)
-        sqlPrepared(a, newStatement2, newCounter2)
-      case Table(table, tableFunc) => sqlPrepared(tableFunc(table), st, counter)
-      case Column(column, columnFunc) => sqlPrepared(columnFunc(column), st, counter)
-      case Done => (st, counter)
+        val newState: State[PState, Unit] = for { _ <- sqlPrepared(cond1, state); _ <- sqlPrepared(cond2, state) } yield ()
+        sqlPrepared(a, newState)
+      case Table(table, tableFunc) => sqlPrepared(tableFunc(table), state)
+      case Column(column, columnFunc) => sqlPrepared(columnFunc(column), state)
+      case Done => state
     }
-    case \/-(endValue) => (st, counter)
+    case \/-(endValue) => state
   }
 
-  import Conditional._
-  import SQLTable._
-  import SQLColumn._
- 
+
   val sub: Free[FreeQuery, Unit] = 
     for {
       _ <- select( List("XXXX","YYY"))
       _ <- from("sub-table" as "s")
-      _ <- where(("neat" in List(1,2,3,4)) :: Nil)
+      _ <- where( "neat" in List(1,2,3,4) )
     } yield ()
 
   val tmp: Free[FreeQuery, Unit] =
@@ -276,11 +302,17 @@ object FreeQuery {
           _ <- select(List("column1","column2"))
         } yield ()
       }
-      _ <- where( ("levin" === "cool") :: Nil )
+      _ <- where( "levin" === "cool" )
+      /*_ <- whereQ {
+        for {
+          _ <- and(("free" === "query"), ("and" =!= "or"))
+        } yield ()
+      }*/
       _ <- done
     } yield ()
 
 }
+
 
 /**
  * SQL TABLE
