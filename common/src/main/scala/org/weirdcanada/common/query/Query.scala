@@ -227,12 +227,12 @@ object FreeQuery {
       case And(cond1, cond2, a) => 
         val statement1: String = sqlInterpreter(cond1, Nil)
         val statement2: String = sqlInterpreter(cond2, Nil)
-        val andStatement: String = "(%s) AND (%s)".format(statement1, statement2)
+        val andStatement: String = "%s AND %s".format(statement1, statement2)
         sqlInterpreter(a, statements ::: andStatement :: Nil )
       case Or(cond1, cond2, a) => 
         val statement1: String = sqlInterpreter(cond1, Nil)
         val statement2: String = sqlInterpreter(cond2, Nil)
-        val orStatement: String = "%s OR %s".format(statement1, statement2)
+        val orStatement: String = "(%s) OR (%s)".format(statement1, statement2)
         sqlInterpreter(a, statements ::: orStatement :: Nil )
       case Table(table, tableFunc) => sqlInterpreter(tableFunc(table), statements)
       case Column(column, columnFunc) => sqlInterpreter(columnFunc(column), statements)
@@ -303,11 +303,6 @@ object FreeQuery {
         } yield ()
       }
       _ <- where( "levin" === "cool" )
-      /*_ <- whereQ {
-        for {
-          _ <- and(("free" === "query"), ("and" =!= "or"))
-        } yield ()
-      }*/
       _ <- done
     } yield ()
 
