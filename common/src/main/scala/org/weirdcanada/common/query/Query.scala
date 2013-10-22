@@ -112,6 +112,7 @@ case class Where[A](logics: List[Conditional[_]], next: A) extends FreeQuery[A] 
   def and[B](newLogic: Conditional[B]): Where[A] = Where(this.logics ::: newLogic :: Nil, next)
 }
 case class Table[A](table: SQLTable, func: SQLTable => A) extends FreeQuery[A]
+case class Column[A](column: SQLColumn, func: SQLColumn => A) extends FreeQuery[A]
 case object Done extends FreeQuery[Nothing]
 
 object FreeQuery {
@@ -124,6 +125,7 @@ object FreeQuery {
       case FromQ(subQuery, next) => FromQ(subQuery, f(next))
       case Where(logics, next) => Where(logics, f(next))
       case Table(table, g) => Table(table, f compose g) 
+      case Column(column, g) => Column(column, f compose g)
       case Done => Done
     }
   }
@@ -171,6 +173,7 @@ object FreeQuery {
         }
         sqlInterpreter(a, statements ::: whereStatement :: Nil )
       case Table(table, tableFunc) => sqlInterpreter(tableFunc(table), statements)
+      case Column(column, columnFunc) => sqlInterpreter(columnFunc(column), statements)
       case Done => statements.mkString("\n")
     }
     case \/-(endValue) => statements.mkString("\n")
@@ -195,6 +198,7 @@ object FreeQuery {
         }}
         sqlPrepared(a, newStatement, newCounter)
       case Table(table, tableFunc) => sqlPrepared(tableFunc(table), st, counter)
+      case Column(column, columnFunc) => sqlPrepared(columnFunc(column), st, counter)
       case Done => (st, counter)
     }
     case \/-(endValue) => (st, counter)
