@@ -69,8 +69,8 @@ object JDBCValue {
   }
 
   implicit class JDBCIterable[A : JDBCValue](as: Iterable[A]) extends JDBCValue[Iterable[A]] {
-    val sqlType: Int = Types.BIGINT // fix this
     val jdbcVal: JDBCValue[A] = implicitly[JDBCValue[A]]
+    val sqlType: Int = jdbcVal.sqlType
     def set(st: PreparedStatement, i: Int, as: Iterable[A]): Unit = 
       jdbcVal.set(st, i, as.head)
   }
@@ -124,6 +124,8 @@ case class Where[A](logics: List[Conditional[_]], next: A) extends FreeQuery[A] 
 }
 case class Table[A](table: SQLTable, func: SQLTable => A) extends FreeQuery[A]
 case class Column[A](column: SQLColumn, func: SQLColumn => A) extends FreeQuery[A]
+case class And[A,B,C](cond1: Conditional[B], cond2: Conditional[C], next: A) extends FreeQuery[A]
+case class Or[A,B,C](cond1: Conditional[B], cond2: Conditional[C], next: A) extends FreeQuery[A]
 case object Done extends FreeQuery[Nothing]
 
 object FreeQuery {
@@ -137,6 +139,8 @@ object FreeQuery {
       case Where(logics, next) => Where(logics, f(next))
       case Table(table, g) => Table(table, f compose g) 
       case Column(column, g) => Column(column, f compose g)
+      case And(cond1, cond2, next) => And(cond1, cond2, f(next))
+      case Or(cond1, cond2, next) => Or(cond1, cond2, f(next))
       case Done => Done
     }
   }
@@ -159,6 +163,9 @@ object FreeQuery {
   def table(table: SQLTable): Free[FreeQuery, SQLTable] = 
     Suspend(Table(table, t => Return(t)))
 
+  def and[A,B](cond1: Conditional[A], cond2: Conditional[B]): Free[FreeQuery, Unit] = 
+    Suspend(And(cond1, cond2, Return(())))
+
   private def renderConditional(conditional: Conditional[_]): String = conditional match {
     case Eq(column, _) => "%s = ?".format(column)
     case DoesNotEqual(column, _) => "%s <> ?".format(column)
@@ -166,6 +173,19 @@ object FreeQuery {
     case LessThanOrEqualTo(column, _) =>  "%s <= ?".format(column)
     case In(column, values) => "%s IN (%s)".format( column, values.map {_ => "?" }.mkString(",") ) 
   }
+
+  private def setConditional[A](conditional: Conditional[A], st: PreparedStatement, counter: Int): (PreparedStatement, Int) =
+    conditional match {
+      case conditional @ Eq(_, value) => conditional.getSetter.set(st, counter, value); (st, counter + 1)
+      case conditional @ DoesNotEqual(_, value) => conditional.getSetter.set(st, counter, value); (st, counter + 1)
+      case conditional @ LessThan(_, value) => conditional.getSetter.set(st, counter, value); (st, counter + 1)
+      case conditional @ LessThanOrEqualTo(_, value) => conditional.getSetter.set(st, counter, value); (st, counter + 1)
+      case conditional @ In(_, values) => 
+        values.foldLeft( (st, counter) ){ case ( (newSt, newInCounter), value) => 
+          conditional.getSetter.set(newSt, newInCounter, value)
+          (newSt, newInCounter + 1)
+        }
+    }
 
   def sqlInterpreter[A](query: Free[FreeQuery,A], statements: List[String]): String = query.resume match {
     case -\/(freeValue) => freeValue match {
@@ -191,6 +211,12 @@ object FreeQuery {
           case string => "WHERE %s".format(string)
         }
         sqlInterpreter(a, statements ::: whereStatement :: Nil )
+      case And(cond1, cond2, a) => 
+        val andStatement: String = "(%s) AND (%s)".format(renderConditional(cond1), renderConditional(cond2))
+        sqlInterpreter(a, statements ::: andStatement :: Nil )
+      case Or(cond1, cond2, a) => 
+        val andStatement: String = "%s OR %s".format(renderConditional(cond1), renderConditional(cond2))
+        sqlInterpreter(a, statements ::: andStatement :: Nil )
       case Table(table, tableFunc) => sqlInterpreter(tableFunc(table), statements)
       case Column(column, columnFunc) => sqlInterpreter(columnFunc(column), statements)
       case Done => statements.mkString("\n")
@@ -207,18 +233,18 @@ object FreeQuery {
       case From(table, a) => sqlPrepared(a, st, counter)
       case FromQ(subquery, a) => sqlPrepared(a, st, counter)
       case Where(logics, a) => 
-        val (newStatement, newCounter): (PreparedStatement, Int) = logics.foldLeft( (st, counter) ){ (acc, logic) => logic match {
-          case conditional @ Eq(_, value) => conditional.getSetter.set(st, counter, value); (st, counter + 1)
-          case conditional @ DoesNotEqual(_, value) => conditional.getSetter.set(st, counter, value); (st, counter + 1)
-          case conditional @ LessThan(_, value) => conditional.getSetter.set(st, counter, value); (st, counter + 1)
-          case conditional @ LessThanOrEqualTo(_, value) => conditional.getSetter.set(st, counter, value); (st, counter + 1)
-          case conditional @ In(_, values) => 
-            values.foldLeft( (st, counter) ){ case ( (newSt, newInCounter), value) => 
-              conditional.getSetter.set(newSt, newInCounter, value)
-              (newSt, newInCounter + 1)
-            }
-        }}
+        val (newStatement, newCounter): (PreparedStatement, Int) = logics.foldLeft( (st, counter) ){ (acc, logic) => 
+          setConditional(logic, acc._1, acc._2)
+        }
         sqlPrepared(a, newStatement, newCounter)
+      case And(cond1, cond2, a) => 
+        val (newStatement, newCounter): (PreparedStatement, Int) = setConditional(cond1, st, counter)
+        val (newStatement2, newCounter2): (PreparedStatement, Int) = setConditional(cond2, newStatement, newCounter)
+        sqlPrepared(a, newStatement2, newCounter2)
+      case Or(cond1, cond2, a) => 
+        val (newStatement, newCounter): (PreparedStatement, Int) = setConditional(cond1, st, counter)
+        val (newStatement2, newCounter2): (PreparedStatement, Int) = setConditional(cond2, newStatement, newCounter)
+        sqlPrepared(a, newStatement2, newCounter2)
       case Table(table, tableFunc) => sqlPrepared(tableFunc(table), st, counter)
       case Column(column, columnFunc) => sqlPrepared(columnFunc(column), st, counter)
       case Done => (st, counter)
