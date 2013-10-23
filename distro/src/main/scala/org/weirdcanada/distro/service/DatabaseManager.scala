@@ -32,7 +32,7 @@ class DatabaseManager(config: Config) {
     // Use Lift's Mapper ORM to populate the database
     Schemifier.schemify(true, Schemifier.infoF _,
         Account, Artist, Publisher, Album, ArtistsPublishers, PublishersAlbums, ArtistsAlbums, Track,
-        ConsignedItem, AlbumsConsignedItems, Sale, Consignment)
+        ConsignedItem, AlbumsConsignedItems, Sale, Consignment, Payment)
 
     // Dev scaffolding
     if (Props.devMode) {
