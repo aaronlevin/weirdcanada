@@ -1,6 +1,8 @@
 package org.weirdcanada.common.query
 
 import scalaz.{Free, FreeInstances, Functor, \/, -\/, \/-, State, syntax}
+import scalaz.std.list._
+import scalaz.syntax.traverse._
 import Free._
 import State.{get, init, modify, put, state}
 
@@ -133,12 +135,14 @@ case class LessThan[A, B : JDBCValue](column: SQLColumn, value: B, next: A) exte
 case class In[A, B : JDBCValue](column: SQLColumn, values: Iterable[B], next: A) extends FreeQuery[A] {
   lazy val jdbc: JDBCValue[B] = implicitly[JDBCValue[B]]
   def mapF[C](f: A => C): In[C, B] = In(this.column, this.values, f(next))
-  // TODO: don't blow up the stack
   def set: State[(PreparedStatement, Int), Unit] = 
-    values
-      .foldLeft(state[(PreparedStatement, Int), Unit](())){ (acc, value) => 
-        acc.flatMap { _ => modify { (s: (PreparedStatement, Int)) => jdbc.set(s._1, s._2, value); (s._1, s._2 +1) } } 
-      }
+    for {
+      _ <- values
+            .toList
+            .traverseS { v => 
+              modify{ (s: (PreparedStatement, Int)) => jdbc.set(s._1, s._2, v); (s._1, s._2 +1) }
+            }
+    } yield ()
 }
 case object Done extends FreeQuery[Nothing]
 
