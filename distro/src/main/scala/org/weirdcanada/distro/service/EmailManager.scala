@@ -11,7 +11,7 @@ sealed trait EmailTemplate {
 }
 abstract class BaseEmailTemplate(val subject: String) extends EmailTemplate
 case class ConfirmRegistrationEmail(confirmUrl: String, firstName: String) extends BaseEmailTemplate("Registration Confirmation")
-case class PaymentRequestEmail(name: String, accountUrl: String, unofficialBalance: BigDecimal) extends BaseEmailTemplate("Payment Request")
+case class PaymentRequestEmail(name: String, accountUrl: String, unofficialBalance: BigDecimal, paymentId: Long) extends BaseEmailTemplate("Payment Request")
 
 
 class EmailManager(config: Config, emailFactory: EmailFactory) {
@@ -28,10 +28,11 @@ class EmailManager(config: Config, emailFactory: EmailFactory) {
         "#first-name" #> firstName
       ).apply(confirmRegistrationTemplate)
       
-      case PaymentRequestEmail(name, accountUrl, unofficialBalance) => (
+      case PaymentRequestEmail(name, accountUrl, unofficialBalance, paymentId) => (
         "#name" #> name &
         "#account-link [href]" #> accountUrl &
-        "#balance" #> unofficialBalance
+        "#balance" #> unofficialBalance &
+        "#paymentId" #> paymentId
       ).apply(paymentRequestTemplate)
       
       case unhandled @ _ =>
