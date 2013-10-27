@@ -25,6 +25,7 @@ object AlbumApp extends App with Loggable {
   case object Show extends Mode
   case object Update extends Mode
   case object Delete extends Mode
+  case object List extends Mode
   
   case class Args(
     mode: Mode = Show,
@@ -56,6 +57,8 @@ object AlbumApp extends App with Loggable {
           parseArgs(tail, args.copy(mode = Delete, id = Some(id.toLong)))
         case "-s" :: id :: tail =>
           parseArgs(tail, args.copy(mode = Show, id = Some(id.toLong)))
+        case "-l" :: tail =>
+          parseArgs(tail, args.copy(mode = List))
         
         //case "-v" :: tail =>
         //  parseArgs(tail, args.copy(verbose = true))
@@ -97,6 +100,27 @@ class AlbumApp(args: Args) {
     sys.exit(code)
   }
   
+  def print(album: Album) {
+    val json =
+      "album" -> (
+        ("id" -> album.id.is) ~ 
+        ("title" -> album.title.is) ~
+        ("sku" -> album.sku.is) ~
+        ("description" -> album.description.is) ~
+        ("url" -> album.url.is) ~
+        ("releaseYear" -> album.releaseYear.is) ~
+        ("format" -> album.format.is.toString) ~
+        ("shopifyId" -> album.shopifyId.is) ~
+        ("catalogNumber" -> album.catalogNumber.is) ~
+        ("firstPressing" -> album.isFirstPressing.is) ~
+        ("imageUrl" -> album.imageUrl.is) ~
+        ("additionalImageUrls" -> album.additionalImageUrls.is)
+        // TODO: publishers, tracks, artists, consigned items?
+      )
+    
+    println(pretty(render(json)))
+  }
+  
   def apply = {
     // Helper method to make the for-comprehension below a little cleaner
     def require(bool: => Boolean) = if (bool) Some(true) else None
@@ -116,6 +140,11 @@ class AlbumApp(args: Args) {
           Album.findByKey(id).map(Album.delete_!)
           exit(0, "Deleted album %d".format(id))
         
+        case (List, _) =>
+          val allItems = Album.findAll
+          allItems.map(print)
+          exit(0, "%d Albums".format(allItems.length))
+          
         case _ =>
           exit(1, "Invalid options")
       }
@@ -130,24 +159,6 @@ class AlbumApp(args: Args) {
       album.save
     }
 
-    val json =
-      "album" -> (
-        ("id" -> album.id.is) ~ 
-        ("title" -> album.title.is) ~
-        ("sku" -> album.sku.is) ~
-        ("description" -> album.description.is) ~
-        ("url" -> album.url.is) ~
-        ("releaseYear" -> album.releaseYear.is) ~
-        ("format" -> album.format.is.toString) ~
-        ("shopifyId" -> album.shopifyId.is) ~
-        ("catalogNumber" -> album.catalogNumber.is) ~
-        ("firstPressing" -> album.isFirstPressing.is) ~
-        ("imageUrl" -> album.imageUrl.is) ~
-        ("additionalImageUrls" -> album.additionalImageUrls.is)
-        // TODO: publishers, tracks, artists, consigned items?
-      )
-      
-    println(pretty(render(json)))
-    
+    print(album)
   } // def apply
 }

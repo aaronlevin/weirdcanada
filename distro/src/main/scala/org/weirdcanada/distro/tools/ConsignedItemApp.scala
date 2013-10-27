@@ -1,3 +1,5 @@
+package org.weirdcanada.distro.tools
+
 import net.liftweb.json._
 import net.liftweb.common.Loggable
 import net.liftweb.json.{pretty, render}
@@ -29,6 +31,7 @@ object ConsignedItemApp extends App with Loggable {
   case object Show extends Mode
   case object Update extends Mode
   case object Delete extends Mode
+  case object List extends Mode
   
   case class Args(
     mode: Mode = Show,
@@ -63,6 +66,8 @@ object ConsignedItemApp extends App with Loggable {
           parseArgs(tail, args.copy(mode = Delete, id = Some(id.toLong)))
         case "-s" :: id :: tail =>
           parseArgs(tail, args.copy(mode = Show, id = Some(id.toLong)))
+        case "-l" :: tail =>
+          parseArgs(tail, args.copy(mode = List))
         
 
         case "-guid" :: guid :: tail =>
@@ -111,6 +116,24 @@ class ConsignedItemApp(args: Args) {
     sys.exit(code)
   }
   
+  def print(consignedItem: ConsignedItem) {
+    val json =
+      "consignedItem" -> (
+        ("id" -> consignedItem.id.is) ~ 
+        ("guid" -> consignedItem.guid.is) ~
+        ("customerCost" -> consignedItem.customerCost.is) ~
+        ("wholesaleCost" -> consignedItem.wholesaleCost.is) ~
+        ("markUp" -> consignedItem.markUp.is) ~
+        ("coverCondition" -> consignedItem.coverCondition.is.toString) ~
+        ("mediaCondition" -> consignedItem.mediaCondition.is.toString) ~
+        ("additionalNotes" -> consignedItem.additionalNotes.is) ~
+        ("album" -> consignedItem.album.obj.map(_.toString).getOrElse("")) ~
+        ("consignor" -> consignedItem.consignor.obj.map(_.toString).getOrElse(""))
+      )
+      
+    println(pretty(render(json)))    
+  }
+  
   def apply = {
     // Helper method to make the for-comprehension below a little cleaner
     def require(bool: => Boolean) = if (bool) Some(true) else None
@@ -129,6 +152,11 @@ class ConsignedItemApp(args: Args) {
           ConsignedItem.findByKey(id).map(ConsignedItem.delete_!)
           exit(0, "Deleted ConsignedItem %d".format(id))
         
+        case (List, _) =>
+          val allItems = ConsignedItem.findAll
+          allItems.map(print)
+          exit(0, "%d ConsignedItems".format(allItems.length))
+          
         case _ =>
           exit(1, "Invalid options")
       }
@@ -146,21 +174,6 @@ class ConsignedItemApp(args: Args) {
       consignedItem.save
     }
 
-    val json =
-      "consignedItem" -> (
-        ("id" -> consignedItem.id.is) ~ 
-        ("guid" -> consignedItem.guid.is) ~
-        ("customerCost" -> consignedItem.customerCost.is) ~
-        ("wholesaleCost" -> consignedItem.wholesaleCost.is) ~
-        ("markUp" -> consignedItem.markUp.is) ~
-        ("coverCondition" -> consignedItem.coverCondition.is.toString) ~
-        ("mediaCondition" -> consignedItem.mediaCondition.is.toString) ~
-        ("additionalNotes" -> consignedItem.additionalNotes.is) ~
-        ("album" -> consignedItem.album.obj.map(_.toString).getOrElse("")) ~
-        ("consignor" -> consignedItem.consignor.obj.map(_.toString).getOrElse(""))
-      )
-      
-    println(pretty(render(json)))
-    
+    print(consignedItem)
   } // def apply
 }
