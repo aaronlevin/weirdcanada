@@ -38,7 +38,7 @@ object ConsignedItemApp extends App with Loggable {
     id: Option[Long] = None,
     customerCost: Option[BigDecimal] = None,
     wholesaleCost: Option[BigDecimal] = None,
-    markUp: Option[BigDecimal] = None,
+    markUp: Option[BigDecimal] = Some(BigDecimal(1.00)),
     consignor: Option[Long] = None,
     album: Option[Long] = None,
     notes: Option[String] = None,
@@ -70,7 +70,7 @@ object ConsignedItemApp extends App with Loggable {
           parseArgs(tail, args.copy(mode = List))
         
 
-        case "-guid" :: guid :: tail =>
+        case "-guid" :: guid :: tail => // Note: Guid is automatically assigned. only use this to override the value
           parseArgs(tail, args.copy(guid = Some(guid)))
           
         case "-mediacond" :: cond :: tail =>
