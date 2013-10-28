@@ -11,6 +11,7 @@ import net.liftweb.common.Full
 import org.weirdcanada.distro.api.shopify.Variant
 import org.weirdcanada.distro.util.AnyExtensions._
 import org.weirdcanada.distro.util.IdList
+import org.weirdcanada.distro.api.shopify.WrapperObject
 
 object UploadConsignedItemToShopify extends App with Loggable {
   val config = Config.fromLiftProps
@@ -58,7 +59,11 @@ class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopif
     
     new Variant(
       barcode = "",
-      options = Map.empty,
+      options = List(
+        1 -> consignedItem.guid.is // 1 -> consignedItem.consignor.obj.dmap("Default")(_.displayName)
+        //2 -> consignedItem.mediaCondition.is.toString,
+        //3 -> consignedItem.coverCondition.is.toString
+      ).toMap,
       position = 1,
       price = consignedItem.customerCost.is,
       sku = albumProp(_.sku.is),
@@ -66,10 +71,20 @@ class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopif
     )
   }
   
+  /*
+  def shopifyVariantFromConsignedItem = {
+    Metafield(
+      "guid",
+      consignedItem.guid.is,
+      "weirdcanada"
+    )
+  }
+  */
   
   def upload = {
     for {
       album <- consignedItem.album.obj ?~ "Consigned item %s has no album".format(consignedItem.id.is)
+      //metafield = shopifyVariantFromConsignedItem
       variant = shopifyVariantFromConsignedItem
     }
     yield {
@@ -83,6 +98,7 @@ class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopif
           case productId => productId
         }
       
+      //shopify.addProductVariant(productId, List(metafield)) |>
       shopify.addProductVariant(productId, variant) |>
         (pv => {
           println("Created Shopify variant #%s from consigned item #%s (%s)".format(pv.id, consignedItem.id.is, consignedItem.guid.is))
