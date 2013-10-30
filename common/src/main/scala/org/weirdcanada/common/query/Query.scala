@@ -97,6 +97,16 @@ object SQLColumn {
   implicit def string2Column(columnName: String): SQLColumn = SQLColumn(columnName, None)
 }
 
+sealed trait JoinType
+case object InnerJoin extends JoinType
+case object LeftJoin extends JoinType
+case object RightJoin extends JoinType
+
+/**
+ * Joined table
+ */
+case class JoinedTables(leftTable: SQLTable, rightTable: SQLTable)
+
 
 /**
  * The Free Query Free Monad
@@ -236,7 +246,7 @@ object FreeQuery {
       case And(cond1, cond2, a) => 
         val statement1: String = sqlInterpreter(cond1, Nil)
         val statement2: String = sqlInterpreter(cond2, Nil)
-        val andStatement: String = "%s AND %s".format(statement1, statement2)
+        val andStatement: String = "(%s) AND (%s)".format(statement1, statement2)
         sqlInterpreter(a, statements ::: andStatement :: Nil )
       case Or(cond1, cond2, a) => 
         val statement1: String = sqlInterpreter(cond1, Nil)
