@@ -89,24 +89,30 @@ object JDBCValue {
 /**
  * SQL COLUMN
  */
-case class SQLColumn(name: String, table: Option[SQLTable])
+case class SQLColumn(name: String, table: Option[SQLTable]) {
+  def ===(column: SQLColumn): (SQLColumn, SQLColumn) = (this, column)
+  lazy val render: String = (
+    for { 
+      t <- table
+      alias <- t.alias
+    } yield "%s.%s".format(alias, name)
+    ).getOrElse( name )
+
+}
 object SQLColumn {
   implicit class SQLColumnSyntax(columnName: String) {
     def in(table: SQLTable): SQLColumn = SQLColumn(columnName, Some(table))
+    def ===(column: SQLColumn): (SQLColumn, SQLColumn) = (SQLColumn(columnName, None), column)
   }
   implicit def string2Column(columnName: String): SQLColumn = SQLColumn(columnName, None)
+
+
 }
 
 sealed trait JoinType
 case object InnerJoin extends JoinType
 case object LeftJoin extends JoinType
 case object RightJoin extends JoinType
-
-/**
- * Joined table
- */
-case class JoinedTables(leftTable: SQLTable, rightTable: SQLTable)
-
 
 /**
  * The Free Query Free Monad
@@ -118,6 +124,7 @@ case class From[A](table: SQLTable, next: A) extends FreeQuery[A]
 case class FromQ[A](subQuery: Free[FreeQuery,Unit], next: A) extends FreeQuery[A]
 case class Where[A, B](logicQuery: Free[FreeQuery,B], next: A) extends FreeQuery[A]
 case class Table[A](table: SQLTable, func: SQLTable => A) extends FreeQuery[A]
+case class JoinedTables[A](joinType: JoinType, table1: SQLTable, table2: SQLTable, joinCondition: Option[(SQLColumn, SQLColumn)], next: A) extends FreeQuery[A]
 case class Column[A](column: SQLColumn, func: SQLColumn => A) extends FreeQuery[A]
 case class And[A,B,C](cond1: Free[FreeQuery, B], cond2: Free[FreeQuery, C], next: A) extends FreeQuery[A]
 case class Or[A,B,C](cond1: Free[FreeQuery, B], cond2: Free[FreeQuery, C], next: A) extends FreeQuery[A]
@@ -171,6 +178,7 @@ object FreeQuery {
       case lt @ LessThan(_, _, _) => lt.mapF(f) 
       case inQ @ In(_,_,_) => inQ.mapF(f)
       case Table(table, g) => Table(table, f compose g) 
+      case JoinedTables(j, l, r, cond, next) => JoinedTables(j, l, r, cond, f(next))
       case Column(column, g) => Column(column, f compose g)
       case And(cond1, cond2, next) => And(cond1, cond2, f(next))
       case Or(cond1, cond2, next) => Or(cond1, cond2, f(next))
@@ -198,6 +206,9 @@ object FreeQuery {
 
   def and[A,B](cond1: Free[FreeQuery, A], cond2: Free[FreeQuery, B]): Free[FreeQuery, Unit] = 
     Suspend(And(cond1, cond2, Return(())))
+
+  def innerJoin(table1: SQLTable, table2: SQLTable): Free[FreeQuery, Unit] =
+    Suspend(JoinedTables(InnerJoin, table1, table2, None, Return(())))
 
   import SQLTable._
   import SQLColumn._
@@ -254,6 +265,14 @@ object FreeQuery {
         val orStatement: String = "(%s) OR (%s)".format(statement1, statement2)
         sqlInterpreter(a, statements ::: orStatement :: Nil )
       case Table(table, tableFunc) => sqlInterpreter(tableFunc(table), statements)
+      case JoinedTables(joinType, table1, table2, joinCondition, a) => 
+        val joinTypeString = joinType match { 
+          case InnerJoin => "INNER JOIN"
+          case LeftJoin => "LEFT JOIN"
+          case RightJoin => "RIGHT JOIN"
+        }
+        val onCondition = joinCondition.map { case (col1, col2) => "ON %s = %s".format(col1.render, col2.render) }.getOrElse {""}
+        sqlInterpreter(a, statements ::: (table1.render + joinTypeString + table2.render + onCondition) :: Nil)
       case Column(column, columnFunc) => sqlInterpreter(columnFunc(column), statements)
       case Done => statements.mkString("\n")
     }
@@ -294,6 +313,7 @@ object FreeQuery {
         val newState: State[PState, Unit] = for { _ <- sqlPrepared(cond1, state); _ <- sqlPrepared(cond2, state) } yield ()
         sqlPrepared(a, newState)
       case Table(table, tableFunc) => sqlPrepared(tableFunc(table), state)
+      case JoinedTables(_, _, _, _, a) => sqlPrepared(a, state)
       case Column(column, columnFunc) => sqlPrepared(columnFunc(column), state)
       case Done => state
     }
@@ -321,20 +341,31 @@ object FreeQuery {
           _ <- select(List("column1","column2"))
         } yield ()
       }
+      _ <- fromQ { t1 innerJoin "table2" |*| column1 === "neat" }
       _ <- where( "levin" === "cool" )
       _ <- done
     } yield ()
 
 }
 
+ //    _ <- from(table1).innerJoin(table2 on column2 == "randomColumn")
 
 /**
  * SQL TABLE
  */
 case class SQLTable(name: String, alias: Option[String]) {
+
+  lazy val render: String = alias.map { a => "%s AS %s".format(name, a) }.getOrElse { name }
+  
   import FreeQuery._
   def column(columnName: String): Free[FreeQuery,SQLColumn] = 
     Suspend(Column(SQLColumn(columnName, Some(this)), t => Return(t)))
+
+  def |*|(columnPair: (SQLColumn, SQLColumn)): (SQLTable, SQLColumn, SQLColumn) = 
+    (this, columnPair._1, columnPair._2)
+
+  def innerJoin(triple: (SQLTable, SQLColumn, SQLColumn)): Free[FreeQuery, Unit] =
+    Suspend(JoinedTables(InnerJoin, this, triple._1, Some((triple._2, triple._3)), Return(())))
 }
 object SQLTable {
   implicit class SQLTableSyntax(tableName: String) {
