@@ -113,6 +113,8 @@ sealed trait JoinType
 case object InnerJoin extends JoinType
 case object LeftJoin extends JoinType
 case object RightJoin extends JoinType
+case object OuterJoin extends JoinType
+case object CrossJoin extends JoinType
 
 /**
  * The Free Query Free Monad
@@ -270,6 +272,8 @@ object FreeQuery {
           case InnerJoin => " INNER JOIN "
           case LeftJoin => " LEFT JOIN "
           case RightJoin => " RIGHT JOIN "
+          case OuterJoin => " OUTER JOIN "
+          case CrossJoin => " CROSS JOIN "
         }
         val onCondition = joinCondition.map { case (col1, col2) => " ON (%s = %s)".format(col1.render, col2.render) }.getOrElse {""}
         sqlInterpreter(a, statements ::: (table1.render + joinTypeString + table2.render + onCondition) :: Nil)
@@ -369,6 +373,19 @@ case class SQLTable(name: String, alias: Option[String]) {
 
   def innerJoin(triple: (SQLTable, SQLColumn, SQLColumn)): Free[FreeQuery, Unit] =
     Suspend(JoinedTables(InnerJoin, this, triple._1, Some((triple._2, triple._3)), Return(())))
+
+  def leftJoin(triple: (SQLTable, SQLColumn, SQLColumn)): Free[FreeQuery, Unit] =
+    Suspend(JoinedTables(LeftJoin, this, triple._1, Some((triple._2, triple._3)), Return(())))
+
+  def rightJoin(triple: (SQLTable, SQLColumn, SQLColumn)): Free[FreeQuery, Unit] =
+    Suspend(JoinedTables(RightJoin, this, triple._1, Some((triple._2, triple._3)), Return(())))
+
+  def outerJoin(triple: (SQLTable, SQLColumn, SQLColumn)): Free[FreeQuery, Unit] =
+    Suspend(JoinedTables(OuterJoin, this, triple._1, Some((triple._2, triple._3)), Return(())))
+
+  def crossJoin(table: SQLTable): Free[FreeQuery, Unit] = 
+    Suspend(JoinedTables(CrossJoin, this, table, None, Return(())))
+
 }
 object SQLTable {
   implicit class SQLTableSyntax(tableName: String) {
