@@ -231,13 +231,7 @@ object FreeQuery {
   def sqlInterpreter[A](query: Free[FreeQuery,A], statements: List[String]): String = query.resume match {
     case -\/(freeValue) => freeValue match {
       case Select(columns, a) => 
-        val columnString: List[String] = 
-          columns.map { column => 
-            (for {
-              table <- column.table
-              alias <- table.alias
-            } yield "%s.%s".format(alias, column.name)).getOrElse { column.name }
-          }
+        val columnString: List[String] = columns.map { _.render }
         sqlInterpreter(a, statements :::  "select %s".format(columnString.mkString(",")) :: Nil)
       case From(table, a) => 
         val sqlString: String = table.alias match {
