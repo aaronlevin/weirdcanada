@@ -267,11 +267,11 @@ object FreeQuery {
       case Table(table, tableFunc) => sqlInterpreter(tableFunc(table), statements)
       case JoinedTables(joinType, table1, table2, joinCondition, a) => 
         val joinTypeString = joinType match { 
-          case InnerJoin => "INNER JOIN"
-          case LeftJoin => "LEFT JOIN"
-          case RightJoin => "RIGHT JOIN"
+          case InnerJoin => " INNER JOIN "
+          case LeftJoin => " LEFT JOIN "
+          case RightJoin => " RIGHT JOIN "
         }
-        val onCondition = joinCondition.map { case (col1, col2) => "ON %s = %s".format(col1.render, col2.render) }.getOrElse {""}
+        val onCondition = joinCondition.map { case (col1, col2) => " ON (%s = %s)".format(col1.render, col2.render) }.getOrElse {""}
         sqlInterpreter(a, statements ::: (table1.render + joinTypeString + table2.render + onCondition) :: Nil)
       case Column(column, columnFunc) => sqlInterpreter(columnFunc(column), statements)
       case Done => statements.mkString("\n")
@@ -361,6 +361,9 @@ case class SQLTable(name: String, alias: Option[String]) {
   def column(columnName: String): Free[FreeQuery,SQLColumn] = 
     Suspend(Column(SQLColumn(columnName, Some(this)), t => Return(t)))
 
+  /**
+   * Alias for "ON". Must use operator here for precedence ordering.
+   */
   def |*|(columnPair: (SQLColumn, SQLColumn)): (SQLTable, SQLColumn, SQLColumn) = 
     (this, columnPair._1, columnPair._2)
 
