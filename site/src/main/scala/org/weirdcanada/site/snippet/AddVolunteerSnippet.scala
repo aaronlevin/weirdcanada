@@ -30,11 +30,12 @@ class AddVolunteerSnippet(db: DB, volunteer: Box[Volunteer]) extends DynamicForm
   val insertVolunteerDB = insertIntoDB(db) _
 
   // memoize volunteer bio snippet
-  private val volunteerBioMemoize: MemoizeTransform = SHtml.memoize(bio(volunteer))
+  private val volunteerEnglishBioMemoize: MemoizeTransform = SHtml.memoize(bio(volunteer))
+  private val volunteerFrancaisBioMemoize: MemoizeTransform = SHtml.memoize(bio(volunteer, false))
 
   def dispatch = {
     case "render" => render
-    case "bio" => volunteerBioMemoize 
+    case "bio" => volunteerEnglishBioMemoize 
     case "bioText" => bioText
   }
 
@@ -63,10 +64,11 @@ class AddVolunteerSnippet(db: DB, volunteer: Box[Volunteer]) extends DynamicForm
     }
   }
 
-  private def bio(volunteer: Box[Volunteer]): NodeSeq => NodeSeq = {
-    volunteer.map { v => renderVolunteerBio(v, true) } openOr { (ns: NodeSeq) => <p>Bio not available</p> }
+  private def bio(volunteer: Box[Volunteer], english: Boolean = true): NodeSeq => NodeSeq = {
+    volunteer.map { v => renderVolunteerBio(v, english) } openOr { (ns: NodeSeq) => <p>Bio not available</p> }
   }
 
   private def bioText: NodeSeq => NodeSeq = 
-    "name=get-bio-text" #> SHtml.ajaxButton("Get Bio Text", () => JsCmds.SetValById("bio-textarea", volunteerBioMemoize.applyAgain().toString))
+    "name=get-english-bio-text" #> SHtml.ajaxButton("Get English Bio Text", () => JsCmds.SetValById("bio-textarea", volunteerEnglishBioMemoize.applyAgain().toString)) &
+    "name=get-francais-bio-text" #> SHtml.ajaxButton("Get Francais Bio Text", () => JsCmds.SetValById("bio-textarea", volunteerFrancaisBioMemoize.applyAgain().toString))
 }
