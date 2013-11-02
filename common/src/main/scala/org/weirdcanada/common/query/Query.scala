@@ -1,5 +1,7 @@
 package org.weirdcanada.common.query
 
+import JoinTypeInstances._
+
 import scalaz.{Free, FreeInstances, Functor, \/, -\/, \/-, State, syntax}
 import scalaz.std.list._
 import scalaz.syntax.traverse._
@@ -47,74 +49,6 @@ import java.sql.{PreparedStatement, Types}
  *  } yield ()
  */
 
-/**
- * A TypeClass for types that can be set in `PreparedStatement`s
- */
-sealed trait JDBCValue[A] {
-  def set(st: PreparedStatement, i: Int, a: A): Unit
-  val sqlType: Int
-}
-/**
- * instances
- */
-object JDBCValue {
-
-  implicit object jdbcString extends JDBCValue[String] {
-    def set(st: PreparedStatement, i: Int, a: String): Unit =
-      st.setString(i,a)
-    val sqlType: Int = Types.VARCHAR
-  }
-
-  implicit object jdbcInt extends JDBCValue[Int] {
-    def set(st: PreparedStatement, i: Int, a: Int): Unit = 
-      st.setInt(i,a)
-    val sqlType: Int = Types.INTEGER
-  }
-
-  implicit object jdbcBigInt extends JDBCValue[Long] {
-    def set(st: PreparedStatement, i: Int, a: Long): Unit = 
-      st.setLong(i,a)
-    val sqlType: Int = Types.BIGINT
-  }
-
-  implicit class JDBCIterable[A : JDBCValue](as: Iterable[A]) extends JDBCValue[Iterable[A]] {
-    val jdbcVal: JDBCValue[A] = implicitly[JDBCValue[A]]
-    val sqlType: Int = jdbcVal.sqlType
-    def set(st: PreparedStatement, i: Int, as: Iterable[A]): Unit = 
-      jdbcVal.set(st, i, as.head)
-  }
-
-}
-
-/**
- * SQL COLUMN
- */
-case class SQLColumn(name: String, table: Option[SQLTable]) {
-  def ===(column: SQLColumn): (SQLColumn, SQLColumn) = (this, column)
-  lazy val render: String = (
-    for { 
-      t <- table
-      alias <- t.alias
-    } yield "%s.%s".format(alias, name)
-    ).getOrElse( name )
-
-}
-object SQLColumn {
-  implicit class SQLColumnSyntax(columnName: String) {
-    def in(table: SQLTable): SQLColumn = SQLColumn(columnName, Some(table))
-    def ===(column: SQLColumn): (SQLColumn, SQLColumn) = (SQLColumn(columnName, None), column)
-  }
-  implicit def string2Column(columnName: String): SQLColumn = SQLColumn(columnName, None)
-
-
-}
-
-sealed trait JoinType
-case object InnerJoin extends JoinType
-case object LeftJoin extends JoinType
-case object RightJoin extends JoinType
-case object OuterJoin extends JoinType
-case object CrossJoin extends JoinType
 
 /**
  * The Free Query Free Monad
@@ -344,48 +278,6 @@ object FreeQuery {
       _ <- done
     } yield ()
 
-}
-
- //    _ <- from(table1).innerJoin(table2 on column2 == "randomColumn")
-
-/**
- * SQL TABLE
- */
-case class SQLTable(name: String, alias: Option[String]) {
-
-  lazy val render: String = alias.map { a => "%s AS %s".format(name, a) }.getOrElse { name }
-  
-  import FreeQuery._
-  def column(columnName: String): Free[FreeQuery,SQLColumn] = 
-    Suspend(Column(SQLColumn(columnName, Some(this)), t => Return(t)))
-
-  /**
-   * Alias for "ON". Must use operator here for precedence ordering.
-   */
-  def |*|(columnPair: (SQLColumn, SQLColumn)): (SQLTable, SQLColumn, SQLColumn) = 
-    (this, columnPair._1, columnPair._2)
-
-  def innerJoin(triple: (SQLTable, SQLColumn, SQLColumn)): Free[FreeQuery, Unit] =
-    Suspend(JoinedTables(InnerJoin, this, triple._1, Some((triple._2, triple._3)), Return(())))
-
-  def leftJoin(triple: (SQLTable, SQLColumn, SQLColumn)): Free[FreeQuery, Unit] =
-    Suspend(JoinedTables(LeftJoin, this, triple._1, Some((triple._2, triple._3)), Return(())))
-
-  def rightJoin(triple: (SQLTable, SQLColumn, SQLColumn)): Free[FreeQuery, Unit] =
-    Suspend(JoinedTables(RightJoin, this, triple._1, Some((triple._2, triple._3)), Return(())))
-
-  def outerJoin(triple: (SQLTable, SQLColumn, SQLColumn)): Free[FreeQuery, Unit] =
-    Suspend(JoinedTables(OuterJoin, this, triple._1, Some((triple._2, triple._3)), Return(())))
-
-  def crossJoin(table: SQLTable): Free[FreeQuery, Unit] = 
-    Suspend(JoinedTables(CrossJoin, this, table, None, Return(())))
-
-}
-object SQLTable {
-  implicit class SQLTableSyntax(tableName: String) {
-    def as(alias: String): SQLTable = SQLTable(tableName, Some(alias))
-  }
-  implicit def string2Table(tableName: String): SQLTable = SQLTable(tableName, None)
 }
 
 object QueryMain {
