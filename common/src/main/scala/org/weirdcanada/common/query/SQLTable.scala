@@ -44,5 +44,11 @@ object SQLTable {
   implicit class SQLTableSyntax(tableName: String) {
     def as(alias: String): SQLTable = SQLTable(tableName, Some(alias))
   }
-  implicit def string2Table(tableName: String): SQLTable = SQLTable(tableName, None)
+  implicit def string2Table(tableName: String): SQLTable = tableName.split(" as ").toList match {
+    case tableName :: columnName :: Nil => SQLTable(tableName, Some(columnName))
+    case _ => tableName.split(" AS ").toList match {
+      case tableName :: columnName :: Nil => SQLTable(tableName, Some(columnName))
+      case _ => SQLTable(tableName, None)
+    }
+  }
 }
