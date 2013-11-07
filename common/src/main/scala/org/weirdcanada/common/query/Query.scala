@@ -154,6 +154,11 @@ object FreeQuery {
 
   import SQLTable._
   import SQLColumn._
+
+  implicit class FreeQuerySyntax(query: Free[FreeQuery, Unit]) {
+   def and(query2: Free[FreeQuery, Unit]): Free[FreeQuery, Unit] =
+    Suspend(And(query, query2, Return()))
+  }
  
   implicit class ConditionalStringSyntax(string: String) {
     def ===[A : JDBCValue](a: A): Free[FreeQuery, Unit] = 

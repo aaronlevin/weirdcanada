@@ -75,7 +75,9 @@ object FreeQueryStringTest {
       table1 as t1
       inner join table2 as t2 on (t1.id = t2.id)
     where (
-      t1.column1 = ?
+      ( t1.column1 = ? )
+      and
+      ( t2.column2 <> ? )
     )
   """
 
@@ -89,7 +91,7 @@ object FreeQueryStringTest {
       t2Id <- t2.column("id")
       _ <- select(column1, column2)
       _ <- from { t1 innerJoin t2 |*| t1Id === t2Id }
-      _ <- where( column1 === 5 )
+      _ <- where { (column1 === 5) and (column2 =!= "seven") }
     } yield ()
 
   def cleanse(string: String): String = 
