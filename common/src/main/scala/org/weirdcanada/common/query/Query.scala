@@ -57,7 +57,7 @@ sealed trait FreeQuery[+A]
 
 case class Select[A](columns: List[SQLColumn], next: A) extends FreeQuery[A]
 case class From[A](table: SQLTable, next: A) extends FreeQuery[A] 
-case class FromQ[A](subQuery: Free[FreeQuery,Unit], next: A) extends FreeQuery[A]
+case class FromQ[A](subQuery: Free[FreeQuery,Unit], withBrackets: Boolean, next: A) extends FreeQuery[A]
 case class Where[A, B](logicQuery: Free[FreeQuery,B], next: A) extends FreeQuery[A]
 case class Table[A](table: SQLTable, func: SQLTable => A) extends FreeQuery[A]
 case class JoinedTables[A](joinType: JoinType, table1: SQLTable, table2: SQLTable, joinCondition: Option[(SQLColumn, SQLColumn)], next: A) extends FreeQuery[A]
@@ -109,7 +109,7 @@ object FreeQuery {
     def map[A, B](fa: FreeQuery[A])(f: A => B): FreeQuery[B] = fa match {
       case Select(columns, next) => Select(columns, f(next))
       case From(tables, next) => From(tables, f(next) )
-      case FromQ(subQuery, next) => FromQ(subQuery, f(next))
+      case FromQ(subQuery, b, next) => FromQ(subQuery, b, f(next))
       case Where(logic, next) => Where(logic, f(next))
       case eq @ Equals(_, _, _) => eq.mapF(f) 
       case neq @ NotEqual(_, _, _) => neq.mapF(f) 
@@ -125,14 +125,17 @@ object FreeQuery {
     }
   }
 
-  def select(columns: List[SQLColumn]): Free[FreeQuery, Unit] =
-    Suspend(Select(columns, Return(())))
+  def select(columns: SQLColumn*): Free[FreeQuery, Unit] =
+    Suspend(Select(columns.toList, Return(())))
 
   def from(table: SQLTable): Free[FreeQuery, Unit] =
     Suspend(From(table, Return(())))
 
+  def from(subQuery: Free[FreeQuery, Unit]): Free[FreeQuery, Unit] =
+    Suspend(FromQ(subQuery, false, Return(())))
+
   def fromQ(subQuery: Free[FreeQuery,Unit]): Free[FreeQuery, Unit] = 
-    Suspend(FromQ(subQuery, Return(())))
+    Suspend(FromQ(subQuery, true, Return(())))
  
   def done: Free[FreeQuery, Unit] = 
     Return(Done)
@@ -176,7 +179,8 @@ object FreeQuery {
           case Some(as) => "FROM %s AS %s".format(table.name, as)
         }
         sqlInterpreter(a, statements ::: sqlString :: Nil)
-      case FromQ(subquery, a) => sqlInterpreter(a, statements ::: "from ( %s )".format(sqlInterpreter(subquery,Nil)) :: Nil)
+      case FromQ(subquery, false, a) => sqlInterpreter(a, statements ::: "from %s ".format(sqlInterpreter(subquery,Nil)) :: Nil)
+      case FromQ(subquery, true, a) => sqlInterpreter(a, statements ::: "from ( %s )".format(sqlInterpreter(subquery,Nil)) :: Nil)
       case Where(logicQuery, a) => 
         val whereStatement: String = "WHERE ( %s )".format(sqlInterpreter(logicQuery,Nil))
         sqlInterpreter(a, statements ::: whereStatement :: Nil)
@@ -220,7 +224,7 @@ object FreeQuery {
     case -\/(freeValue) => freeValue match {
       case Select(columns, a) => sqlPrepared(a, state)
       case From(table, a) => sqlPrepared(a, state)
-      case FromQ(subQuery, a) => 
+      case FromQ(subQuery, _, a) => 
         val newState: State[PState, Unit] = sqlPrepared(subQuery, state)
         sqlPrepared(a, newState)
       case Where(logic, a) => 
@@ -258,7 +262,7 @@ object FreeQuery {
 
   val sub: Free[FreeQuery, Unit] = 
     for {
-      _ <- select( List("XXXX","YYY"))
+      _ <- select( "XXXX","YYY")
       _ <- from("sub-table" as "s")
       _ <- where( "neat" in List(1,2,3,4) )
     } yield ()
@@ -267,13 +271,13 @@ object FreeQuery {
     for {
       t1 <- table("freeTable" as "f")
       column1 <- t1.column("free-column1")
-      y <- select(List(column1, "column1", "column2"))
+      y <- select(column1, "column1", "column2")
       _ <- from(t1)
       _ <- from("cool" as "c") 
       _ <- fromQ(sub)
       _ <- fromQ { 
         for {
-          _ <- select(List("column1","column2"))
+          _ <- select("column1","column2")
         } yield ()
       }
       _ <- fromQ { t1 innerJoin "table2" |*| column1 === "neat" }

@@ -39,22 +39,21 @@ object FreeQueryStringTest {
     for {
       t1 <- table("table1" as "t1")
       column1 <- t1.column("column1")
-      _ <- select(List(column1))
+      _ <- select(column1)
       _ <- from(t1)
     } yield ()
 
   val freeQuery1Alt: Free[FreeQuery, Unit] = 
     for {
-      _ <- select(List("t1.column1"))
+      _ <- select("t1.column1")
       _ <- from("table1 as t1")
     } yield ()
 
   val freeQueryString2: String = """
     select t1.column1, t2.column2
-    from (
+    from 
       table1 as t1
       inner join table2 as t2 on (t1.id = t2.id)
-    )
   """
 
   val freeQuery2: Free[FreeQuery, Unit] = 
@@ -65,8 +64,8 @@ object FreeQueryStringTest {
       column2 <- t2.column("column2")
       t1Id <- t1.column("id")
       t2Id <- t2.column("id")
-      _ <- select(List(column1, column2))
-      _ <- fromQ { t1 innerJoin t2 |*| t1Id === t2Id }
+      _ <- select(column1, column2)
+      _ <- from { t1 innerJoin t2 |*| t1Id === t2Id }
     } yield ()
 
   def cleanse(string: String): String = 
