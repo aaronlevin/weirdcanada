@@ -101,6 +101,9 @@ case object Done extends FreeQuery[Nothing]
 
 object FreeQuery {
 
+  import SQLColumn._
+  import SQLTable._
+
   implicit object queryFunctor extends Functor[FreeQuery] {
 
     def map[A, B](fa: FreeQuery[A])(f: A => B): FreeQuery[B] = fa match {
