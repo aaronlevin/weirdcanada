@@ -155,7 +155,7 @@ object FreeQuery {
   import SQLTable._
   import SQLColumn._
  
-  implicit class ConditionalSyntax(string: String) {
+  implicit class ConditionalStringSyntax(string: String) {
     def ===[A : JDBCValue](a: A): Free[FreeQuery, Unit] = 
       Suspend( Equals(string, a, Return(())))
     def =!=[A : JDBCValue](a: A): Free[FreeQuery, Unit] = 
@@ -166,6 +166,19 @@ object FreeQuery {
       Suspend( LessThan(string, a, Return(())))
     def in[A : JDBCValue](as: Iterable[A]): Free[FreeQuery, Unit] = 
       Suspend( In(string, as, Return(())))
+  }
+
+  implicit class ConditionalColumnSyntax(column: SQLColumn) {
+    def ===[A : JDBCValue](a: A): Free[FreeQuery, Unit] = 
+      Suspend( Equals(column, a, Return(())))
+    def =!=[A : JDBCValue](a: A): Free[FreeQuery, Unit] = 
+      Suspend( NotEqual(column, a, Return(())))
+    def <=[A : JDBCValue](a: A): Free[FreeQuery, Unit] = 
+      Suspend( LessThanOrEqual(column, a, Return(())))
+    def <[A : JDBCValue](a: A): Free[FreeQuery, Unit] = 
+      Suspend( LessThan(column, a, Return(())))
+    def in[A : JDBCValue](as: Iterable[A]): Free[FreeQuery, Unit] = 
+      Suspend( In(column, as, Return(())))
   }
 
   def sqlInterpreter[A](query: Free[FreeQuery,A], statements: List[String]): String = query.resume match {
@@ -184,12 +197,12 @@ object FreeQuery {
       case Where(logicQuery, a) => 
         val whereStatement: String = "WHERE ( %s )".format(sqlInterpreter(logicQuery,Nil))
         sqlInterpreter(a, statements ::: whereStatement :: Nil)
-      case Equals(column, _, a) => sqlInterpreter(a, statements ::: "%s = ?".format(column.name) :: Nil)
-      case NotEqual(column, _, a) => sqlInterpreter(a, statements ::: "%s <> ?".format(column.name) :: Nil)
-      case LessThanOrEqual(column, _, a) => sqlInterpreter(a, statements ::: "%s LessThanOrEqual ?".format(column.name) :: Nil)
-      case LessThan(column, _, a) => sqlInterpreter(a, statements ::: "%s < ?".format(column.name) :: Nil)
+      case Equals(column, _, a) => sqlInterpreter(a, statements ::: "%s = ?".format(column.render) :: Nil)
+      case NotEqual(column, _, a) => sqlInterpreter(a, statements ::: "%s <> ?".format(column.render) :: Nil)
+      case LessThanOrEqual(column, _, a) => sqlInterpreter(a, statements ::: "%s LessThanOrEqual ?".format(column.render) :: Nil)
+      case LessThan(column, _, a) => sqlInterpreter(a, statements ::: "%s < ?".format(column.render) :: Nil)
       case In(column, values, a) => 
-        val inString: String = "%s IN (%s)".format( column.name, values.map {_ => "?" }.mkString(",") )
+        val inString: String = "%s IN (%s)".format( column.render, values.map {_ => "?" }.mkString(",") )
         sqlInterpreter(a, statements ::: inString :: Nil)
       case And(cond1, cond2, a) => 
         val statement1: String = sqlInterpreter(cond1, Nil)

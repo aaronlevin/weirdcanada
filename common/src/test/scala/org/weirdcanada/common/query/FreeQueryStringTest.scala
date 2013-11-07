@@ -10,22 +10,22 @@ class FreeQueryStringTest extends Specification { def is = s2"""
 
   The FreeQuery string should
     equal to another string   $e1
+    equal when using alternate notation  $e2
 
   The second FreeQuery string should
-    equal to another string   $e2
+    equal to another string   $e3
+
+  The third FreeQuery string should
+    work with where clauses!  $e4
   """
 
-  import FreeQueryStringTest.{
-    freeQuery1, 
-    freeQuery2, 
-    freeQueryString1,
-    freeQueryString2,
-    cleanse
-  }
-  import FreeQuery._ //sqlInterpreter
+  import FreeQueryStringTest._
+  import FreeQuery._ 
 
   def e1 = cleanse(freeQueryString1) mustEqual cleanse(sqlInterpreter(freeQuery1, Nil))
-  def e2 = cleanse(freeQueryString2) mustEqual cleanse(sqlInterpreter(freeQuery2, Nil))
+  def e2 = cleanse(freeQueryString1) mustEqual cleanse(sqlInterpreter(freeQuery1Alt, Nil))
+  def e3 = cleanse(freeQueryString2) mustEqual cleanse(sqlInterpreter(freeQuery2, Nil))
+  def e4 = cleanse(freeQueryString3) mustEqual cleanse(sqlInterpreter(freeQuery3, Nil))
 
 }
 
@@ -35,6 +35,7 @@ object FreeQueryStringTest {
   import SQLTable._
 
   val freeQueryString1: String = """select t1.column1 from table1 as t1"""
+  
   val freeQuery1: Free[FreeQuery, Unit] = 
     for {
       t1 <- table("table1" as "t1")
@@ -66,6 +67,29 @@ object FreeQueryStringTest {
       t2Id <- t2.column("id")
       _ <- select(column1, column2)
       _ <- from { t1 innerJoin t2 |*| t1Id === t2Id }
+    } yield ()
+
+  val freeQueryString3: String = """
+    select t1.column1, t2.column2
+    from 
+      table1 as t1
+      inner join table2 as t2 on (t1.id = t2.id)
+    where (
+      t1.column1 = ?
+    )
+  """
+
+  val freeQuery3: Free[FreeQuery, Unit] = 
+    for { 
+      t1 <- table("table1" as "t1")
+      t2 <- table("table2" as "t2")
+      column1 <- t1.column("column1")
+      column2 <- t2.column("column2")
+      t1Id <- t1.column("id")
+      t2Id <- t2.column("id")
+      _ <- select(column1, column2)
+      _ <- from { t1 innerJoin t2 |*| t1Id === t2Id }
+      _ <- where( column1 === 5 )
     } yield ()
 
   def cleanse(string: String): String = 
