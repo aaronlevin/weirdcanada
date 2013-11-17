@@ -4,11 +4,10 @@ import scalaz.Free
 import scalaz.State
 
 import org.specs2._
-import org.specs2.mock.Mockito
 
 import java.sql.{DriverManager, Connection, PreparedStatement}
 
-class FreeQueryPreparedStatementTest extends Specification with Mockito { def is = s2"""
+class FreeQueryPreparedStatementTest extends Specification { def is = s2"""
 
   This is a specification to ensure that prepared statements are updated properly
 
