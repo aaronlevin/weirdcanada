@@ -10,7 +10,7 @@ import State.{get, init, modify, put, state}
 
 import scala.annotation.tailrec
 import language.implicitConversions
-import java.sql.{PreparedStatement, Types}
+import java.sql.{Connection, PreparedStatement, Types}
 
 /**
  * Goals: 
@@ -296,44 +296,6 @@ object FreeQuery {
       case Done => state
     }
     case \/-(endValue) => state
-  }
-
-
-  val sub: Free[FreeQuery, Unit] = 
-    for {
-      _ <- select( "XXXX","YYY")
-      _ <- from("sub-table" as "s")
-      _ <- where( "neat" in List(1,2,3,4) )
-    } yield ()
-
-  val tmp: Free[FreeQuery, Unit] =
-    for {
-      t1 <- table("freeTable" as "f")
-      column1 <- t1.column("free-column1")
-      y <- select(column1, "column1", "column2")
-      _ <- from(t1)
-      _ <- from("cool" as "c") 
-      _ <- fromQ(sub)
-      _ <- fromQ { 
-        for {
-          _ <- select("column1","column2")
-        } yield ()
-      }
-      _ <- fromQ { t1 innerJoin "table2" |*| column1 === "neat" }
-      _ <- where( "levin" === "cool" )
-      _ <- done
-    } yield ()
-
-}
-
-object QueryMain {
-
-  def main(args: Array[String]) {
-
-    import FreeQuery._
-
-    println("%s".format(sqlInterpreter(tmp,Nil)))
-
   }
 
 }
