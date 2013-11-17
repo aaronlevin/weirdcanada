@@ -48,11 +48,10 @@ class FreeQueryPreparedStatementTest extends Specification with Mockito { def is
   beforeRs.next()
   val before = beforeRs.getInt(1)
 
-  val ps1 = connection.prepareStatement(sqlInterpreter(freeQuery1, Nil))
-  val init: (PreparedStatement, Int) = (ps1, 1)
-  val initState = for { _ <- State.init[(PreparedStatement, Int)] } yield ()
-
-  sqlPrepared(freeQuery1, initState).run(init)._1._1.execute()
+  /**
+   * Execute update statement via freeQuery1
+   */
+  FreeQuery.execute(connection, freeQuery1)
 
   val afterRs = 
     connection
@@ -63,15 +62,11 @@ class FreeQueryPreparedStatementTest extends Specification with Mockito { def is
   val after = afterRs.getInt(1)
   
   /**
-   * Execute second query
+   * Execute second query using `executeQuery` helper method
    */
-  val ps2 = connection.prepareStatement(sqlInterpreter(freeQuery2, Nil))
-  val init2: (PreparedStatement, Int) = (ps2, 1)
 
-  val secondQueryRs = sqlPrepared(freeQuery2, initState).run(init2)._1._1.executeQuery()
-
-  secondQueryRs.next()
-  val secondQueryResult = secondQueryRs.getInt(1)
+  val secondQueryResult =
+    FreeQuery.executeQuery[Int](connection, freeQuery2) { _.getInt(1) }.head
 
   def e1 = before mustEqual 6
   def e2 = after mustEqual 5
@@ -101,7 +96,7 @@ object FreeQueryPreparedStatementTest {
       column1 <- t1.column("column1")
       _ <- select(column1)
       _ <- from(t1)
-      _ <- where { column1 in List(100,200,300,400,500,600,700) }
+      _ <- where { column1 in List(200,300,400,100,600,700) }
     } yield ()
 
 

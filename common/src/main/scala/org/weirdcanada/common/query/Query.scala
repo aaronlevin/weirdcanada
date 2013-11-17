@@ -9,8 +9,9 @@ import Free._
 import State.{get, init, modify, put, state}
 
 import scala.annotation.tailrec
+import scala.collection.mutable.ListBuffer
 import language.implicitConversions
-import java.sql.{Connection, PreparedStatement, Types}
+import java.sql.{Connection, PreparedStatement, ResultSet, Types}
 
 /**
  * Goals: 
@@ -296,6 +297,29 @@ object FreeQuery {
       case Done => state
     }
     case \/-(endValue) => state
+  }
+
+  def executeQuery[A](c: Connection, query: Free[FreeQuery, Unit])(f: ResultSet => A): List[A] = {
+    val ps = c.prepareStatement(sqlInterpreter(query, Nil))
+    val init: (PreparedStatement, Int) = (ps, 1)
+    val initState = for { _ <- State.init[(PreparedStatement, Int)] } yield ()
+
+    val resultSet = sqlPrepared(query, initState).run(init)._1._1.executeQuery()
+
+    val resultBuffer = new ListBuffer[A]
+
+    while(resultSet.next)
+      resultBuffer += f(resultSet)
+
+    resultBuffer.toList
+  }
+
+  def execute(c: Connection, query: Free[FreeQuery, Unit]): Boolean = {
+    val ps = c.prepareStatement(sqlInterpreter(query, Nil))
+    val init: (PreparedStatement, Int) = (ps, 1)
+    val initState = for { _ <- State.init[(PreparedStatement, Int)] } yield ()
+
+    sqlPrepared(query, initState).run(init)._1._1.execute()
   }
 
 }
