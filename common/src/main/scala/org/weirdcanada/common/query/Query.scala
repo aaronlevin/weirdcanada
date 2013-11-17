@@ -270,21 +270,11 @@ object FreeQuery {
             .toList
             .foldLeft(state) { (acc, cond) => sqlPrepared(cond, acc) }
         sqlPrepared(a, stateAction)
-      case eq @ Equals(_, value, a) => 
-        val newState: State[PState, Unit] = for { _ <- state; _ <- eq.set } yield ()
-        sqlPrepared(a, newState)
-      case neq @ NotEqual(_, value, a) => 
-        val newState: State[PState, Unit] = for { _ <- state; _ <- neq.set } yield ()
-        sqlPrepared(a, newState)
-      case lte @ LessThanOrEqual(_, value, a) => 
-        val newState: State[PState, Unit] = for { _ <- state; _ <- lte.set } yield ()
-        sqlPrepared(a, newState)
-      case lt @ LessThan(_, value, a) => 
-        val newState: State[PState, Unit] = for { _ <- state; _ <- lt.set } yield ()
-        sqlPrepared(a, newState)
-      case in @ In(_, values, a) => 
-        val newState: State[PState, Unit] = for { _ <- state; _ <- in.set } yield ()
-        sqlPrepared(a, newState)
+      case eq @ Equals(_, _, a) => sqlPrepared(a, state.flatMap { _ => eq.set })
+      case neq @ NotEqual(_, value, a) => sqlPrepared(a, state.flatMap { _ => neq.set })
+      case lte @ LessThanOrEqual(_, value, a) => sqlPrepared(a, state.flatMap { _ => lte.set })
+      case lt @ LessThan(_, value, a) => sqlPrepared(a, state.flatMap { _ => lt.set })
+      case in @ In(_, values, a) => sqlPrepared(a, state.flatMap { _ => in.set })
       case And(cond1, cond2, a) => 
         val newState: State[PState, Unit] = for { _ <- sqlPrepared(cond1, state); _ <- sqlPrepared(cond2, state) } yield ()
         sqlPrepared(a, newState)
