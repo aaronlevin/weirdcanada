@@ -1,0 +1,697 @@
+header{
+	top:-90px;
+	&.active {
+		top: 0;
+	}
+	-webkit-transition: top 0.2s linear;
+	-moz-transition: top 0.2s linear;
+	transition: top 0.2s linear;
+	position:fixed;
+	width:100%;
+	z-index:100;
+	height:0; // allows the overlapped content to be clicked on
+	h1{
+		height:0; // allows the overlapped content to be clicked on
+		margin:0;
+		a{
+			margin:100px 0 0 13px;
+			display:block;
+			text-indent:-9999px;
+			background:$color-foreground-second;
+			float:left;
+			width:60px;
+			height:50px;
+			background-image:url(../images/logo.png);
+			background-position:50% 50%;
+			background-repeat:no-repeat;
+		}
+	}
+}
+nav{
+	width:100%;
+	position:absolute;
+	top:0px;
+	background:$color-foreground-second;
+	color:$color-foreground-sixth;
+	font-family: Gibson-Light;
+	font-weight: normal;
+	font-style: normal;
+	letter-spacing:1px;
+	padding-right: 37px; //This and the margin below need to be used to undo the bootstrap weirdness in the block stretching from edge to edge in the window.
+	margin: 0 !important;
+
+	.languageToggle{
+		@include make-md-column(1, $gutter: $grid-gutter-width);
+		position:absolute;
+		top:0;
+		right:0;
+		background:$color-foreground-third;
+		color:$color-foreground-fifth;
+		font-size:0.7em;
+		display:block;
+		text-align:center;
+		&:hover{
+			text-decoration:none;
+			background:$color-foreground-fifth;
+			color:$color-foreground-third;
+			cursor:pointer;
+		}
+	}
+	.container{
+		height:100px;
+	}
+	h2, ul, div.searchBox{
+		bottom:15%;
+		padding-left: 0;
+	}
+	h2{
+		font-size:0.8em;
+		font-weight:100;
+		margin:0 0 0.5em 0;
+		font-style: italic;
+		strong{
+			font-size:1.2em;
+			display:block;
+			font-weight:900;
+			letter-spacing:1px;
+			text-transform:uppercase;
+			font-style: normal;
+		}
+		a, a:visited, a:hover, a:focus {
+			color:$color-foreground-sixth;
+		}
+		@include breakpoint($bkpt-992){
+			@include make-md-column(3, $gutter: $grid-gutter-width);
+			position:absolute;
+		}
+	}
+	div{
+		position:relative;
+	}
+	ul{
+		text-transform:uppercase;
+		margin-bottom:0;
+		padding:0;
+		&.nav-tabs{
+			border:none;
+			padding-top:40px;
+		}
+		li{
+			@include make-md-column(4, $gutter: $grid-gutter-width);
+			font-size:0.8em;
+			list-style:none;
+			display:inline-block;
+			a, a:visited{
+				color:$color-foreground-sixth;
+				position:relative;
+				padding-left:1em;
+				&:hover, &.active{
+					&:before{
+						content:"";
+						width:0.75em;
+						height:0.75em;
+						background:$color-foreground-third;
+						display:inline-block;
+						position:absolute;
+						left:0em;
+						top:0.025em;
+					}
+				}
+			}
+		}
+		@include breakpoint($bkpt-992){
+			margin-left: -12.5px;
+			margin-right: -12.5px;
+			text-transform:uppercase;
+			position:absolute !important;
+		}
+	}
+	footer &{
+		border-top:2px solid $color-foreground-second;
+		#post &{
+			border:none;
+		}
+		background-color:$color-foreground-sixth;
+		color:$color-foreground-third;
+		position:relative;
+		border-bottom: 5px solid $color-foreground-second;
+		h2, ul{
+			bottom:20%;
+		}
+		li{
+			a, a:visited{
+				color:$color-foreground-third;
+			}
+		}
+		h2{
+			a, a:visited, a:hover, a:focus {
+				color:$color-foreground-third;
+			}
+		}
+		.languageToggle{
+			position:absolute;
+			top:auto;
+			bottom:0;
+			right:0;
+			background:$color-foreground-fifth;
+			color:$color-foreground-third;
+			&:hover{
+				text-decoration:none;
+				background:$color-foreground-third;
+				color:$color-foreground-fifth;
+			}
+		}
+	}
+}
+
+
+
+
+#index, #grids{ //styling for the lists of articles
+	.articleList{
+		article{ //makes the text a bit smaller for the big lists of content
+			font-size:0.800em;
+			margin-bottom:2em;
+		}
+		&.features{
+			@include breakpoint($bkpt-992){
+				article{
+					position:relative;
+					overflow:hidden;
+				}
+				.postMedia{
+					overflow:hidden;
+					height:50%;
+					position:static;
+					img{
+						margin:-25% 0;
+						width:100%;
+						height:auto;
+					}
+				}
+			}
+		}
+		&.features.inner{ //using inner pulls the title in over the article image, changes the color of the text so it's legible, etc.
+			@include breakpoint($bkpt-992){
+				article{
+					color:$color-background;
+					height:252px;
+					width:100%;
+					div{
+						font-size:1.1em;
+						position:absolute;
+						bottom:1em;
+						right:1em;
+					}
+				}
+				.articleHead{
+					text-align:right;
+					.postType:before{
+						background:$color-background;
+					}
+				}
+				h1, h2, h3, a, a:visited{
+					color:$color-background;
+					text-shadow: 0px 0px 6px $color-foreground; 
+				}
+				h3, p{
+					display:none;
+				}
+				.postMedia{
+					overflow:hidden;
+					height:100%;
+					position:static;
+					img{
+						margin:-25% 0;
+						width:100%;
+						height:auto;
+					}
+				}
+			}
+			@include breakpoint($bkpt-1200){
+				article{
+					height:318px;
+					div{
+						font-size:1.3em;
+					}
+				}	
+			}
+		}
+		&.features.gridBlock{
+			article{
+				position:relative;
+			}
+			h1, h2, h3, a, a:visited{
+				color:$color-background;
+				text-shadow: 0px 0px 6px $color-foreground; 
+				text-align:right;
+			}
+			.postMedia{
+				height:100%;
+				img{
+					margin:0;
+					width:100%;
+					height:auto;
+				}
+			}
+		}
+		&.gridBlock{
+			article{
+				@media (min-width: 992px){
+					min-height:430px;
+					p{
+						display:none;
+					}
+				}
+			}
+			.postMedia{
+				height:auto;
+				@media (min-width: 992px){
+					height:236px;
+				}
+				@media (min-width: 1200px){
+					height:301px;
+				}
+				img{
+					margin:0;
+					width:100%;
+					height:auto;
+					@media (min-width: 1200px){
+						width:auto;
+						height:100%;
+					}
+				}
+			}
+		}
+	}
+}
+section{
+	margin-top:7em;
+	&.featurePost{
+		margin-top:0.5em;
+	}
+	h1{
+		font-size:1.2em;
+		font-weight: 600;
+		color:$color-foreground-second;
+		clear:left;
+	}
+	h2{
+		font-size: 1em;
+	}
+	article{
+		h1{
+			clear:none;
+			line-height:1.375em;
+			margin:0 0 0.1em 0;
+		}
+		h2{ 
+			font-weight: 500;
+			color:$color-foreground-third;
+			margin:0 0 0.125em 0;
+		}
+		h3{
+			font-size:0.9em;
+			font-weight:100;
+			color:$color-foreground-fourth;
+			margin:0.3em 0;
+		}
+		aside.pull{
+			@include pullBlock(9,3);
+			font-size:1.5em;
+			font-weight:100;
+			margin-bottom:0.5em;
+			line-height:1.1em;
+		}
+		aside.photoBlock{
+			@include pullBlock(10,2);
+			img{
+				width:100%;
+			}
+			margin-bottom:0.5em;
+			padding:1em 0;
+			.caption{
+				margin-top:1em;
+				font-size:0.7em;
+				padding-top:0.25em;
+				color:$color-foreground-fifth;
+				border-top:1px solid $color-foreground-fifth;
+			}
+		}
+	}
+	.postMedia{
+		overflow: hidden;
+		img{
+			width:100%;
+			height:auto;
+		}
+		.postImageThumbs{
+			margin-top:0.5em;
+				a{
+					@include make-md-column(3, $gutter: $grid-gutter-width); // This makes no sense... 
+					margin-bottom:0.5em;
+					img{
+						width:100%;
+						height:auto;
+					}
+				}
+		}
+		.postMediaPlayer{ //values for mockup purposes only
+			clear:left;
+			width:100%;
+			color:$color-foreground-third;
+			background:$color-foreground-sixth;
+			display:block;
+			padding:1em;
+		}
+	}
+}
+section#post{
+	&.topPost{
+		.postMedia{
+			margin-bottom:1em;
+		}
+	}
+	&.featurePost{
+		.postContent{
+			margin-top:-7em;
+			.articleHead{
+				& > h1, & > h2{
+					color:$color-background;
+					font-size:1.750em;
+					margin-bottom:0;
+					text-shadow: 0px 0px 6px $color-foreground;
+				}
+				h2{
+					font-size: 1em;
+				}
+				margin-bottom:3em;
+			}
+		}
+		.postType{
+			font-size:1em;
+			text-shadow: 0px 0px 6px $color-foreground;
+			a, a:visited{
+				color:$color-background;
+			}
+			&:before{
+				background:$color-background;
+			}
+		}
+		.postMeta{
+			margin-top:2em;
+		}
+	}
+	.postLinks{ //tags, details, etc for reviews
+		margin-top:2em;
+		padding-top:1em;
+		border-top:1px solid $color-foreground-fifth;
+		h2, p, ul{
+			font-size:0.6em;
+			color:$color-foreground-fourth;
+		}
+		h2{
+			text-transform:uppercase;
+			margin:0;
+			&:before{
+				content:"";
+				width:0.75em;
+				height:0.75em;
+				background:$color-foreground-fourth;
+				display:inline-block;
+				margin-right:0.25em;
+				border-radius:0.8em;
+			}
+		}
+		ul{
+			padding:0;
+			li{
+				list-style:none;
+			}
+		}
+	}
+	.postMeta{ //sidebar stuff for posts
+		font-size:0.7em;
+		color:$color-foreground-third;
+		.postCredits{
+			border-bottom:1px solid $color-foreground-fifth;
+			margin-bottom:1em;
+		}
+		.socialBlock{
+			border-bottom:1px solid $color-foreground-fifth;
+			margin-bottom:1.25em;
+			ul{
+				padding:0;
+			}
+			li{
+				list-style:none;
+				a, a:visited{
+					opacity:0.5;
+					transition: opacity 0.3s ease-out;
+					-moz-transition: opacity 0.3s ease-out; /* FF3.7+ */
+					-o-transition: opacity 0.3s ease-out; /* Opera 10.5 */
+					-webkit-transition: opacity 0.3s ease-out; /* Saf3.2+, Chrome */
+				}
+				a:hover{
+					opacity:1;
+					transition: opacity 0.3s ease-out;
+					-moz-transition: opacity 0.3s ease-out; /* FF3.7+ */
+					-o-transition: opacity 0.3s ease-out; /* Opera 10.5 */
+					-webkit-transition: opacity 0.3s ease-out; /* Saf3.2+, Chrome */
+				}
+				& a:before{
+					content:"";
+					width:1.5em;
+					height:0.75em;
+					background:$color-foreground-fourth;
+					display:inline-block;
+					margin-right:0.25em;
+					border-radius:0.8em;
+				}
+				&.socialTw a:before{
+					background:#009fd0;
+				}
+				&.socialFb a:before{
+					background:#4b67a1;
+				}
+			}
+		}
+		.comments{
+			h2{
+				text-transform:uppercase;
+				color:$color-foreground-fourth;
+				font-size:0.857em;
+				line-height:1em;
+				margin-bottom:0.5em;
+				&:before{
+					content:"2";
+					color:$color-background;
+					width:1em;
+					height:1em;
+					background:$color-foreground-fourth;
+					display:inline-block;
+					margin-right:0.25em;
+					padding:0.125em 0 0 0;
+					line-height:1.15em;
+					text-align:center;
+				}
+			}
+			.commentList{
+				margin-bottom:0.5em;
+			}
+			.commentReply{
+				text-align:right;
+			}
+			.commentBlock{
+				padding:0.75em 0;
+				border-bottom:1px solid $color-foreground-sixth;
+				.commentAuthor{
+				
+				}
+				.commentNote{
+					margin-left:0.5em;
+					p{
+						margin-bottom:0.125;
+						color:$color-foreground-third;
+					}
+				}
+				.commentMeta{
+					p{
+						font-size:0.7em;
+						margin:0;
+						text-align:right;
+					}
+				}
+			}
+		}
+	}
+}
+.postFooter{ //This is the footer specifically for suggested links, etc. 
+	border-top:2px solid $color-foreground-second;
+	background-color:$color-foreground-sixth;
+	margin:2em 0 0 0;
+	padding:1.5em 0 0 0;
+	h2.col-md-2{
+		font-size:1em;
+		font-family: Gibson-Light;
+		font-weight: normal;
+		font-style: normal;
+		letter-spacing:1px;
+		text-transform:uppercase;
+		margin:0;
+	}
+	.relatedBig{	
+		font-size:0.800em;
+		h1{
+			font-size:1em;
+			margin:0;
+		}
+		h2{
+			font-size:0.950em;
+			margin:0;
+		}
+		p{
+			font-size:0.9em;
+			margin:0;
+		}
+	}
+	ul{
+		margin:0;
+		li{
+			font-size:0.7em;
+			list-style:none;
+			margin:0;
+		}
+	}
+	&:after{ //little horizontal divider between post footer and site footer
+		content:"";
+		height:1px;
+		background-color:$color-foreground-fourth;
+		width:33%;
+		margin:2em auto 0 auto;
+		display:block;
+	}
+}
+	
+// General styles 
+
+.postType{ //Add this styling to put the little grey box before a post type category (Music, Art, film, etc)
+	text-transform:uppercase;
+	font-size:0.6em;
+	margin:0;
+	a, a:visited{
+		color:$color-foreground-third;
+		&:hover{
+			text-decoration:none;
+		}
+	}
+	&:before{
+		content:"";
+		width:0.75em;
+		height:0.75em;
+		background:$color-foreground-third;
+		display:inline-block;
+		margin-right:0.25em;
+	}
+}
+
+#search{ // Styling for Search page
+	section{
+		margin-top:6em;
+	}
+}
+.searchBox{ // General search box styling
+	position:absolute;
+	padding-left:1.75em;
+	form{
+		font-size:0.8em;
+		display:inline-block;
+		margin-left:0.125em;
+	}
+	label{
+		display:none;
+	}
+	input{
+		background-color:transparent;
+		display:block;
+		border:none;
+		border-bottom:1px solid $color-foreground;
+		color:$color-foreground-fourth;
+		&:focus{
+			outline:none;
+			border-bottom:1px solid $color-foreground-fifth;
+		}
+		section &{
+			line-height:1.167em;
+			border-bottom:1px solid $color-foreground-fifth;
+		}
+	}
+}
+.paginationBlock{
+	#post &{
+		display:none;
+	}
+	p{
+		@include make-md-column(3, $gutter: $grid-gutter-width);
+		display:inline-block;
+		text-transform:uppercase;
+		font-size:0.8em;
+		a{
+			color:$color-foreground-third;
+		}
+		&.older{
+			float:left;
+			a{
+				padding-left:1.25em;
+				display:inline-block;
+				position:relative;
+				&:hover:before{
+					left:0;
+					transition: left 0.3s ease-out;
+					-moz-transition: left 0.3s ease-out; /* FF3.7+ */
+					-o-transition: left 0.3s ease-out; /* Opera 10.5 */
+					-webkit-transition: left 0.3s ease-out; /* Saf3.2+, Chrome */
+				}
+				&:before{
+					content:"<";
+					display:inline-block;
+					position:absolute;
+					left:0.5em;
+					transition: left 0.3s ease-out;
+					-moz-transition: left 0.3s ease-out; /* FF3.7+ */
+					-o-transition: left 0.3s ease-out; /* Opera 10.5 */
+					-webkit-transition: left 0.3s ease-out; /* Saf3.2+, Chrome */
+				}
+			}
+		}
+		&.newer{
+			float:right;
+			text-align:right;
+			a{
+				padding-right:1.25em;
+				display:inline-block;
+				position:relative;
+				&:hover:before{
+					right:0;
+					transition: right 0.3s ease-out;
+					-moz-transition: right 0.3s ease-out; /* FF3.7+ */
+					-o-transition: right 0.3s ease-out; /* Opera 10.5 */
+					-webkit-transition: right 0.3s ease-out; /* Saf3.2+, Chrome */
+				}
+				&:before{
+					content:">";
+					display:inline-block;
+					position:absolute;
+					right:0.5em;
+					transition: right 0.3s ease-out;
+					-moz-transition: right 0.3s ease-out; /* FF3.7+ */
+					-o-transition: right 0.3s ease-out; /* Opera 10.5 */
+					-webkit-transition: right 0.3s ease-out; /* Saf3.2+, Chrome */
+				}
+			}
+		}
+	}
+}
+
+
+

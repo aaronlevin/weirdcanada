@@ -1,0 +1,42 @@
+// Setting the site up for success by undoing default stuff
+
+a, a:visited{
+	color:$color-foreground;
+}
+a:hover{
+	text-decoration:none;
+}
+
+
+::-webkit-input-placeholder { /* WebKit browsers */
+	text-transform:uppercase;
+}
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+	text-transform:uppercase;
+}
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+	text-transform:uppercase;
+}
+:-ms-input-placeholder { /* Internet Explorer 10+ */
+	text-transform:uppercase;
+}
+
+
+
+// media query breakpoints
+$bkpt-smartphone: 320px 480px;
+$bkpt-iphone:320x;
+$bkpt-440:440px;
+$bkpt-480:480px;
+$bkpt-iphone-retina:'width' 320px, 'device-pixel-ratio' 2;
+$bkpt-iphone-5:'width' 320px, 'device-pixel-ratio' 2;
+$bkpt-ipad:768px 1024px;
+$bkpt-ipad-tall:1024px 768px;
+$bkpt-sub-768:767px max-width;
+$bkpt-768:768px, 'no-query' true;
+$bkpt-992:992px, 'no-query' true;
+$bkpt-1200:1200px, 'no-query' true;
+$bkpt-1024:1025px, 'no-query' true;
+$bkpt-1100:1100px, 'no-query' true;
+$bkpt-1300:1300px, 'no-query' false;
+$bkpt-1600:1600px, 'no-query' false;
