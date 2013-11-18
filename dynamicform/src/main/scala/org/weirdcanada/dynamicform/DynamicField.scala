@@ -91,7 +91,7 @@ object BasicField {
   import DynamicField.{makeInput}
 
   def defaultTransformer(name: String, updateFunc: String => JsCmd, value: => String): NodeSeq => NodeSeq = 
-    makeInput(None, name) #> SHtml.ajaxText("", updateFunc, "placeholder" -> name, "value" -> value) 
+    makeInput(None, name) #> SHtml.ajaxText("", updateFunc, "placeholder" -> name, "value" -> value, "class" -> "form-control") 
 
 }
 

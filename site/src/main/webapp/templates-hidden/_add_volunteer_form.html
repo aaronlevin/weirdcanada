@@ -6,119 +6,96 @@
         format: 'yyyy-mm-dd',
         todayBtn: 'linked',
         }).on('changeDate', function(ev) {
-          $('#birthday').blur();
+        $('#birthday').blur();
       });
     });
   </script>
 
   <h3>Volunteer #<span name="volunteer-number">1</span></h3>
 
-  <div class="control-group" name="volunteer-firstname-field">
-    <div class="controls">
+  <form role="form">
+
+    <div class="form-group" name="volunteer-firstname-field">
       <input name="volunteer-firstname-input">
     </div>
-  </div>
-  
-  <div class="control-group" name="volunteer-lastname-field">
-    <div class="controls">
+
+    <div class="form-group" name="volunteer-lastname-field">
       <input name="volunteer-lastname-input">
     </div>
-  </div>
 
- <div class="control-group" name="volunteer-email-field">
-    <div class="controls">
+    <div class="form-group" name="volunteer-email-field">
       <input name="volunteer-email-input">
     </div>
-  </div>
-  
 
-  <div class="control-group" name="volunteer-phone-field">
-    <div class="controls">
+
+    <div class="form-group" name="volunteer-phone-field">
       <input name="volunteer-phone-input">
     </div>
-  </div>
 
-  <div class="control-group" name="volunteer-city-field">
-    <div class="controls">
+    <div class="form-group" name="volunteer-city-field">
       <input name="volunteer-city-input">
     </div>
-  </div>
 
-  <div class="control-group" name="volunteer-province-field">
-    <div class="controls">
+    <div class="form-group" name="volunteer-province-field">
       <input name="volunteer-province-input">
     </div>
-  </div>
 
-  <!-- interests -->
-  <div class="well">
+    <!-- interests -->
+    <div class="well">
 
-    <h3>Interests</h3>
+      <h3>Interests</h3>
 
-
-    <div name="add-volunteer-interests">
-      <div class="control-group" name="volunteer-interest-interest">
-        <div class="controls">
+      <div name="add-volunteer-interests">
+        <div class="form-group" name="volunteer-interest-interest">
           <input name="volunteer-interest-interest-input">
         </div>
+
+        <p>[ <span class="add-on" style="cursor:pointer;" name="volunteer-interests-add">+</span> | <span class="add-on" style="cursor:pointer;" name="volunteer-interests-remove">-</span> ]</p>
+
       </div>
 
-    <p>[ <span class="add-on" style="cursor:pointer;" name="volunteer-interests-add">+</span> | <span class="add-on" style="cursor:pointer;" name="volunteer-interests-remove">-</span> ]</p>
+
+      <div id="volunteer-interests-elements"></div>
 
     </div>
 
+    <!-- /interests -->
 
-    <div id="volunteer-interests-elements"></div>
-
-  </div>
-
-  <!-- /interests -->
-
-  <div class="control-group" name="volunteer-availability-field">
-    <div class="controls">
+    <div class="form-group" name="volunteer-availability-field">
       <input name="volunteer-availability-input">
     </div>
-  </div>
 
-  <div class="control-group" name="volunteer-whyworkwithus-field">
-    <div class="controls">
+    <div class="form-group" name="volunteer-whyworkwithus-field">
       <input name="volunteer-whyworkwithus-input">
     </div>
-  </div>
 
-  <div class="control-group" name="volunteer-gender-field">
-    <div class="controls">
+    <div class="form-group" name="volunteer-gender-field">
       <input name="volunteer-gender-input">
     </div>
-  </div>
 
-  <div class="control-group" name="volunteer-address-field">
-    <div class="controls">
+    <div class="form-group" name="volunteer-address-field">
       <input name="volunteer-address-input">
     </div>
-  </div>
 
-  <div class="control-group" name="volunteer-birthday-field">
-    <div class="controls input-append date" data-date="2013-07-01" data-date-format="yyyy-mm-dd" >
-      <label>Birthday</label>
-      <input name="volunteer-birthday-input">
+    <div class="form-group" name="volunteer-birthday-field">
+      <div class="form-control input-append date" data-date="2013-07-01" data-date-format="yyyy-mm-dd" >
+        <label>Birthday</label>
+        <input name="volunteer-birthday-input">
+      </div>
     </div>
-  </div>
 
-  <!-- volunteer bio -->
-  <div class="well">
-    <span data-lift="embed?what=_add_volunteer_bio_form"></span>
-  </div>
+    <!-- volunteer bio -->
+    <div class="well">
+      <span data-lift="embed?what=_add_volunteer_bio_form"></span>
+    </div>
 
-  <div name="action">
-    <div class="control-group">
-      <div class="controls">
+    <div name="action">
+      <div class="form-group">
         <input name="process-volunteer">
       </div>
     </div>
+
+
+
+
   </div>
-
-
-
-
-</div>

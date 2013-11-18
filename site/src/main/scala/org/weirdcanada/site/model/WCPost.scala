@@ -2,6 +2,7 @@ package org.weirdcanada.site.model
 
 // scala
 import scala.xml.{Elem, NodeSeq, Text, Unparsed}
+import scala.annotation.tailrec
 
 // weirdcanada
 import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasEmpty, HasFields, ManyRecordField, RecordField}
@@ -77,12 +78,19 @@ object Post {
   private val postPublishersLens = postReleaseLens >=> Release.releasePublishersLens
   private val postTitleLens = postReleaseLens >=> Release.releaseTitleLens
 
+  @tailrec
+  private def insertSlashes(nodes: List[NodeSeq], previous: NodeSeq = NodeSeq.Empty): NodeSeq = nodes match {
+    case Nil => previous
+    case head :: Nil =>  previous ++ head
+    case node :: moreNodes => insertSlashes(moreNodes, previous ++ node ++ Text(" // ") )
+  }
+
   def renderAsXml(post: Post): NodeSeq = {
     val artistsString = postArtistsLens.get(post).map { Artist.artistNameLens.get }.mkString(" // ")
     val cities = postArtistsLens.get(post).map { Artist.artistCityLens.get }
     val provinces = postArtistsLens.get(post).map { Artist.artistProvinceLens.get }
     val geoString = (cities zip provinces).map { case (c,p) => "%s, %s".format(c,p) }.mkString(" // ")
-    val publishersXml = postPublishersLens.get(post).map { Publisher.renderAsXml }
+    val publishersXml = insertSlashes( postPublishersLens.get(post).map { Publisher.renderAsXml } )
     val webSounds = 
       postArtistsLens
         .get(post)

@@ -57,12 +57,19 @@ case class Post(
 
   import SupportLenses._
 
+  @tailrec
+  private def insertSlashes(nodes: List[NodeSeq], previous: NodeSeq = NodeSeq.Empty): NodeSeq = nodes match {
+    case Nil => previous
+    case node :: moreNodes => insertSlashes(moreNodes, node ++ Text(" // ") ++ previous)
+  }
+
+
   def renderAsXml = {
     val artistsString = postArtistsLens.get(this).map { artistNameLens.get }.mkString(" // ")
     val cities = postArtistsLens.get(this).map { artistCityLens.get }
     val provinces = postArtistsLens.get(this).map { artistProvinceLens.get }
     val geoString = (cities zip provinces).map { case (c,p) => "%s, %s".format(c,p) }.mkString(" // ")
-    val publishersXml = postPublishersLens.get(this).map { _.renderAsXml }
+    val publishersXml = insertSlashes( postPublishersLens.get(this).map { _.renderAsXml } )
     val webSounds = 
       postArtistsLens
         .get(this)
