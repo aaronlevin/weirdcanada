@@ -49,7 +49,7 @@ class Boot extends Bootable {
     def sitemap = SiteMap(
       Menu.i("Home") / "index", // >> User.AddUserMenusAfter, // the simple way to declare a menu
 
-      Menu.i("Add") / "add" >> If( () => User.loggedIn_? , "dude, login, yo!"), 
+      Menu.i("Add") / "add", //>> If( () => User.loggedIn_? , "dude, login, yo!"), 
       Menu.i("Add Volunteer") / "add-volunteer" >> If( () => User.loggedIn_? , "dude, login, yo!"),
       Menu.i("Search Volunteers") / "search-volunteers" >> If( () => User.loggedIn_? , "dude, login, yo!"),
       Menu.i("Volunteer Bios") / "volunteer-bios" >> If( () => User.loggedIn_?, "dude, login, yo!")

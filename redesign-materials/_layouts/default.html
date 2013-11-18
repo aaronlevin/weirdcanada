@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title>{{ site.name }} - {{ page.title }}</title>
+		<meta name="viewport" content="width=device-width">
+		
+		<link rel="stylesheet" href="css/style.css">
+		<script src="bower_components/jquery/jquery.js"></script>
+		<script src="js/site.js"></script>
+		
+		<!--
+		/* @license
+		 * MyFonts Webfont Build ID 2659789, 2013-10-07T16:02:14-0400
+		 * 
+		 * The fonts listed in this notice are subject to the End User License
+		 * Agreement(s) entered into by the website owner. All other parties are 
+		 * explicitly restricted from using the Licensed Webfonts(s).
+		 * 
+		 * You may obtain a valid license at the URLs below.
+		 * 
+		 * Webfont: Gibson Light by Canada Type
+		 * URL: http://www.myfonts.com/fonts/canadatype/gibson/light/
+		 * 
+		 * Webfont: Gibson Light Italic by Canada Type
+		 * URL: http://www.myfonts.com/fonts/canadatype/gibson/light-italic/
+		 * 
+		 * Webfont: Gibson Bold Italic by Canada Type
+		 * URL: http://www.myfonts.com/fonts/canadatype/gibson/bold-italic/
+		 * 
+		 * Webfont: Gibson Semi Bold Italic by Canada Type
+		 * URL: http://www.myfonts.com/fonts/canadatype/gibson/semi-bold-italic/
+		 * 
+		 * Webfont: Gibson Bold by Canada Type
+		 * URL: http://www.myfonts.com/fonts/canadatype/gibson/bold/
+		 * 
+		 * Webfont: Gibson by Canada Type
+		 * URL: http://www.myfonts.com/fonts/canadatype/gibson/regular/
+		 * 
+		 * Webfont: Gibson Semi Bold by Canada Type
+		 * URL: http://www.myfonts.com/fonts/canadatype/gibson/semi-bold/
+		 * 
+		 * Webfont: Gibson Italic by Canada Type
+		 * URL: http://www.myfonts.com/fonts/canadatype/gibson/italic/
+		 * 
+		 * 
+		 * License: http://www.myfonts.com/viewlicense?type=web&buildid=2659789
+		 * Licensed pageviews: 20,000
+		 * Webfonts copyright: Copyright &#x00A9; 2011 Rod McDonald. Published by Canada Type.
+		 * All rights reserved.
+		 * 
+		 * © 2013 MyFonts Inc
+		*/
+		-->
+	</head>
+	<body id="{{ page.id }}" class="{{ page.class }}">
+		<a class="sr-only" href="#content">Skip navigation</a>
+		<header>
+		  <h1 class="title"><a href="/" class="scol-md-1">{{ site.name }}</a></h1>
+			{% include nav.html %}
+		</header>
+		<div class="content">
+			{{ content }}
+			<div class="paginationBlock container">
+				<p class="older"><a href="#">Older Posts</a></p>
+				<p class="newer"><a href="#">Newer Posts</a></p>
+			</div>
+		</div>
+		<footer class="">
+			{% include nav.html %}
+		</footer>
+    </body>
+</html>

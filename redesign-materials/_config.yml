@@ -1,0 +1,8 @@
+name: Weird Canada
+tagline: We are Northernly
+pygments: true
+permalink: /:year/:month/:day/:title
+paginate: 10
+excerpt_separator: </p>
+
+exclude: [sass, coffee, config.rb, info.markdown, renamed_posts]

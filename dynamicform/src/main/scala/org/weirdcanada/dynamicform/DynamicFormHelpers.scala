@@ -89,7 +89,7 @@ trait DynamicFormHelpers {
 object DynamicFormFieldRenderHelpers {
 
   def textAreaRender[A](accessor: A => String)(selector: String)(filler: String)(current: A)(updateFunc: String => JsCmd): NodeSeq => NodeSeq =
-    selector #> SHtml.ajaxTextarea(accessor(current), updateFunc, "placeholder" -> filler)
+    selector #> SHtml.ajaxTextarea(accessor(current), updateFunc, "placeholder" -> filler, "class" -> "form-control")
 
   def selectRender[A](accessor: A => String)(selector: String)(selectOptions: Seq[(String,String)])(current: A)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = {
     val currentValue: Box[String] = accessor(current) match {
