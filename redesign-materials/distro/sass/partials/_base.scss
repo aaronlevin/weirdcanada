@@ -1,0 +1,22 @@
+// Setting the site up for success by undoing default stuff
+
+a, a:visited{
+	color:$color-foreground;
+}
+a:hover{
+	text-decoration:none;
+}
+
+
+::-webkit-input-placeholder { /* WebKit browsers */
+	text-transform:uppercase;
+}
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+	text-transform:uppercase;
+}
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+	text-transform:uppercase;
+}
+:-ms-input-placeholder { /* Internet Explorer 10+ */
+	text-transform:uppercase;
+}

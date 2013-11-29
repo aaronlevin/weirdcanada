@@ -1,0 +1,12 @@
+@mixin widthBlock($grid) {
+	width: percentage(($grid / $grid-columns));
+	padding-left:($grid-gutter-width / 2);
+}
+
+@mixin pullBlock($quoteWidth,$gridPull) {
+	$quoteWidth : $quoteWidth*2;
+	$gridPull : $gridPull*2;
+	width: percentage(($quoteWidth / $grid-columns));
+//	padding-left:($grid-gutter-width / 2);
+	margin-left:percentage((($gridPull / $grid-columns)*-1)) ;
+}
