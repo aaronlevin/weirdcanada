@@ -19,7 +19,7 @@ class LoginPage(service: Service) extends DistroPage {
     //"#login-form" #> SHtml.ajaxForm(onSubmit, body) &
     "@email-address" #> FocusOnLoad(SHtml.email(emailAddress, (newVal: String) => emailAddress = newVal, "type" -> "email", "class" -> "form-control")) &
     "@password" #> SHtml.password(password, password = _) &
-    "#login" #> SHtml.submit("Login", () => login)
+    "@login" #> SHtml.submit("Login", () => login)
     
   def login {
     Account.findByEmailAddress(emailAddress)
