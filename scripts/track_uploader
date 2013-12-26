@@ -29,21 +29,22 @@ do
 		
 		echo ">> ... uploading $MP3_FILE"
 
-		curl -T "$MP3_FILE" "$WEIRD_FTP""/binary/" --user "$WEIRD_USER":"$WEIRD_PASS"
-		
+    s3cmd put --acl-public --guess-mime-type $MP3_FILE "s3://wc-tracks/$MP3_FILE"
+
 		echo ">> ... uploading $OGG_FILE"
 
-		curl -T "$OGG_FILE" "$WEIRD_FTP""/binary/" --user "$WEIRD_USER":"$WEIRD_PASS"
+    s3cmd put --acl-public --guess-mime-type $OGG_FILE "s3://wc-tracks/$OGG_FILE"
 
 		echo "
 <audio controls=\"controls\" class=\"audioTrack\" preload=\"none\">
-	<source src=\"http://weirdcanada.com/binary/$OGG_FILE\" type='audio/ogg; codecs=\"vorbis\"' />
-	<source src=\"http://weirdcanada.com/binary/$MP3_FILE\" type='audio/mpeg; codecs=\"mp3\"' />
+	<source src=\"https://s3.amazonaws.com/wc-tracks/$OGG_FILE\" type='audio/ogg; codecs=\"vorbis\"' />
+	<source src=\"https://s3.amazonaws.com/wc-tracks/$MP3_FILE\" type='audio/mpeg; codecs=\"mp3\"' />
 </audio>
-<p class=\"audioTrack\"><a href=\"http://weirdcanada.com/binary/$MP3_FILE\" target=\"_blank\">TRACKNAME</a></p>
+<p class=\"audioTrack\"><a href=\"https://s3.amazonaws.com/wc-tracks/$MP3_FILE\" target=\"_blank\">TRACKNAME</a></p>
 "
 
 		rm $WAV_FILE
+    rm $OGG_FILE
 	fi
 done
 
