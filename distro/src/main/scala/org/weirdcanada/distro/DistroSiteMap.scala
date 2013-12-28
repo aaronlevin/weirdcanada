@@ -9,17 +9,17 @@ import org.weirdcanada.distro.service.Service
 class DistroSiteMapBuilder(service: Service) {
   implicit def svc = service
   import DistroSiteMapBuilder._
-  
+
   def toSiteMap =
     SiteMap(
       Menu.i("Home") / "index",
 
       Menu.i("Register") / "register" >> mustBeVisitor,
-      
+
       Menu.i("Check Your Inbox") / "check-your-inbox"
         >> mustBeLoggedIn
         >> Loc.Hidden,
-      
+
       Menu.i("Dashboard") / "admin" / "dashboard" >> mustBeAdmin,
       Menu.i("Accounts") / "admin" / "account-list" >> mustBeAdmin,
       AccountPage.toMenu(service),
@@ -28,7 +28,7 @@ class DistroSiteMapBuilder(service: Service) {
         >> mustBeLoggedIn
         >> Loc.Hidden
         >> Loc.EarlyResponse(() => requestPaymentResponse),
-        
+
       Menu.i("My Account") / "my-account" >> mustBeLoggedIn,
 
       Menu.i("Logout") / "logout" >> mustBeLoggedIn
@@ -36,13 +36,12 @@ class DistroSiteMapBuilder(service: Service) {
           service.SessionManager.current.logOut
           S.redirectTo("/")
         }),
-        
+
       Menu.i("Confirm Registration") / "confirm-registration"
         >> Loc.Hidden
         >> Loc.EarlyResponse(() => confirmRegistration)
     )
 
-    
     def confirmRegistration = {
       for {
         email <- S.param("email")
@@ -51,10 +50,10 @@ class DistroSiteMapBuilder(service: Service) {
       yield {
         service.AccountManager.confirmRegistration(email, key)
       }
-      
+
       Full(RedirectResponse("/"))
     }
-    
+
     def requestPaymentResponse = {
       for {
         account <- service.SessionManager.current.accountOpt
