@@ -1,6 +1,7 @@
 *.class
 *.swp
 *.jar
+*.un~
 tags
 target/
 .keep
