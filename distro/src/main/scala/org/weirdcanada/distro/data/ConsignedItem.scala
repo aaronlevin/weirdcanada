@@ -11,7 +11,7 @@ class ConsignedItem extends LongKeyedMapper[ConsignedItem] with IdPK with OneToM
 
   object Condition extends Enumeration {
     type Type = Value
-    val NotApplicable, Excellent, VeryGood, Good, Bad, VeryBad = Value // TODO: these are placeholders... what values should I be using?
+    val StillSealed, MintMinus, Excellent, VeryGoodPlus, VeryGood, Good, Poor = Value
   }
   
   object Age extends Enumeration {
@@ -26,6 +26,8 @@ class ConsignedItem extends LongKeyedMapper[ConsignedItem] with IdPK with OneToM
   object mediaCondition extends MappedEnum(this, Condition)
   object additionalNotes extends MappedText(this)
   // TODO: object age 
+  object consignedDate extends MappedDateTime(this)
+  object quantity extends MappedInt(this)
   object customerCost extends MappedDecimal(this, MathContext.DECIMAL32, 2)
   object wholesaleCost extends MappedDecimal(this, MathContext.DECIMAL32, 2)
   object markUp extends MappedDecimal(this, MathContext.DECIMAL32, 2)
