@@ -1,4 +1,4 @@
-<div class="lift:ConsignorPage">
+<div data-lift="ConsignorPage">
   <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 
   <div id="registration-confirmed" class="success" style="text-align: center;">
@@ -23,11 +23,12 @@
           <h1>Hello, <strong>Reluctant Recordings</strong></h1> 
           <div class="statsFilter">
             <h2>Sales Statistics for:</h2>
-            <ul class="statsTime">
-              <li><a href="#">All Time</a></li>
-              <li class="statsFilter-active"><a href="#">This Week</a></li>
-              <li><a href="#">This Month</a></li>
+            <ul class="statsTime" >
+              <li><a href="#" name="all-time">All Time</a></li>
+              <li class="statsFilter-active" name="this-week"><a href="#">This Week</a></li>
+              <li><a href="#" name="this-month">This Month</a></li>
               <li><a href="#">02.23.13 – 04.12.13</a></li>
+              <li style="display:none;"><span name="custom-date"></span></li>
             </ul>
             <ul class="statsFormat">
               <li><a href="#">All</a></li>
@@ -39,20 +40,20 @@
           </div>
 
           <div class="row stats">
-            <div>
-              <h2>Best Seller</h2>
+            <div name="best-seller">
+              <h2 name="best-seller-header">Best Seller</h2>
               <img src="images/releaseImage.jpg" alt="">
             </div>
-            <div>
+            <div name="total-sales">
               <h2>Total Sales for:</h2>
               <h3>All Releases</h3>
-              <p class="count">34</p>
+              <p class="count" name="total-sales-count">34</p>
               <h2>Wyrd Owes You:</h2>
-              <p class="owing"><strong>$900.00</strong></p>
+              <p class="owing"><strong>$<span name="total-sales-owe">900.00</span></strong></p>
             </div>
-            <div class=" clear">
+            <div class=" clear" name="top-selling-cities">
               <h2>Top Selling Cities</h2>
-              <ol>
+              <ol name="top-selling-cities-list">
                 <li>Edmonton, Ab</li>
                 <li>Moncton, NB</li>
                 <li>Yellowknife, NWT</li>

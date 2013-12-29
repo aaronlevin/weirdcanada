@@ -1,8 +1,9 @@
 package org.weirdcanada.distro.data
 
-import net.liftweb.mapper._
-import org.weirdcanada.distro.data._
 import java.math.MathContext
+import net.liftweb.mapper._
+import org.joda.time.DateTime
+import org.weirdcanada.distro.data._
 import org.weirdcanada.distro.api.shopify.Order
 
 class Sale extends LongKeyedMapper[Sale] with IdPK with Address {
@@ -30,4 +31,23 @@ object Sale extends Sale with LongKeyedMetaMapper[Sale] {
   def getLatestOrderId = {
     DB.runQuery("SELECT MAX(orderId) FROM sale")._2.headOption.flatMap(_.headOption).filterNot(_ == null).map(_.toLong)
   }
+
+  /**
+   * Get all sales for an account by an account id.
+   *
+   * @param accountId the id of the account
+   * @returns a list of `Sale`
+   */
+  def getSalesByAccount(accountId: Long): List[Sale] = {
+    Sale.findAll(By(consignor, accountId))
+  }
+
+  /**
+   * Helper method to filter sales by a start and end date
+   */
+  def filter(sales: List[Sale], startDate: DateTime, endDate: DateTime): List[Sale] = 
+    sales
+      .filter { s =>
+        s.dateTime.is.before(endDate.toDate) && !s.dateTime.is.before(startDate.toDate)
+      }
 }
