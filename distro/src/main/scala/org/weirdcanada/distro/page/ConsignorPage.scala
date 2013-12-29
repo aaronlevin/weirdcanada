@@ -23,6 +23,7 @@ class ConsignorPage(service: Service) extends DistroPage {
   var currentDateSelectId = "li-all-time"
   var format = "all"
   var currentFormatSelectId = "li-format-all"
+  var currentSalesHeader = "All Releases"
 
   val account = service.SessionManager.current.account
   val charts = List()
@@ -97,6 +98,7 @@ class ConsignorPage(service: Service) extends DistroPage {
         .flatMap { _.headOption.map { s => (s.city.is, s.province.is) } }
         .take(5)
 
+    "name=total-sales-header *" #> currentSalesHeader &
     "name=best-seller [src]" #> {
       for {
         best <- bestSeller
@@ -165,12 +167,22 @@ class ConsignorPage(service: Service) extends DistroPage {
    * @returns a function from `Unit` to `JsCmd`
    */
   private def formatUpdater(formatType: String) = () => {
+
     val jsCmd = """
       document.getElementById("%s").className= "";
       document.getElementById("li-format-%s").className = "statsFilter-active";
     """.format(currentFormatSelectId,formatType)
 
+
     currentFormatSelectId = "li-format-%s".format(formatType)
+    currentSalesHeader = formatType match {
+      case "all" => "All Releases"
+      case "lp" => "Vinyl Releses"
+      case "cd" => "CDs"
+      case "tape" => "Cassettes"
+      case "digital" => "Digital"
+      case _ => "Other Releases"
+    }
 
     Run(jsCmd) &
     Replace("sales-charts", chartMemoize.applyAgain())
