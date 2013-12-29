@@ -4,12 +4,62 @@ import net.liftweb.mapper._
 
 class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToMany[Long, Album] {
   def getSingleton = Album
-  
+
   object Type extends Enumeration {
     type Type = Value
-    val CompactDisc, Vinyl, Cassete, Digital = Value
+    val CompactDisc, Vinyl, TwelveInchVinyl, SevenInchVinyl, Cassette, Digital, Lathe = Value
   }
-  
+
+  /**
+   * Convert the `Type` enum to a string
+   *
+   * @returns a string representation of the enum
+   */
+  def formatTypeString: String = {
+    import Type._
+    val formatType = format.is
+    if( formatType == CompactDisc)
+      "compact disc"
+    else if (formatType == Vinyl)
+      "vinyl"
+    else if (formatType == TwelveInchVinyl)
+      "12\""
+    else if (formatType == SevenInchVinyl)
+      "7\""
+    else if (formatType == Cassette)
+      "tape"
+    else if (formatType == Digital)
+      "digital"
+    else if (formatType == Lathe)
+      "lathe"
+    else 
+      "cool"
+  }
+
+  /**
+   * Test if this album has the format of the right type
+   *
+   * @returns a boolean indicating whether the test was true or not.
+   */
+  def isOfType(formatString: String): Boolean = {
+    import Type._
+    lazy val formatType = format.is
+
+    formatString match {
+      case "all" => true
+      case "lp" => {
+        (formatType == Vinyl) ||
+        (formatType == TwelveInchVinyl) ||
+        (formatType == SevenInchVinyl) ||
+        (formatType == Lathe)
+      }
+      case "cd" => (formatType == CompactDisc)
+      case "tape" => (formatType == Cassette)
+      case "digital" => (formatType == Digital)
+      case _ => false
+    }
+  }
+
   object title extends MappedString(this, 256)
   object url extends MappedString(this, 256)
   object description extends MappedText(this)

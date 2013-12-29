@@ -1,45 +1,47 @@
 <div data-lift="ConsignorPage">
   <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 
-  <div id="registration-confirmed" class="success" style="text-align: center;">
-    <script type="text/javascript">
-// <![CDATA[
-    if (history && typeof history.replaceState === "function") {
-      history.replaceState(null, null, "/");
-    }
-// ]]>
-    </script>
-    <a style="float: right;" href="#" onclick="$('#registration-confirmed').slideUp(); return false;">close</a>
-    Thank you, your registration has been confirmed.
-  </div>
-  <div id="registration-error" class="error" style="text-align: center;">
-    <a style="float: right;" href="#" onclick="$('#registration-confirmed').slideUp(); return false;">close</a>
-    <span id="registration-error-message"/>
+  <div>
+    <div id="registration-confirmed" class="success" style="text-align: center;">
+      <script type="text/javascript">
+  // <![CDATA[
+      if (history && typeof history.replaceState === "function") {
+        history.replaceState(null, null, "/");
+      }
+  // ]]>
+      </script>
+      <a style="float: right;" href="#" onclick="$('#registration-confirmed').slideUp(); return false;">close</a>
+      Thank you, your registration has been confirmed.
+    </div>
+    <div id="registration-error" class="error" style="text-align: center;">
+      <a style="float: right;" href="#" onclick="$('#registration-confirmed').slideUp(); return false;">close</a>
+      <span id="registration-error-message"/>
+    </div>
   </div>
 
     <div class="container">
       <div class="row">
         <section class="salesSummary">
-          <h1>Hello, <strong>Reluctant Recordings</strong></h1> 
+          <h1>Hello, <strong name="account-name">Reluctant Recordings</strong></h1> 
           <div class="statsFilter">
             <h2>Sales Statistics for:</h2>
-            <ul class="statsTime" >
-              <li><a href="#" name="all-time">All Time</a></li>
-              <li class="statsFilter-active" name="this-week"><a href="#">This Week</a></li>
-              <li><a href="#" name="this-month">This Month</a></li>
-              <li><a href="#">02.23.13 – 04.12.13</a></li>
+            <ul class="statsTime">
+              <li id="li-all-time" class="statsFilter-active"><a href="#" name="all-time">All Time</a></li>
+              <li  id="li-this-week"><a href="#" name="this-week">This Week</a></li>
+              <li id="li-this-month"><a href="#" name="this-month">This Month</a></li>
+              <li id="li-custom-date"><a href="#">02.23.13 – 04.12.13</a></li>
               <li style="display:none;"><span name="custom-date"></span></li>
             </ul>
             <ul class="statsFormat">
-              <li><a href="#">All</a></li>
-              <li><a href="#">lp</a></li>
-              <li><a href="#">cd</a></li>
-              <li class="statsFilter-active"><a href="#">tape</a></li>
-              <li><a href="#">download</a></li>
+              <li id="li-format-all" class="statsFilter-active"><a href="#" name="format-all">All</a></li>
+              <li id="li-format-lp"><a href="#" name="format-lp">lp</a></li>
+              <li id="li-format-cd"><a href="#" name="format-cd">cd</a></li>
+              <li id="li-format-tape"><a href="#" name="format-tape">tape</a></li>
+              <li id="li-format-digital"><a href="#" name="format-digital">digital</a></li>
             </ul>
           </div>
 
-          <div class="row stats">
+          <div class="row stats" id="sales-charts" style="text-align:center;">
             <div name="best-seller">
               <h2 name="best-seller-header">Best Seller</h2>
               <img src="images/releaseImage.jpg" alt="">
@@ -49,7 +51,7 @@
               <h3>All Releases</h3>
               <p class="count" name="total-sales-count">34</p>
               <h2>Wyrd Owes You:</h2>
-              <p class="owing"><strong>$<span name="total-sales-owe">900.00</span></strong></p>
+              <p class="owing"><strong>$<span name="total-sales-owed">900.00</span></strong></p>
             </div>
             <div class=" clear" name="top-selling-cities">
               <h2>Top Selling Cities</h2>
@@ -114,15 +116,15 @@
           </thead>
           <tbody class="consigned-items">
           <tr class="consigned-item">
-            <td><image src="images/postImage3.jpg"></td>
-            <td><span id="artist">Jimmy Joe</span></td>
-            <td><span id="title">Self-titled</span></td>
-            <td><span id="format">LP</span></td>
-            <td><span id="consigned">24</span></td>
-            <td><span id="sold">16</span></td>
-            <td><span id="remaining">8</span></td>
-            <td><span id="price">$4.99</span></td>
-            <td><span id="sku">SKU</span></td>
+            <td><image src="images/postImage3.jpg" name="image"></td>
+            <td><span name="artist">Jimmy Joe</span></td>
+            <td><span name="title">Self-titled</span></td>
+            <td><span name="format">LP</span></td>
+            <td><span name="consigned">24</span></td>
+            <td><span name="sold">16</span></td>
+            <td><span name="remaining">8</span></td>
+            <td><span name="price">$4.99</span></td>
+            <td><span name="sku">SKU</span></td>
             <td><a href="#" class="btn btn-xs btn-default">Sales Breakdown</a></td>
             <td><a href="#" class="btn btn-xs btn-default">Edit</a></td>
           </tr>

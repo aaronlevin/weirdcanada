@@ -45,9 +45,15 @@ object Sale extends Sale with LongKeyedMetaMapper[Sale] {
   /**
    * Helper method to filter sales by a start and end date
    */
-  def filter(sales: List[Sale], startDate: DateTime, endDate: DateTime): List[Sale] = 
+  def filter(sales: List[Sale], format: String, startDate: DateTime, endDate: DateTime): List[Sale] = 
     sales
       .filter { s =>
-        s.dateTime.is.before(endDate.toDate) && !s.dateTime.is.before(startDate.toDate)
+        s.dateTime.is.before(endDate.toDate) && 
+        !s.dateTime.is.before(startDate.toDate) && {
+          if( format == "all" )
+            true
+          else
+            s.consignedItem.obj.flatMap { _.album.obj.map { _.isOfType(format) }}.openOr (false)
+        }
       }
 }
