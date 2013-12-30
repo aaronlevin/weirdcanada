@@ -8,17 +8,27 @@
  * Built for http://www.improvely.com
  */
 
+.daterangepicker .ranges .btn {
+  font-size: 16px;
+}
+
  .daterangepicker.dropdown-menu {
   max-width: none;
   z-index: 3000;
 }
 
+.daterangepicker .table-condensed tbody > tr > td {
+  padding: 0px;
+}
+
 .daterangepicker.opensleft .ranges, .daterangepicker.opensleft .calendar {
+  font-size: 16px;
   float: left;
   margin: 4px;
 }
 
 .daterangepicker.opensright .ranges, .daterangepicker.opensright .calendar {
+  font-size: 16px;
   float: right;
   margin: 4px;
 }
@@ -212,7 +222,7 @@
 }
 
 .daterangepicker td.active, .daterangepicker td.active:hover {
-  background-color: #357ebd;
+  background-color: #47a447;
   border-color: #3071a9;
   color: #fff;
 }
