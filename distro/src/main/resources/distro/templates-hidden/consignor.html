@@ -1,69 +1,97 @@
-<div data-lift="ConsignorPage">
-  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<div>
+  <lift:head>
+    <script type="text/javascript" src="/bower_components/bootstrap-daterangepicker/moment.min.js"></script>
+    <script type="text/javascript" src="/bower_components/bootstrap-daterangepicker/daterangepicker.js"></script>
+    <link rel="stylesheet" type="text/css" href="/bower_components/bootstrap-daterangepicker/daterangepicker-bs3.css" />
+  </lift:head>
 
-  <div>
-    <div id="registration-confirmed" class="success" style="text-align: center;">
-      <script type="text/javascript">
-  // <![CDATA[
-      if (history && typeof history.replaceState === "function") {
-        history.replaceState(null, null, "/");
-      }
-  // ]]>
-      </script>
-      <a style="float: right;" href="#" onclick="$('#registration-confirmed').slideUp(); return false;">close</a>
-      Thank you, your registration has been confirmed.
-    </div>
-    <div id="registration-error" class="error" style="text-align: center;">
-      <a style="float: right;" href="#" onclick="$('#registration-confirmed').slideUp(); return false;">close</a>
-      <span id="registration-error-message"/>
-    </div>
-  </div>
+  <div data-lift="ConsignorPage">
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 
-    <div class="container">
-      <div class="row">
-        <section class="salesSummary">
-          <h1>Hello, <strong name="account-name">Reluctant Recordings</strong></h1> 
-          <div class="statsFilter">
-            <h2>Sales Statistics for:</h2>
-            <ul class="statsTime">
-              <li id="li-all-time" class="statsFilter-active"><a href="#" name="all-time">All Time</a></li>
-              <li  id="li-this-week"><a href="#" name="this-week">This Week</a></li>
-              <li id="li-this-month"><a href="#" name="this-month">This Month</a></li>
-              <li id="li-custom-date"><a href="#">02.23.13 – 04.12.13</a></li>
-              <li style="display:none;"><span name="custom-date"></span></li>
-            </ul>
-            <ul class="statsFormat">
-              <li id="li-format-all" class="statsFilter-active"><a href="#" name="format-all">All</a></li>
-              <li id="li-format-lp"><a href="#" name="format-lp">lp</a></li>
-              <li id="li-format-cd"><a href="#" name="format-cd">cd</a></li>
-              <li id="li-format-tape"><a href="#" name="format-tape">tape</a></li>
-              <li id="li-format-digital"><a href="#" name="format-digital">digital</a></li>
-            </ul>
-          </div>
+    <script type="text/javascript">
+// <![CDATA[
+      $(document).ready(function() {
+        $('#daterange').daterangepicker(
+          {
+            format: 'YYYY-MM-DD'
+          },
+          function(start, end) {
+            document.getElementById("double_date").value = start.format('YYYY-MM-DD') + '-' + end.format('YYYY-MM-DD');
+            $('#double_date').triggerHandler("blur");
+            document.getElementById("li-all-time").className = "";
+            document.getElementById("li-this-week").className = "";
+            document.getElementById("li-this-month").className = "";
+            document.getElementById("li-custom-date").className = "statsFilter-active";
+            document.getElementById("daterange").textContent = start.format('MM.DD.YY') + ' - ' + end.format('MM.DD.YY');
+          }
+        );
+      });
+// ]]>
+    </script>
 
-          <div class="row stats" id="sales-charts" style="text-align:center;">
-            <div name="best-seller">
-              <h2 name="best-seller-header">Best Seller</h2>
-              <img src="images/releaseImage.jpg" alt="">
+    <div>
+      <div id="registration-confirmed" class="success" style="text-align: center;">
+        <script type="text/javascript">
+// <![CDATA[
+        if (history && typeof history.replaceState === "function") {
+          history.replaceState(null, null, "/");
+        }
+// ]]>
+        </script>
+        <a style="float: right;" href="#" onclick="$('#registration-confirmed').slideUp(); return false;">close</a>
+        Thank you, your registration has been confirmed.
+      </div>
+      <div id="registration-error" class="error" style="text-align: center;">
+        <a style="float: right;" href="#" onclick="$('#registration-confirmed').slideUp(); return false;">close</a>
+        <span id="registration-error-message"/>
+        </div>
+      </div>
+
+      <div class="container">
+        <div class="row">
+          <section class="salesSummary">
+            <h1>Hello, <strong name="account-name">Reluctant Recordings</strong></h1> 
+            <div class="statsFilter">
+              <h2>Sales Statistics for:</h2>
+              <ul class="statsTime">
+                <li id="li-all-time" class="statsFilter-active"><a href="#" name="all-time">All Time</a></li>
+                <li  id="li-this-week"><a href="#" name="this-week">This Week</a></li>
+                <li id="li-this-month"><a href="#" name="this-month">This Month</a></li>
+                <li id="li-custom-date"><a href="#" id="daterange">02.23.13 – 04.12.13</a></li>
+                <li style="display:none;"><span name="custom-date"></span></li>
+              </ul>
+              <ul class="statsFormat">
+                <li id="li-format-all" class="statsFilter-active"><a href="#" name="format-all">All</a></li>
+                <li id="li-format-lp"><a href="#" name="format-lp">lp</a></li>
+                <li id="li-format-cd"><a href="#" name="format-cd">cd</a></li>
+                <li id="li-format-tape"><a href="#" name="format-tape">tape</a></li>
+                <li id="li-format-digital"><a href="#" name="format-digital">digital</a></li>
+              </ul>
             </div>
-            <div name="total-sales">
-              <h2>Total Sales for:</h2>
-              <h3 name="total-sales-header">All Releases</h3>
-              <p class="count" name="total-sales-count">34</p>
-              <h2>Wyrd Owes You:</h2>
-              <p class="owing"><strong>$<span name="total-sales-owed">900.00</span></strong></p>
-            </div>
-            <div class=" clear" name="top-selling-cities">
-              <h2>Top Selling Cities</h2>
-              <ol name="top-selling-cities-list">
-                <li>Edmonton, Ab</li>
-                <li>Moncton, NB</li>
-                <li>Yellowknife, NWT</li>
-                <li>Saskatoon, SK</li>
-                <li>Vancouver, BC</li>
-              </ol>
-            </div>
-            <!--
+
+            <div class="row stats" id="sales-charts" style="text-align:center;">
+              <div name="best-seller">
+                <h2 name="best-seller-header">Best Seller</h2>
+                <img src="images/releaseImage.jpg" alt="">
+              </div>
+              <div name="total-sales">
+                <h2>Total Sales for:</h2>
+                <h3 name="total-sales-header">All Releases</h3>
+                <p class="count" name="total-sales-count">34</p>
+                <h2>Wyrd Owes You:</h2>
+                <p class="owing"><strong>$<span name="total-sales-owed">900.00</span></strong></p>
+              </div>
+              <div class=" clear" name="top-selling-cities">
+                <h2>Top Selling Cities</h2>
+                <ol name="top-selling-cities-list">
+                  <li>Edmonton, Ab</li>
+                  <li>Moncton, NB</li>
+                  <li>Yellowknife, NWT</li>
+                  <li>Saskatoon, SK</li>
+                  <li>Vancouver, BC</li>
+                </ol>
+              </div>
+              <!--
             <div>
               <h2>Top Five</h2>
               <script data-lift="Chart.mySalesBySku?divId=my-sales-by-sku"></script>
@@ -76,64 +104,65 @@
               </ol>
             </div>
             -->
-            <div>
-              <h2>Visualization</h2>
-              <div class="vizBox">
-                <script data-lift="Chart.mySalesByFormat?divId=my-sales-by-format"></script>
+              <div>
+                <h2>Visualization</h2>
+                <div class="vizBox">
+                  <script data-lift="Chart.mySalesByFormat?divId=my-sales-by-format"></script>
+                </div>
+              </div>
+              <div>
+                <h2>No Seller</h2>
+                <img src="images/releaseImage.jpg" alt="">
+              </div>
+              <div>
+                <h2>Visualization 2</h2>
+                <div class="vizBox">
+                  <script data-lift="Chart.mySalesByDate?divId=my-sales-by-date"></script>
+                </div>
               </div>
             </div>
-            <div>
-              <h2>No Seller</h2>
-              <img src="images/releaseImage.jpg" alt="">
-            </div>
-            <div>
-              <h2>Visualization 2</h2>
-              <div class="vizBox">
-                <script data-lift="Chart.mySalesByDate?divId=my-sales-by-date"></script>
-              </div>
-            </div>
-          </div>
+          </section>
+
+        </div>
+
+        <section class="salesInventory row">
+          <table class="table table-hover table-condensed table-striped">
+            <thead>
+              <tr>
+                <th class="salesInventoryImage">&nbsp;</th>
+                <th>Artist</th>
+                <th>Title</th>
+                <th>Format</th>
+                <th>Consigned</th>
+                <th>Sold</th>
+                <th>Remaining</th>
+                <th>Price</th>
+                <th>SKU</th>
+                <th>&nbsp;</th>
+                <th>&nbsp;</th>
+              </tr>
+            </thead>
+            <tbody class="consigned-items">
+            <tr class="consigned-item">
+              <td><image src="images/postImage3.jpg" name="image"></td>
+              <td><span name="artist">Jimmy Joe</span></td>
+              <td><span name="title">Self-titled</span></td>
+              <td><span name="format">LP</span></td>
+              <td><span name="consigned">24</span></td>
+              <td><span name="sold">16</span></td>
+              <td><span name="remaining">8</span></td>
+              <td><span name="price">$4.99</span></td>
+              <td><span name="sku">SKU</span></td>
+              <td><a href="#" class="btn btn-xs btn-default">Sales Breakdown</a></td>
+              <td><a href="#" class="btn btn-xs btn-default">Edit</a></td>
+            </tr>
+            </tbody>
+          </table>
         </section>
 
       </div>
 
-      <section class="salesInventory row">
-        <table class="table table-hover table-condensed table-striped">
-          <thead>
-            <tr>
-              <th class="salesInventoryImage">&nbsp;</th>
-              <th>Artist</th>
-              <th>Title</th>
-              <th>Format</th>
-              <th>Consigned</th>
-              <th>Sold</th>
-              <th>Remaining</th>
-              <th>Price</th>
-              <th>SKU</th>
-              <th>&nbsp;</th>
-              <th>&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody class="consigned-items">
-          <tr class="consigned-item">
-            <td><image src="images/postImage3.jpg" name="image"></td>
-            <td><span name="artist">Jimmy Joe</span></td>
-            <td><span name="title">Self-titled</span></td>
-            <td><span name="format">LP</span></td>
-            <td><span name="consigned">24</span></td>
-            <td><span name="sold">16</span></td>
-            <td><span name="remaining">8</span></td>
-            <td><span name="price">$4.99</span></td>
-            <td><span name="sku">SKU</span></td>
-            <td><a href="#" class="btn btn-xs btn-default">Sales Breakdown</a></td>
-            <td><a href="#" class="btn btn-xs btn-default">Edit</a></td>
-          </tr>
-          </tbody>
-        </table>
-      </section>
 
     </div>
-
-
   </div>
 </div>

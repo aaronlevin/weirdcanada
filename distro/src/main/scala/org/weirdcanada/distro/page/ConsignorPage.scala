@@ -148,7 +148,8 @@ class ConsignorPage(service: Service) extends DistroPage {
       case Some((newStartDate,newEndDate)) =>
         startDate = newStartDate
         endDate = newEndDate
-        Noop
+        currentDateSelectId = "li-custom-date"
+        Replace("sales-charts", chartMemoize.applyAgain())
       case _ => Noop
     }
   }
@@ -200,7 +201,7 @@ class ConsignorPage(service: Service) extends DistroPage {
     "name=all-time" #> SHtml.a(dateUpdater("li-all-time")(DateTimeUtil.allTime), Text("All Time")) &
     "name=this-week" #> SHtml.a(dateUpdater("li-this-week")(DateTimeUtil.thisWeek), Text("This Week")) &
     "name=this-month" #> SHtml.a(dateUpdater("li-this-month")(DateTimeUtil.thisMonth), Text("This Month")) &
-    "name=custom-date" #> SHtml.hidden(hiddenDatesUpdater, "", "id" -> "double-date")
+    "name=custom-date" #> SHtml.ajaxText("jerry hello", hiddenDatesUpdater, "id" -> "double_date")
 
   /**
    * Render the format selection. We allow the following format selection
