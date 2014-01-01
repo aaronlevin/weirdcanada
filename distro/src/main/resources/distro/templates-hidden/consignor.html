@@ -126,8 +126,8 @@
 
         </div>
 
-        <section class="salesInventory row">
-          <table class="table table-hover table-condensed table-striped">
+        <section class="salesInventory row" data-lift="ConsignorPage.renderConsignedItems">
+          <table class="table table-hover table-condensed table-striped" name="consigned-items-table">
             <thead>
               <tr>
                 <th class="salesInventoryImage">&nbsp;</th>
@@ -143,22 +143,23 @@
                 <th>&nbsp;</th>
               </tr>
             </thead>
-            <tbody class="consigned-items" data-lift="ConsignorPage.renderConsignedItems">
-            <tr class="consigned-item">
-              <td><image src="images/postImage3.jpg" name="image"></td>
-              <td><span name="artist">Jimmy Joe</span></td>
-              <td><span name="title">Self-titled</span></td>
-              <td><span name="format">LP</span></td>
-              <td><span name="consigned">24</span></td>
-              <td><span name="sold">16</span></td>
-              <td><span name="remaining">8</span></td>
-              <td><span name="price">$4.99</span></td>
-              <td><span name="sku">SKU</span></td>
-              <td><a href="#" class="btn btn-xs btn-default">Sales Breakdown</a></td>
-              <td><a href="#" class="btn btn-xs btn-default">Edit</a></td>
-            </tr>
+            <tbody class="consigned-items">
+              <tr class="consigned-item">
+                <td><image src="images/postImage3.jpg" name="image"></td>
+                <td><span name="artist">Jimmy Joe</span></td>
+                <td><span name="title">Self-titled</span></td>
+                <td><span name="format">LP</span></td>
+                <td><span name="consigned">24</span></td>
+                <td><span name="sold">16</span></td>
+                <td><span name="remaining">8</span></td>
+                <td><span name="price">$4.99</span></td>
+                <td><span name="sku">SKU</span></td>
+                <td><a href="#" class="btn btn-xs btn-default">Sales Breakdown</a></td>
+                <td><a href="#" class="btn btn-xs btn-default">Edit</a></td>
+              </tr>
             </tbody>
           </table>
+          <p class="clearable">You haven't consigned any items.</p>
         </section>
 
       </div>

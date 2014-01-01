@@ -4,7 +4,7 @@ import net.liftweb.common.Full
 import net.liftweb.http.{DispatchSnippet, S, SHtml}
 import net.liftweb.http.js.{JsCmd, JsCmds}
 import JsCmds.{Noop, Replace, Run}
-import net.liftweb.util.{ClearNodes, Helpers, PassThru}
+import net.liftweb.util.{ClearClearable, ClearNodes, Helpers, PassThru}
 import Helpers._
 import org.weirdcanada.common.util.DateTimeUtil
 import org.weirdcanada.distro.service.{BalanceTooLow, EmailNotValidated, PaymentAllowed, Service}
@@ -86,10 +86,13 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
           <div style="text-align:center;">
           <h3>Welcome to the consignment page!</h3>{
             if(consignedItems.isEmpty)
-              <p>Unfortunately you haven't consigned any items with us yet, so we don't have any delicious data for you yet! Please email <a href="mailto:sell@weirdcanada.com">sell@weirdcanada.com</a> to start consigning with us!</p>
+              <p>Unfortunately you haven't consigned any items with us yet, so we don't have any delicious data for you! Please email <a href="mailto:sell@weirdcanada.com">sell@weirdcanada.com</a> to start consigning with us!</p>
             else
               <p>Unfortunately you haven't sold any items yet, so we don't have any delicious data for you :( Never fear! We'd like to help! Please visit <a href="http://distro.weirdcanada.com/faq">this page</a> for some tips!</p>
-          }</div>
+          }
+          <p>(psst! here is what the dashboard will look like when you get some sales!)</p>
+          <img src="http://weird-canada-images.s3.amazonaws.com/distro-screencap.png" width="300"/>
+        </div>
       } else
         chartMemoize
     }
@@ -270,17 +273,23 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
    * Render the table displaying consigned items
    */
   def renderConsignedItems =
+    consignedItems match {
+      case Nil =>
+       ".consigned-items" #> Nil
+      case _ =>
         ".consigned-item" #> consignedItems.flatMap{ consignedItem =>
-      consignedItem.album.obj.map{ album =>
-        "@consigned" #> consignedItem.quantity.is &
-        "@sold" #> 1 &
-        "@remaining" #> 2 &
-        "@price" #> "%s // %s".format(consignedItem.customerCost.is, consignedItem.wholesaleCost.is) &
-        "@sku" #> consignedItem.guid &
-        "@image" #> album.imageUrl &
-        "@artist" #> album.artists.map { _.name.is }.mkString { " // " } &
-        "@title" #> album.title.is &
-        "@format" #> album.formatTypeString
-      }
+          consignedItem.album.obj.map{ album =>
+            "@consigned" #> consignedItem.quantity.is &
+            "@sold" #> 1 &
+            "@remaining" #> 2 &
+            "@price" #> "%s // %s".format(consignedItem.customerCost.is, consignedItem.wholesaleCost.is) &
+            "@sku" #> consignedItem.guid &
+            "@image [src]" #> album.imageUrl &
+            "@artist" #> album.artists.map { _.name.is }.mkString { " // " } &
+            "@title" #> album.title.is &
+            "@format" #> album.formatTypeString
+          }
+      } &
+      ClearClearable
     }
 }
