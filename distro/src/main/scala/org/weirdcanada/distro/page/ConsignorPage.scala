@@ -80,7 +80,19 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
     case "renderFormatSelection" => renderFormatSelection
     case "renderConsignedItems" => renderConsignedItems
     case "renderAccountHeader" => "name=account-name" #> accountNameHeader
-    case "renderChart" => "name=sales-charts" #> chartMemoize
+    case "renderChart" => "name=sales-charts" #> { 
+      if(consignedItems.isEmpty || sales.isEmpty) {
+        (_: NodeSeq) =>
+          <div style="text-align:center;">
+          <h3>Welcome to the consignment page!</h3>{
+            if(consignedItems.isEmpty)
+              <p>Unfortunately you haven't consigned any items with us yet, so we don't have any delicious data for you yet! Please email <a href="mailto:sell@weirdcanada.com">sell@weirdcanada.com</a> to start consigning with us!</p>
+            else
+              <p>Unfortunately you haven't sold any items yet, so we don't have any delicious data for you :( Never fear! We'd like to help! Please visit <a href="http://distro.weirdcanada.com/faq">this page</a> for some tips!</p>
+          }</div>
+      } else
+        chartMemoize
+    }
   }
 
   /**
