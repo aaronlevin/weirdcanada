@@ -19,23 +19,45 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
   /**
    * Date vars for date selection
    */
-  var (startDate, endDate) = DateTimeUtil.allTime
-  var currentDateSelectId = "li-all-time"
-  var format = "all"
-  var currentFormatSelectId = "li-format-all"
-  var currentSalesHeader = "All Releases"
+  private var (startDate, endDate) = DateTimeUtil.allTime
+  private var currentDateSelectId = "li-all-time"
+  private var format = "all"
+  private var currentFormatSelectId = "li-format-all"
+  private var currentSalesHeader = "All Releases"
 
-  val account = service.SessionManager.current.account
+  /**
+   * The account of the user viewing the consignor page.
+   */
+  private val account = service.SessionManager.current.account
+
+  /**
+   * What we call the user when they land on the page.
+   */
   private val accountNameHeader =
     if(account.organization.is.isEmpty)
       "%s %s".format(account.firstName.is, account.lastName.is)
     else
       account.organization.is
 
-  val charts = List()
+  /**
+   * The items the user / account has consigned with the wyrd distro
+   */
   val consignedItems = account.consignedItems.toList // TODO: make sure albums are preloaded
+
+  /**
+   * Sales for the current account. We load up all the sales in memory as
+   * they're likely to be small and this saves us from hitting the datatbase too
+   * often.
+   *
+   * This is lazy as we may not actually need to call this if the user just
+   * registered or has zero consigned items.
+   */
   lazy val sales: List[Sale] = Sale.getSalesByAccount(account.id.is)
 
+  /**
+   * when a user visits this page, they may or may not have been validated or
+   * may have encountered a confirmation error.
+   */
   val (wasJustValidated, confirmationError) =
     (account.emailValidated.is, S.param("confirmKey")) match {
       case (false, Full(confirmKey)) =>
@@ -48,8 +70,12 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
         (false, None)
     }
 
+  /**
+   * Dispatch
+   */
   override def dispatch = {
     case "renderRequestPayment" => renderRequestPayment
+    case "renderAccountConfirmation" => renderAccountConfirmation
     case "renderDateSelection" => renderDateSelection
     case "renderFormatSelection" => renderFormatSelection
     case "renderConsignedItems" => renderConsignedItems
@@ -58,20 +84,18 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
   }
 
   /**
-   * Main render function
-   *
-  def render =
-    renderRequestPayment &
-    renderDateSelection &
-    renderFormatSelection &
-    renderConsignedItems &
-    "name=sales-summary" #> chartMemoize
-    */
-
-  def renderRequestPayment =
+   * Render the module that flashes to the user that their account has been
+   * confirmed.
+   */
+  def renderAccountConfirmation =
     "#registration-confirmed" #> (if (wasJustValidated) "*" #> PassThru else "*" #> NodeSeq.Empty) &
-    "#registration-error" #> confirmationError.map(error => "registration-error-message" #> error).getOrElse("*" #> NodeSeq.Empty) &
-    "#request-payment" #> ((ns: NodeSeq) => 
+    "#registration-error" #> confirmationError.map(error => "registration-error-message" #> error).getOrElse("*" #> NodeSeq.Empty) 
+
+  /**
+   * Render the request payment buttons
+   */
+  def renderRequestPayment =
+   "#request-payment" #> ((ns: NodeSeq) => 
       service.AccountManager.canRequestPayment(account) match {
         case EmailNotValidated =>
           Text("Can request payments once your email address is confirmed")
@@ -87,7 +111,7 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
    * `endDate` of the dates
    */
   val chartMemoize = SHtml.idMemoize( (outer) => {
-    val saleItems = Sale.filter(sales, format, startDate, endDate)
+    lazy val saleItems = Sale.filter(sales, format, startDate, endDate)
 
     lazy val bestSeller: Option[Sale] = 
       saleItems
@@ -124,7 +148,6 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
     } 
   })
 
-  //def renderCharts = chartMemoize
 
   val dateFormatter = DateTimeFormat.forPattern("mmm dd, yyyy")
 
