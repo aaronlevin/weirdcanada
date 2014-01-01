@@ -5,7 +5,8 @@
     <link rel="stylesheet" type="text/css" href="/bower_components/bootstrap-daterangepicker/daterangepicker-bs3.css" />
   </lift:head>
 
-  <div data-lift="ConsignorPage">
+  <!-- <div data-lift="ConsignorPage"> -->
+  <div>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 
     <script type="text/javascript">
@@ -29,7 +30,7 @@
 // ]]>
     </script>
 
-    <div>
+    <div data-lift="ConsignorPage.renderRequestPayment">
       <div id="registration-confirmed" class="success" style="text-align: center;">
         <script type="text/javascript">
 // <![CDATA[
@@ -49,18 +50,18 @@
 
       <div class="container">
         <div class="row">
-          <section class="salesSummary">
-            <h1>Hello, <strong name="account-name">Reluctant Recordings</strong></h1> 
+          <section class="salesSummary" name="sales-summary">
+            <h1 data-lift="ConsignorPage.renderAccountHeader">Hello, <strong name="account-name">Reluctant Recordings</strong></h1> 
             <div class="statsFilter">
               <h2>Sales Statistics for:</h2>
-              <ul class="statsTime">
+              <ul class="statsTime" data-lift="ConsignorPage.renderDateSelection">
                 <li id="li-all-time" class="statsFilter-active"><a href="#" name="all-time">All Time</a></li>
-                <li  id="li-this-week"><a href="#" name="this-week">This Week</a></li>
+                <li id="li-this-week"><a href="#" name="this-week">This Week</a></li>
                 <li id="li-this-month"><a href="#" name="this-month">This Month</a></li>
                 <li id="li-custom-date"><a href="#" id="daterange">02.23.13 – 04.12.13</a></li>
                 <li style="display:none;"><span name="custom-date"></span></li>
               </ul>
-              <ul class="statsFormat">
+              <ul class="statsFormat" data-lift="ConsignorPage.renderFormatSelection">
                 <li id="li-format-all" class="statsFilter-active"><a href="#" name="format-all">All</a></li>
                 <li id="li-format-lp"><a href="#" name="format-lp">lp</a></li>
                 <li id="li-format-cd"><a href="#" name="format-cd">cd</a></li>
@@ -69,7 +70,7 @@
               </ul>
             </div>
 
-            <div class="row stats" id="sales-charts" style="text-align:center;">
+            <div class="row stats" name="sales-charts" id="sales-charts" style="text-align:center;" data-lift="ConsignorPage.renderChart">
               <div name="best-seller">
                 <h2 name="best-seller-header">Best Seller</h2>
                 <img src="images/releaseImage.jpg" alt="">
@@ -142,7 +143,7 @@
                 <th>&nbsp;</th>
               </tr>
             </thead>
-            <tbody class="consigned-items">
+            <tbody class="consigned-items" data-lift="ConsignorPage.renderConsignedItems">
             <tr class="consigned-item">
               <td><image src="images/postImage3.jpg" name="image"></td>
               <td><span name="artist">Jimmy Joe</span></td>

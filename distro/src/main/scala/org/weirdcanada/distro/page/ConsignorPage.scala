@@ -14,7 +14,7 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import scala.xml.{NodeSeq, Text}
 
-class ConsignorPage(service: Service) extends DistroPage {
+class ConsignorPage(service: Service) extends DispatchSnippet {
 
   /**
    * Date vars for date selection
@@ -26,6 +26,12 @@ class ConsignorPage(service: Service) extends DistroPage {
   var currentSalesHeader = "All Releases"
 
   val account = service.SessionManager.current.account
+  private val accountNameHeader =
+    if(account.organization.is.isEmpty)
+      "%s %s".format(account.firstName.is, account.lastName.is)
+    else
+      account.organization.is
+
   val charts = List()
   val consignedItems = account.consignedItems.toList // TODO: make sure albums are preloaded
   lazy val sales: List[Sale] = Sale.getSalesByAccount(account.id.is)
@@ -42,24 +48,29 @@ class ConsignorPage(service: Service) extends DistroPage {
         (false, None)
     }
 
+  override def dispatch = {
+    case "renderRequestPayment" => renderRequestPayment
+    case "renderDateSelection" => renderDateSelection
+    case "renderFormatSelection" => renderFormatSelection
+    case "renderConsignedItems" => renderConsignedItems
+    case "renderAccountHeader" => "name=account-name" #> accountNameHeader
+    case "renderChart" => "name=sales-charts" #> chartMemoize
+  }
+
   /**
    * Main render function
-   */
+   *
   def render =
     renderRequestPayment &
     renderDateSelection &
     renderFormatSelection &
-    //renderCharts &
     renderConsignedItems &
-    "name=account-name" #> {
-      if(account.organization.is.isEmpty)
-        "%s %s".format(account.firstName, account.lastName)
-      else
-        account.organization.is
-    } &
-    "#sales-charts" #> chartMemoize
+    "name=sales-summary" #> chartMemoize
+    */
 
   def renderRequestPayment =
+    "#registration-confirmed" #> (if (wasJustValidated) "*" #> PassThru else "*" #> NodeSeq.Empty) &
+    "#registration-error" #> confirmationError.map(error => "registration-error-message" #> error).getOrElse("*" #> NodeSeq.Empty) &
     "#request-payment" #> ((ns: NodeSeq) => 
       service.AccountManager.canRequestPayment(account) match {
         case EmailNotValidated =>
@@ -224,9 +235,7 @@ class ConsignorPage(service: Service) extends DistroPage {
    * Render the table displaying consigned items
    */
   def renderConsignedItems =
-    "#registration-confirmed" #> (if (wasJustValidated) "*" #> PassThru else "*" #> NodeSeq.Empty) &
-    "#registration-error" #> confirmationError.map(error => "registration-error-message" #> error).getOrElse("*" #> NodeSeq.Empty) &
-    ".consigned-item" #> consignedItems.flatMap{ consignedItem =>
+        ".consigned-item" #> consignedItems.flatMap{ consignedItem =>
       consignedItem.album.obj.map{ album =>
         "@consigned" #> consignedItem.quantity.is &
         "@sold" #> 1 &
