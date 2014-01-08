@@ -55,37 +55,20 @@ object UploadConsignedItemToShopify extends App with Loggable {
 
 class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopify) {
   def shopifyVariantFromConsignedItem = {
-    val albumProp = consignedItem.album.obj.dmap("") _
-    
-    new Variant(
-      barcode = "",
-      options = List(
-        1 -> consignedItem.guid.is // 1 -> consignedItem.consignor.obj.dmap("Default")(_.displayName)
-        //2 -> consignedItem.mediaCondition.is.toString,
-        //3 -> consignedItem.coverCondition.is.toString
-      ).toMap,
-      position = 1,
-      price = consignedItem.customerCost.is,
-      sku = albumProp(_.sku.is),
-      title = albumProp(_.title.is)
-    )
-  }
-  
-  /*
-  def shopifyVariantFromConsignedItem = {
     Metafield(
       "guid",
       consignedItem.guid.is,
       "weirdcanada"
     )
   }
-  */
   
   def upload = {
+    val option1 = 1 // Store the media format in the first option.
+    
     for {
       album <- consignedItem.album.obj ?~ "Consigned item %s has no album".format(consignedItem.id.is)
-      //metafield = shopifyVariantFromConsignedItem
-      variant = shopifyVariantFromConsignedItem
+      metafield = shopifyVariantFromConsignedItem
+      variantOptions = Map(option1 -> album.format.is.toString)
     }
     yield {
       val productId =
@@ -98,8 +81,7 @@ class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopif
           case productId => productId
         }
       
-      //shopify.addProductVariant(productId, List(metafield)) |>
-      shopify.addProductVariant(productId, variant) |>
+      shopify.addProductVariant(productId, Seq(metafield), variantOptions) |>
         (pv => {
           println("Created Shopify variant #%s from consigned item #%s (%s)".format(pv.id, consignedItem.id.is, consignedItem.guid.is))
           
