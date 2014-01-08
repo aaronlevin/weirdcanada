@@ -19,6 +19,9 @@ import org.weirdcanada.distro.util.IdList
 import org.weirdcanada.distro.util.Parse._
 import org.weirdcanada.distro.data.Album
 
+//
+// Helper app to insert/update/delete consigned items in the database
+//
 object ConsignedItemApp extends App with Loggable {
   val config = Config.fromLiftProps
   val dbManager = new DatabaseManager(config)
@@ -135,9 +138,6 @@ class ConsignedItemApp(args: Args) {
   }
   
   def apply = {
-    // Helper method to make the for-comprehension below a little cleaner
-    def require(bool: => Boolean) = if (bool) Some(true) else None
-
     val consignedItem: ConsignedItem =
       (args.mode, args.id) match {
         case (Add, None) =>
