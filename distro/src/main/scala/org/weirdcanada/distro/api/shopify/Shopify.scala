@@ -178,8 +178,8 @@ class Shopify(config: Config) extends Loggable {
     }
   }
 
-  def addProductVariant(productId: Long, metafields: Seq[Metafield], options: (String, Any)*): PersistentVariant = {
-    post("/admin/products/%s/variants.json".format(productId), Variant.ByMetafields(metafields)) match {
+  def addProductVariant(productId: Long, metafields: Seq[Metafield], variantOptions: Map[Int,String], options: (String, Any)*): PersistentVariant = {
+    post("/admin/products/%s/variants.json".format(productId), Variant.ByMetafields(metafields, variantOptions)) match {
       case Variant(result) => result
       case _ => sys.error("Failed to add product %s variant: %s".format(productId, metafields.toString))
     }
