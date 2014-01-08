@@ -13,6 +13,9 @@ import org.weirdcanada.distro.util.Parse._
 import org.weirdcanada.distro.data.Album
 import net.liftweb.common.Box.box2Option
 
+//
+// Helper app to insert/update/delete albums in the database
+//
 object AlbumApp extends App with Loggable {
   val config = Config.fromLiftProps
   val dbManager = new DatabaseManager(config)
@@ -122,9 +125,6 @@ class AlbumApp(args: Args) {
   }
   
   def apply = {
-    // Helper method to make the for-comprehension below a little cleaner
-    def require(bool: => Boolean) = if (bool) Some(true) else None
-
     val album: Album =
       (args.mode, args.id) match {
         case (Add, None) =>
