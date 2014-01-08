@@ -51,11 +51,16 @@ object Variant {
       )
     ).toString
     
-    def apply(metafields: Seq[Metafield]) = compactRender(
+    def apply(metafields: Seq[Metafield], variantOptions: Map[Int,String]) = compactRender(
       JObject(
         JField("variant",
           JObject(
-            Metafield.List(metafields) :: Nil
+            Metafield.List(metafields) ::
+            (
+              variantOptions.map{ case (id, value) =>
+                JField("option%d".format(id), JString(value))
+              }.toList
+            )
           )
         ) :: Nil
       )
