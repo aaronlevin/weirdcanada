@@ -6,8 +6,6 @@ tags
 target/
 .keep
 sbt.bat
-*.db
-*.props
 *.pyc
 src/main/resources/props/default.props
 scripts/bash_variables
@@ -15,3 +13,48 @@ tmp.txt
 src/main/scala/org/weirdcanada/site/snippet/Tmp.scala.bk
 src/test/scala/code/snippet/HelloWorldTest.scala.bk
 weirdcanada-db.dump
+*.log
+
+
+#################
+## Lift
+#################
+# Don't store the temporary H2 databases. They'll be going away soon anyways
+*.db
+target/
+project/target/
+
+# Lotsa secret stuff in here
+*.props
+
+
+#################
+## Eclipse
+#################
+
+*.pydevproject
+.project
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
+.cache
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# CDT-specific
+.cproject
+
+# PDT-specific
+.buildpath

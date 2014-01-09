@@ -13,6 +13,7 @@ import org.weirdcanada.distro.DistroSession
 import net.liftweb.db.DB1.db1ToDb
 import net.liftweb.http.LiftRulesMocker.toLiftRules
 import org.weirdcanada.distro.page.AccountPage
+import java.util.Date
 
 
 sealed trait PaymentNotAllowedReason
@@ -106,11 +107,18 @@ class AccountManager(config: Config, emailManager: EmailManager) {
   def requestPayment(account: Account) {
     canRequestPayment(account) match {
       case PaymentAllowed =>
+        val payment =
+          Payment.create
+            .consignor(account)
+            .requestedAt(new Date)
+            .saveMe
+        
         emailManager.send(config.paymentRequestEmail,
           PaymentRequestEmail(
             account.displayName,
             config.distroEndPoint + AccountPage.calcHref(Some(account.id.is)),
-            account.unofficialBalance.is
+            account.unofficialBalance.is,
+            payment.id.is
           )
         )
         

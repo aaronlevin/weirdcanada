@@ -56,7 +56,7 @@ object EmailManager_Tests extends Specification with Mockito {
     val emailManager = new EmailManager(config, mockEmailFactory)
     
     "contain account name, url and balance" in {
-      emailManager.send(config.paymentRequestEmail, PaymentRequestEmail(name, accountUrl, balance))
+      emailManager.send(config.paymentRequestEmail, PaymentRequestEmail(name, accountUrl, balance, 1))
       
       there was one(mockEmailFactory).send(_eq(config.paymentRequestEmail), _eq(config.smtpUsername), _eq("Payment Request"), nodeSeqContains(name, accountUrl, expectedBalanceString))
     }

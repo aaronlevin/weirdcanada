@@ -5,18 +5,13 @@ import net.liftweb.mapper._
 class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToMany[Long, Album] {
   def getSingleton = Album
 
-  object Type extends Enumeration {
-    type Type = Value
-    val CompactDisc, Vinyl, TwelveInchVinyl, SevenInchVinyl, Cassette, Digital, Lathe = Value
-  }
-
   /**
    * Convert the `Type` enum to a string
    *
    * @returns a string representation of the enum
    */
   def formatTypeString: String = {
-    import Type._
+    import Album.Type._
     val formatType = format.is
     if( formatType == CompactDisc)
       "compact disc"
@@ -42,7 +37,7 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
    * @returns a boolean indicating whether the test was true or not.
    */
   def isOfType(formatString: String): Boolean = {
-    import Type._
+    import Album.Type._
     lazy val formatType = format.is
 
     formatString match {
@@ -66,7 +61,7 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
   object sku extends MappedString(this, 32)
   object shopifyId extends MappedLong(this)
 
-  object format extends MappedEnum(this, Type)
+  object format extends MappedEnum(this, Album.Type)
   object isFirstPressing extends MappedBoolean(this)
   object releaseYear extends MappedInt(this)
   object catalogNumber extends MappedString(this, 32)
@@ -80,9 +75,27 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
   object tracks extends MappedOneToMany(Track, Track.album, OrderBy(Track.number, Ascending))
 
   object consignedItems extends MappedManyToMany(AlbumsConsignedItems, AlbumsConsignedItems.album, AlbumsConsignedItems.consignedItem, ConsignedItem)
+
+  override def toString =
+    "Album(id=%s, title=%s, sku=%s, format=%s, releaseYear=%s, catalogNumber=%s, shopifyId=%s)"
+      .format(
+        id.is,
+        title.is,
+        sku.is,
+        format.is.toString,
+        releaseYear,
+        catalogNumber,
+        shopifyId
+      )
 }
 
 // The companion object to the above Class
 object Album extends Album with LongKeyedMetaMapper[Album] {
+
+  object Type extends Enumeration {
+    type Type = Value
+    val CompactDisc, Vinyl, TwelveInchVinyl, SevenInchVinyl, Cassette, Digital, Lathe = Value
+  }
+
   def findByTitle(title: String): List[Album] = Album.findAll(By(Album.title, title))
 }

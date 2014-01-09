@@ -70,4 +70,8 @@ class PersistentMetafield(
 )
 extends Metafield(key, value, valueType, namespace) {
   // Could override toJson and toJValue... but we don't need to because we don't serialize these
+  
+  override def toString: String =
+    "Metafield(id=%s, key=%s, createdAt=%s, value=%s, type=%s, namespace=%s)"
+      .format(id, key, createdAt.toString(), value, valueType, namespace)
 }

@@ -9,7 +9,7 @@ import org.weirdcanada.distro.api.shopify.Order
 class Sale extends LongKeyedMapper[Sale] with IdPK with Address {
   def getSingleton = Sale
 
-  object orderId extends MappedLong(this) with DBIndexed
+  object orderId extends MappedLong(this) //with DBIndexed
   object lineItemId extends MappedLong(this)
   object dateTime extends MappedDateTime(this) with DBIndexed
   object consignedItem extends MappedLongForeignKey(this, ConsignedItem)
@@ -28,6 +28,8 @@ class Sale extends LongKeyedMapper[Sale] with IdPK with Address {
 
 // The companion object to the above Class
 object Sale extends Sale with LongKeyedMetaMapper[Sale] {
+  override def dbIndexes = UniqueIndex(orderId) :: super.dbIndexes
+  
   def getLatestOrderId = {
     DB.runQuery("SELECT MAX(orderId) FROM sale")._2.headOption.flatMap(_.headOption).filterNot(_ == null).map(_.toLong)
   }
@@ -56,4 +58,8 @@ object Sale extends Sale with LongKeyedMetaMapper[Sale] {
             s.consignedItem.obj.flatMap { _.album.obj.map { _.isOfType(format) }}.openOr (false)
         }
       }
+  
+  def findByOrderId(orderId: Long) = {
+    this.find(By(Sale.orderId, orderId))
+  }
 }

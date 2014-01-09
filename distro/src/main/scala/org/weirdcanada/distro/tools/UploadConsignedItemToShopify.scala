@@ -1,14 +1,17 @@
+package org.weirdcanada.distro.tools
+
 import net.liftweb.json._
 import net.liftweb.common.Loggable
 import org.weirdcanada.distro.Config
-import org.weirdcanada.distro.api.shopify.{Shopify, Metafield, Product}
+import org.weirdcanada.distro.api.shopify.{Shopify, Metafield}
 import org.weirdcanada.distro.service.DatabaseManager
-import org.weirdcanada.distro.util.NullEmailFactory
 import org.weirdcanada.distro.data.ConsignedItem
 import scala.io.Source
 import net.liftweb.common.Full
 import org.weirdcanada.distro.api.shopify.Variant
 import org.weirdcanada.distro.util.AnyExtensions._
+import org.weirdcanada.distro.util.IdList
+import org.weirdcanada.distro.api.shopify.WrapperObject
 
 object UploadConsignedItemToShopify extends App with Loggable {
   val config = Config.fromLiftProps
@@ -16,16 +19,11 @@ object UploadConsignedItemToShopify extends App with Loggable {
   val shopify = new Shopify(config)
 
   dbManager.connect
-  dbManager.createSchema
+  //dbManager.createSchema
 
   // TODO: deal with code duplication
   
-  object IdList {
-    def unapply(commaJoinedIds: String): Option[Seq[Long]] = {
-      Some(commaJoinedIds.split(',').map(_.toLong).toSeq)
-    }
-  }
-  
+
   val ids =
     args.toList match {
       case "-i" :: "-" :: Nil => // Read ids from stdin
@@ -57,23 +55,20 @@ object UploadConsignedItemToShopify extends App with Loggable {
 
 class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopify) {
   def shopifyVariantFromConsignedItem = {
-    val albumProp = consignedItem.album.obj.dmap("") _
-    
-    new Variant(
-      barcode = "",
-      options = Map.empty,
-      position = 1,
-      price = consignedItem.customerCost.is,
-      sku = albumProp(_.sku.is),
-      title = albumProp(_.title.is)
+    Metafield(
+      "guid",
+      consignedItem.guid.is,
+      "weirdcanada"
     )
   }
   
-  
   def upload = {
+    val option1 = 1 // Store the media format in the first option.
+    
     for {
       album <- consignedItem.album.obj ?~ "Consigned item %s has no album".format(consignedItem.id.is)
-      variant = shopifyVariantFromConsignedItem
+      metafield = shopifyVariantFromConsignedItem
+      variantOptions = Map(option1 -> album.format.is.toString)
     }
     yield {
       val productId =
@@ -86,7 +81,7 @@ class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopif
           case productId => productId
         }
       
-      shopify.addProductVariant(productId, variant) |>
+      shopify.addProductVariant(productId, Seq(metafield), variantOptions) |>
         (pv => {
           println("Created Shopify variant #%s from consigned item #%s (%s)".format(pv.id, consignedItem.id.is, consignedItem.guid.is))
           

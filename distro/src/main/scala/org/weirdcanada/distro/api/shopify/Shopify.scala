@@ -55,7 +55,15 @@ class Shopify(config: Config) extends Loggable {
       conn.setRequestProperty ("Authorization", "Basic " + base64Encode(userpass.getBytes))
       fnPrepConnection(conn)
       
-      val rd = new BufferedReader(new InputStreamReader(conn.getInputStream))
+      val (stream, isError) =
+        conn.getResponseCode match {
+          case error if error >= 400 =>
+            (conn.getErrorStream, true)
+          case _ =>
+            (conn.getInputStream, false)
+        }
+      
+      val rd = new BufferedReader(new InputStreamReader(stream))
       var result = ""
       while (rd.readLine match {
         case null => false
@@ -63,6 +71,11 @@ class Shopify(config: Config) extends Loggable {
       }){}
       rd.close
 
+      if (isError) {
+        logger.error("Call to %s failed with %d:\n%s".format(path, conn.getResponseCode, result))
+        throw new RuntimeException("HTTP Status Code %d".format(conn.getResponseCode));
+      }
+      
       // TODO:trace(result)
       result
     }
@@ -80,21 +93,28 @@ class Shopify(config: Config) extends Loggable {
   }
 
   private def makeHttpRequestWithBody(verb: String, path: String, body: String, options: Seq[(String, Any)]): String = {
-    makeHttpRequest(path, options, conn => {
-      conn.setRequestMethod(verb)
+    try {
+      makeHttpRequest(path, options, conn => {
+        conn.setRequestMethod(verb)
+        
+        logger.trace(body)
+  
+        val payload = body.getBytes("UTF-8")
+        conn.addRequestProperty("Content-Type", "application/json; charset=utf-8")
+        conn.addRequestProperty("Content-Length", payload.length.toString)
+        conn.setDoOutput(true);
       
-      logger.trace(body)
-
-      val payload = body.getBytes("UTF-8")
-      conn.addRequestProperty("Content-Type", "application/json; charset=utf-8")
-      conn.addRequestProperty("Content-Length", payload.length.toString)
-      conn.setDoOutput(true);
-    
-      val writer = new DataOutputStream(conn.getOutputStream)
-      writer.write(payload)
-      writer.flush
-      writer.close
-    })
+        val writer = new DataOutputStream(conn.getOutputStream)
+        writer.write(payload)
+        writer.flush
+        writer.close
+      })
+    }
+    catch {
+      case e: Exception =>
+        logger.error("Body was:\n" + body)
+        throw e
+    }
   }
 
   private def post(path: String, body: String, options: Seq[(String, Any)] = Seq.empty) =
@@ -157,7 +177,14 @@ class Shopify(config: Config) extends Loggable {
       case _ => sys.error("Failed to add product %s variant: %s".format(productId, variant.toString))
     }
   }
-  
+
+  def addProductVariant(productId: Long, metafields: Seq[Metafield], variantOptions: Map[Int,String], options: (String, Any)*): PersistentVariant = {
+    post("/admin/products/%s/variants.json".format(productId), Variant.ByMetafields(metafields, variantOptions)) match {
+      case Variant(result) => result
+      case _ => sys.error("Failed to add product %s variant: %s".format(productId, metafields.toString))
+    }
+  }
+
   
   private val metafieldOptions: (String, Any) =
     "fields" -> "created_at,id,key,value,value_type,namespace"

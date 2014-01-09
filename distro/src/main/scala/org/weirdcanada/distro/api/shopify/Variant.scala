@@ -51,11 +51,16 @@ object Variant {
       )
     ).toString
     
-    def apply(metafields: Seq[Metafield]) = compactRender(
+    def apply(metafields: Seq[Metafield], variantOptions: Map[Int,String]) = compactRender(
       JObject(
         JField("variant",
           JObject(
-            Metafield.List(metafields) :: Nil
+            Metafield.List(metafields) ::
+            (
+              variantOptions.map{ case (id, value) =>
+                JField("option%d".format(id), JString(value))
+              }.toList
+            )
           )
         ) :: Nil
       )
@@ -91,16 +96,23 @@ class Variant(
   def toJson = compactRender(toJValue).toString
   
   def toJValue: JValue =
-    JObject(List(
-      JField("barcode", JString(barcode)),
-      JField("option1", JString(options.getOrElse(1, ""))),
-      JField("option2", JString(options.getOrElse(2, ""))),
-      JField("option3", JString(options.getOrElse(3, ""))),
-      JField("position", JInt(position)),
-      JField("price", JString(price.toString)),
-      JField("sku", JString(sku)),
-      JField("title", JString(title))
-    ))
+    JObject(
+      List(
+        "barcode" -> barcode,
+        "option1" -> options.getOrElse(1, ""),
+        "option2" -> options.getOrElse(2, ""),
+        "option3" -> options.getOrElse(3, ""),
+        "sku" -> sku,
+        "title" -> title
+      ).collect{
+        case (field, value) if value.length > 0 =>
+          JField(field, JString(value))
+      } :::
+      List(
+        JField("position", JInt(position)),
+        JField("price", JString(price.toString))
+      )
+    )
 }
 
 class PersistentVariant(
