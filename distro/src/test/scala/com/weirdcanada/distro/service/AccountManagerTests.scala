@@ -25,6 +25,7 @@ object AccountManager_createAccountTests extends Specification with AroundExampl
   val tooShortPassword = "1234567"
   val firstName = "Foo"
   val lastName = "Bar"
+  val organization = "Weird Canada"
   val validAddress1 = "123 Main St"
   val address2 = "Unit #1"
   val city = "Waterloo"
@@ -65,8 +66,8 @@ object AccountManager_createAccountTests extends Specification with AroundExampl
 
     "Reject duplicate email addresses" in {
       val accountCountBefore = Account.count
-      val accountBox1 = service.AccountManager.createAccount(validEmail, validPassword, firstName, lastName, validAddress1, address2, city, province, validPostalCode, country, validPhoneNumber, validPaypalEmail)
-      val accountBox2 = service.AccountManager.createAccount(validEmail, "blah blah", "another", "user", validAddress1, address2, city, province, validPostalCode, country, validPhoneNumber, "foo@paypal.com")
+      val accountBox1 = service.AccountManager.createAccount(validEmail, validPassword, firstName, lastName, organization, validAddress1, address2, city, province, validPostalCode, country, validPhoneNumber, validPaypalEmail)
+      val accountBox2 = service.AccountManager.createAccount(validEmail, "blah blah", "another", "user", organization, validAddress1, address2, city, province, validPostalCode, country, validPhoneNumber, "foo@paypal.com")
       val accountCountAfter = Account.count
 
       accountCountAfter must be equalTo(accountCountBefore + 1)
@@ -75,7 +76,7 @@ object AccountManager_createAccountTests extends Specification with AroundExampl
     }
     
     "Accept valid data and set all fields" in {
-      val accountBox = service.AccountManager.createAccount(validEmail, validPassword, firstName, lastName, validAddress1, address2, city, province, validPostalCode, country, validPhoneNumber, validPaypalEmail)
+      val accountBox = service.AccountManager.createAccount(validEmail, validPassword, firstName, lastName, organization, validAddress1, address2, city, province, validPostalCode, country, validPhoneNumber, validPaypalEmail)
       
       accountBox.toOption must beSome
       val account = accountBox.toOption.get
@@ -98,7 +99,7 @@ object AccountManager_createAccountTests extends Specification with AroundExampl
       val mockEmailFactory = mock[EmailFactory]
       val service = new Service(config, mockEmailFactory)
 
-      service.AccountManager.createAccount(validEmail, validPassword, firstName, lastName, validAddress1, address2, city, province, validPostalCode, country, validPhoneNumber, validPaypalEmail)
+      service.AccountManager.createAccount(validEmail, validPassword, firstName, lastName, organization, validAddress1, address2, city, province, validPostalCode, country, validPhoneNumber, validPaypalEmail)
    
       there was one(mockEmailFactory).send(_eq(validEmail), _eq(config.smtpUsername), any[String], any[NodeSeq])
     }

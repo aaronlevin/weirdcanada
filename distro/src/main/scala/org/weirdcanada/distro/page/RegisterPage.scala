@@ -19,6 +19,7 @@ class RegisterPage(service: Service) extends DistroPage {
   var password = ""
   var firstName = ""
   var lastName = ""
+  var organization = ""
   var address1 = ""
   var address2 = ""
   var city = ""
@@ -35,19 +36,20 @@ class RegisterPage(service: Service) extends DistroPage {
   }
   
   def render = {
-    "@email-address" #> FocusOnLoad(SHtml.ajaxText(emailAddress, updateEmailAddress(_, emailAddress = _))) &
+    "@email-address" #> FocusOnLoad(SHtml.ajaxText(emailAddress, updateEmailAddress(_, emailAddress = _), "class" -> "form-control", "placeholder" -> "thomas@soft.org")) &
     "@password" #> SHtml.ajaxText(password, password = _, "type" -> "password") &
     "@first-name" #> SHtml.ajaxText(firstName, firstName = _) &
     "@last-name" #> SHtml.ajaxText(lastName, lastName = _) &
+    "@organization" #> SHtml.ajaxText(organization, organization = _) &
     "@address1" #> SHtml.ajaxText(address1, address1 = _) &
     "@address2" #> SHtml.ajaxText(address2, address2 = _) &
-    "@city" #> SHtml.ajaxText(city, city = _) &
-    "@province" #> SHtml.ajaxText(province, province = _) & // TODO: drop down for Canada & US, text entry for all others?
-    "@postal-code" #> SHtml.ajaxText(postalCode, postalCode = _) & // TODO: validate for US & Canada?
-    "@country" #> SHtml.ajaxText(country, country = _) & // TODO: drop down
-    "@phone-number" #> SHtml.ajaxText(phoneNumber, phoneNumber = _) &
-    "@paypal-email" #> SHtml.ajaxText(paypalEmail, updateEmailAddress(_, paypalEmail = _)) &
-    "#register" #> SHtml.ajaxButton("Create my account", validateAndCreate _, "onmouseup" -> "$('.error').remove();")
+    "@city" #> SHtml.ajaxText(city, city = _, "type" -> "text", "class" -> "form-control") &
+    "@province" #> SHtml.ajaxText(province, province = _, "type" -> "text", "class" -> "form-control") & // TODO: drop down for Canada & US, text entry for all others?
+    "@postal-code" #> SHtml.ajaxText(postalCode, postalCode = _, "type" -> "text", "class" -> "form-control") & // TODO: validate for US & Canada?
+    "@country" #> SHtml.ajaxText(country, country = _, "type" -> "text", "class" -> "form-control") & // TODO: drop down
+    "@phone-number" #> SHtml.ajaxText(phoneNumber, phoneNumber = _, "type" -> "text", "class" -> "form-control", "placeholder" -> "416-555-5555") &
+    "@paypal-email" #> SHtml.ajaxText(paypalEmail, updateEmailAddress(_, paypalEmail = _), "type" -> "text", "class" -> "form-control") &
+    "@register" #> SHtml.ajaxButton("Create my account", validateAndCreate _, "type" -> "submit", "class" -> "btn btn-default", "onmouseup" -> "$('.error').remove(); $('.has-error').removeClass('has-error');")
   }
 
   val NorthAmericanPhoneNumber = """^1?\(?(\d{3})\)?[ .-]?(\d{3})[ .-]?(\d{4})$""".r
@@ -72,8 +74,17 @@ class RegisterPage(service: Service) extends DistroPage {
     Rule("paypal-email", "Paypal email address is invalid", () => service.AccountManager.isValidEmailAddress(paypalEmail))
   )
   
-  def setError(field: String, message: String) =
-    JsCmds.SetHtml(field + "-error", <div class="error" style="margin: 0;">{message}</div>)
+  def setError(field: String, message: String) = {
+    /*val runString = """
+      (function() {
+        var d = document.getElementById('%s');
+        d.className = d.className + " has-error";
+      })();""".format(field)*/
+    val runString = """var yadda = document.getElementById("%s"); yadda.className = yadda.className + " has-error";""".format(field)
+    //val runString = """$('#%s').addClass('has-error');""".format(field)
+    JsCmds.Run(runString) & 
+    JsCmds.SetHtml(field + "-error", <span class="help-block error" >{message}</span>)
+  }
 
   def validateAndCreate = {
     validations
@@ -88,9 +99,10 @@ class RegisterPage(service: Service) extends DistroPage {
     }
 
   def createAccount: JsCmd = {
-    service.AccountManager.createAccount(emailAddress, password, firstName, lastName, address1, address2, city, province, postalCode, country, phoneNumber, paypalEmail) ?~ "createAccount is Empty"
+    service.AccountManager.createAccount(emailAddress, password, firstName, lastName, organization, address1, address2, city, province, postalCode, country, phoneNumber, paypalEmail) ?~ "createAccount is Empty"
       match {
         case Full(account) =>
+          println("**** AM I HERE?")
           service.SessionManager.current.logIn(account)
           val yearFromNow = 60 * 60 * 24 * 365
           S.addCookie(HTTPCookie("wcdid", Full(account.wcdid.is), if (Props.devMode) Empty else Full(S.hostName), Full("/"), Full(yearFromNow), Empty, Empty, Full(true)))

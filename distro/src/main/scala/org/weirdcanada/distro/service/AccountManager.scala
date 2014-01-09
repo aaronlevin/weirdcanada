@@ -25,7 +25,7 @@ final case object BalanceTooLow extends PaymentNotAllowedReason
 
 
 class AccountManager(config: Config, emailManager: EmailManager) {
-  def createAccount(emailAddress: String, password: String, firstName: String, lastName: String = "", address1: String = "", address2: String = "", city: String ="", province: String = "", postalCode: String = "", country: String = "", phoneNumber: String = "", paypalEmail: String = "") = {
+  def createAccount(emailAddress: String, password: String, firstName: String, lastName: String = "", organization: String = "", address1: String = "", address2: String = "", city: String ="", province: String = "", postalCode: String = "", country: String = "", phoneNumber: String = "", paypalEmail: String = "") = {
     // TODO: move validation rules into here
     tryo {
       val newAccount =
@@ -35,6 +35,7 @@ class AccountManager(config: Config, emailManager: EmailManager) {
           .password(password)
           .firstName(firstName)
           .lastName(lastName)
+          .organization(organization)
           .addressLine1(address1)
           .addressLine2(address2)
           .city(city)

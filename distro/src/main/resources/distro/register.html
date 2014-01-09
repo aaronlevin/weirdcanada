@@ -7,143 +7,130 @@
   <body class="lift:content_id=main">
     <div id="main" class="lift:surround?with=default;at=content">
 
-<div class="lift:RegisterPage">
+      <div class="lift:RegisterPage">
 
-      <h2>Create an Account</h2>
+        <h2>Create an Account</h2>
 
-<table>
-  <tr>
-    <td>
-      <label>Email Address</label>
-    </td>
-    <td>
-      <input name="email-address"/>
-    </td>
-    <td id="email-address-error">
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <label>Password</label>
-    </td>
-    <td>
-      <input name="password"/>
-    </td>
-    <td id="password-error">
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <label>First Name</label>
-    </td>
-    <td>
-      <input name="first-name"/>
-    </td>
-    <td id="first-name-error">
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <label>Last Name</label>
-    </td>
-    <td>
-      <input name="last-name"/>
-    </td>
-    <td id="last-name-error">
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <label>Address Line 1</label>
-    </td>
-    <td>
-      <input name="address1"/>
-    </td>
-    <td id="address1-error">
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <label>Address Line 2</label>
-    </td>
-    <td>
-      <input name="address2"/>
-    </td>
-    <td id="address2-error">
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <label>City</label>
-    </td>
-    <td>
-      <input name="city"/>
-    </td>
-    <td id="city-error">
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <label>Province</label>
-    </td>
-    <td>
-      <input name="province"/>
-    </td>
-    <td id="province-error">
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <label>Postal Code</label>
-    </td>
-    <td>
-      <input name="postal-code"/>
-    </td>
-    <td id="postal-code-error">
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <label>Country</label>
-    </td>
-    <td>
-      <input name="country"/>
-    </td>
-    <td id="country-error">
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <label>Phone Number</label>
-    </td>
-    <td>
-      <input name="phone-number"/>
-    </td>
-    <td id="phone-number-error">
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <label>PayPal Email Address</label>
-    </td>
-    <td>
-      <input name="paypal-email"/>
-    </td>
-    <td id="paypal-email-error">
-    </td>
-  </tr>
-  <tr>
-    <td>
-    </td>
-    <td>
-      <input id="register"/>
-    </td>
-    <td id="register-error">
-    </td>
-  </tr>
-</table>
 
-</div>
-    </div>
-  </body>
-</html>
+        <form class="form-horizontal" role="form">
+
+          <div class="form-group" id="email-address">
+            <label for="" class="col-sm-2 control-label">Email</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" placeholder="thomas@soft.org" name="email-address" type="text">
+              <div id="email-address-error"></div>
+            </div>
+          </div>
+
+          <div class="form-group" id="password">
+            <label for="" class="col-sm-2 control-label">Password</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="password" type="password" placeholder="pIckSom3Thing8CharactersLong">
+              <div id="password-error"></div>
+            </div>
+          </div>
+
+          <div class="form-group" id="first-name">
+            <label for="" class="col-sm-2 control-label">First Name</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="first-name" type="text" placeholder="lizard">
+              <div id="first-name-error"></div>
+            </div>
+          </div>
+
+          <div class="form-group" id="last-name">
+            <label for="" class="col-sm-2 control-label">Last Name</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="last-name" type="text" placeholder="levin">
+              <div id="last-name-error"></div>
+            </div>
+          </div>
+
+          <div class="form-group" id="organization">
+            <label for="" class="col-sm-2 control-label">Organization</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="organization" type="text" placeholder="shadow government">
+              <div id="organization-error"></div>
+            </div>
+          </div>
+
+          <div class="form-group" id="address1">
+            <label for="" class="col-sm-2 control-label">Address Line 1</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="address1" type="text" placeholder="#4 - 2 King Street South">
+              <div id="address1-error"></div>
+            </div>
+          </div>
+
+          <div class="form-group" id="address2">
+            <label for="" class="col-sm-2 control-label">Address Line 2</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="address2" type="text">
+              <div id="address2-error"></div>
+            </div>
+          </div>
+
+          <div class="form-group" id="city">
+            <label for="" class="col-sm-2 control-label">City</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="city" type="text">
+              <div id="city-error"></div>
+            </div>
+          </div>
+
+          <div class="form-group" id="province">
+            <label for="" class="col-sm-2 control-label">Province</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="province" type="text">
+              <div id="province-error"></div>
+            </div>
+          </div>
+
+
+          <div class="form-group" id="postal-code">
+            <label for="" class="col-sm-2 control-label">Postal Code</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="postal-code" type="text">
+              <div id="postal-code-error"></div>
+            </div>
+          </div>
+
+          <div class="form-group" id="country">
+            <label for="" class="col-sm-2 control-label">Country</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="country" type="text">
+              <div id="country-error"></div>
+            </div>
+          </div>
+
+          <div class="form-group" id="phone-number">
+            <label for="" class="col-sm-2 control-label">Phone Number</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="phone-number" type="text">
+              <div id="phone-number-error"></div>
+            </div>
+          </div>
+
+          <div class="form-group" id="paypal-email">
+            <label for="" class="col-sm-2 control-label">Paypal Email</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="paypal-email" type="text">
+              <div id="paypal-email-error"></div>
+            </div>
+          </div>
+
+          <div class="form-group" id="register">
+            <div class="col-sm-offset-2 col-sm-10">
+              <button type="submit" name="register" id="register" type="text">
+                <div id="register-error"></div>
+              </div>
+            </div>
+
+          </form>
+
+
+
+        </div>
+      </div>
+    </body>
+  </html>
