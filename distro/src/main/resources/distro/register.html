@@ -7,6 +7,8 @@
   <body class="lift:content_id=main">
     <div id="main" class="lift:surround?with=default;at=content">
 
+      <script src="bower_components/bootstrap-sass/js/modal.js" data-lift="head"></script>
+
       <div class="lift:RegisterPage">
 
         <h2>Create an Account</h2>
@@ -114,8 +116,9 @@
           <div class="form-group" id="uses-paypal">
             <label for="" class="col-sm-2 control-label">Payment</label>
             <div class="col-sm-10">
-              <input type="checkbox" name="uses-paypal" value="yes">PayPal</input>
-              <span class="help-block">(Optional: We can pay you with PayPal. No pressure if you don't agree with PayPal's shadowy leadership.</span>
+              <input type="checkbox" name="uses-paypal" value="yes">
+                I would like to be paid through PayPal
+              </input>
             </div>
           </div>
 
@@ -126,6 +129,35 @@
               <div id="paypal-email-error"></div>
             </div>
           </div>
+
+          <div class="form-group" id="tos">
+            <!-- <label for="" class="col-sm-2 control-label">Terms of Service</label> -->
+            <label class="col-sm-10 col-sm-offset-2">
+              <input name="tos" type="checkbox" value="yes">
+                Yes, I agree to the <a href="#" data-toggle="modal" data-target="#tos-modal"><u>terms of service</u></a>
+              </input>
+              <div id="tos-error"></div>
+            </label>
+          </div>
+
+          <!-- Modal -->
+          <div class="modal fade" id="tos-modal" tabindex="-1" role="dialog" aria-labelledby="tos-modal-label" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <h4 class="modal-title" id="tos-modal-label">Wyrd Distro - Terms of Service</h4>
+                </div>
+                <div class="modal-body">
+                  ...
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">close</button>
+                </div>
+              </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+          </div><!-- /.modal -->
+
 
           <div class="form-group" id="register">
             <div class="col-sm-offset-2 col-sm-10">

@@ -29,6 +29,7 @@ class RegisterPage(service: Service) extends DistroPage {
   var phoneNumber = ""
   var paypalEmail = ""
   var usesPaypal = false
+  var acceptTerms = false
     
   def updateEmailAddress(newValue: String, fnAssign: String => Unit) = {
     // TODO: perform basic validation (e.g. matches regex?, no domain name misspellings?, already registered,? etc)
@@ -64,13 +65,14 @@ class RegisterPage(service: Service) extends DistroPage {
     "@address1" #> SHtml.ajaxText(address1, address1 = _) &
     "@address2" #> SHtml.ajaxText(address2, address2 = _) &
     "@city" #> SHtml.ajaxText(city, city = _) &
-    "@province" #> SHtml.ajaxEditableSelect(Seq(("", "---")) ++ Province.provinceNameTuples, Empty, handleProvinceSelect) &
+    "@province" #> SHtml.ajaxEditableSelect(Seq(("", "(select)")) ++ Province.provinceNameTuples, Empty, handleProvinceSelect) &
     //"@province" #> SHtml.ajaxText(province, province = _) & // TODO: drop down for Canada & US, text entry for all others?
     "@postal-code" #> SHtml.ajaxText(postalCode, postalCode = _) & // TODO: validate for US & Canada?
     "@country" #> SHtml.ajaxText(country, country = _) & // TODO: drop down
     "@phone-number" #> SHtml.ajaxText(phoneNumber, phoneNumber = _) &
     "@uses-paypal" #> SHtml.ajaxCheckbox(false, paypalToggle) &
     "@paypal-email" #> SHtml.ajaxText(paypalEmail, updateEmailAddress(_, paypalEmail = _)) &
+    "@tos" #> SHtml.ajaxCheckbox(false, acceptTerms = _) &
     "@register" #> SHtml.ajaxButton("Create my account", validateAndCreate _, "type" -> "submit", "class" -> "btn btn-default", "onmouseup" -> "$('.error').remove(); $('.has-error').removeClass('has-error');")
   }
 
@@ -93,7 +95,8 @@ class RegisterPage(service: Service) extends DistroPage {
     Rule("country", "country must not be empty", () => country.length > 0),
     Rule("phone-number", "phone number must not be empty", () => phoneNumber.length >= 10),
     Rule("phone-number", "expecting phone number in ###-###-#### format", () => phoneNumber match { case NorthAmericanPhoneNumber(_, _, _) => true case "" => true case _ => false}),
-    Rule("paypal-email", "Paypal email address is invalid", () => if(usesPaypal) service.AccountManager.isValidEmailAddress(paypalEmail) else true)
+    Rule("paypal-email", "Paypal email address is invalid", () => if(usesPaypal) service.AccountManager.isValidEmailAddress(paypalEmail) else true),
+    Rule("tos", "Ho! You must agree to the Terms of Service", () => acceptTerms)
   )
   
   def setError(field: String, message: String) = {
