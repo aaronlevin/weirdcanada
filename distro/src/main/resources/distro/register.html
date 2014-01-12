@@ -73,7 +73,7 @@
           <div class="form-group" id="city">
             <label for="" class="col-sm-2 control-label">City</label>
             <div class="col-sm-10">
-              <input type="text" class="form-control" name="city" type="text">
+              <input type="text" class="form-control" name="city" type="text" placeholder="Alert">
               <div id="city-error"></div>
             </div>
           </div>
@@ -81,7 +81,7 @@
           <div class="form-group" id="province">
             <label for="" class="col-sm-2 control-label">Province</label>
             <div class="col-sm-10">
-              <input type="text" class="form-control" name="province" type="text">
+              <input type="text" class="form-control" name="province" type="text" placeholder="Nunavut">
               <div id="province-error"></div>
             </div>
           </div>
@@ -106,15 +106,23 @@
           <div class="form-group" id="phone-number">
             <label for="" class="col-sm-2 control-label">Phone Number</label>
             <div class="col-sm-10">
-              <input type="text" class="form-control" name="phone-number" type="text">
+              <input type="text" class="form-control" name="phone-number" type="text" placeholder="416-555-5555">
               <div id="phone-number-error"></div>
+            </div>
+          </div>
+
+          <div class="form-group" id="uses-paypal">
+            <label for="" class="col-sm-2 control-label">Payment</label>
+            <div class="col-sm-10">
+              <input type="checkbox" name="uses-paypal" value="yes">PayPal</input>
+              <span class="help-block">(Optional: We can pay you with PayPal. No pressure if you don't agree with PayPal's shadowy leadership.</span>
             </div>
           </div>
 
           <div class="form-group" id="paypal-email">
             <label for="" class="col-sm-2 control-label">Paypal Email</label>
             <div class="col-sm-10">
-              <input type="text" class="form-control" name="paypal-email" type="text">
+              <input type="text" class="form-control" id="paypal-email-input" name="paypal-email" type="text" disabled>
               <div id="paypal-email-error"></div>
             </div>
           </div>
