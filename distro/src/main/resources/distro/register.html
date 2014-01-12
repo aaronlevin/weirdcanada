@@ -9,6 +9,10 @@
 
       <script src="bower_components/bootstrap-sass/js/modal.js" data-lift="head"></script>
 
+      <h1>Welcome!</h1>
+
+      <p>Before you start consigning items with the Wyrd Distro, you'll need to register. This registration process will grant you access to the dashboard, so you can see the status of your consigned items and request payment at any time. </p>
+
       <div class="lift:RegisterPage">
 
         <h2>Create an Account</h2>
@@ -43,7 +47,7 @@
           <div class="form-group" id="last-name">
             <label for="" class="col-sm-2 control-label">Last Name</label>
             <div class="col-sm-10">
-              <input type="text" class="form-control" name="last-name" type="text" placeholder="levin">
+              <input type="text" class="form-control" name="last-name" type="text" placeholder="person">
               <div id="last-name-error"></div>
             </div>
           </div>
@@ -83,25 +87,31 @@
           <div class="form-group" id="province">
             <label for="" class="col-sm-2 control-label">Province</label>
             <div class="col-sm-10">
-              <input type="text" class="form-control" name="province" type="text" placeholder="Nunavut">
+              <input type="text" class="form-control" name="province" placeholder="Nunavut">
               <div id="province-error"></div>
             </div>
           </div>
 
-
-          <div class="form-group" id="postal-code">
-            <label for="" class="col-sm-2 control-label">Postal Code</label>
-            <div class="col-sm-10">
-              <input type="text" class="form-control" name="postal-code" type="text">
-              <div id="postal-code-error"></div>
+          <div class="form-group hidden" id="province-other">
+            <div class="col-sm-10 col-sm-offset-2">
+              <input type="text" class="form-control" name="province-other" placeholder="state">
+              <div id="province-other-error"></div>
             </div>
           </div>
 
           <div class="form-group" id="country">
             <label for="" class="col-sm-2 control-label">Country</label>
             <div class="col-sm-10">
-              <input type="text" class="form-control" name="country" type="text">
-              <div id="country-error"></div>
+              <input type="text" class="form-control" name="country" placeholder="Canada">
+              <div id="counter-error"></div>
+            </div>
+          </div>
+
+          <div class="form-group" id="postal-code">
+            <label for="" class="col-sm-2 control-label">Postal Code</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="postal-code" type="text" placeholder="K1T 3N2">
+              <div id="postal-code-error"></div>
             </div>
           </div>
 
@@ -146,10 +156,79 @@
               <div class="modal-content">
                 <div class="modal-header">
                   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                  <h4 class="modal-title" id="tos-modal-label">Wyrd Distro - Terms of Service</h4>
+                  <h1 class="modal-title" id="tos-modal-label">Wyrd Distro - Terms of Service</h1>
                 </div>
                 <div class="modal-body">
-                  ...
+                  <h2 id="definitions">Definitions</h2>
+                  <ul>
+                    <li><strong>Wyrd Distro</strong>: this service.</li>
+                    <li><strong>Consignor</strong>: an individual or company consigning items for sale on the Wyrd Distro.</li>
+                    <li><strong>Consumer</strong>: a non-wholesale customer of the Wyrd Distro.</li>
+                    <li><strong>Sale Price</strong>: the price of an item when sold to a consumer.</li>
+                    <li><strong>Wholesale Price</strong>: the price of an item when sold to a record store or other organization purchasing said item for the sole purpose of re-selling.</li>
+                    <li><strong>Consigning an item</strong>: sending a physical or digital item to the Wyrd Distro HQ and granting Wyrd Distro authority to sell said item at Sale Price and Wholesale Price as determined by the consignor.</li>
+                  </ul>
+                  <h2 id="pricing">Pricing</h2>
+                  <ol style="list-style-type: decimal">
+                    <li>You reserve the right to set both the <em>Sale Price</em> and <em>Wholesale Price</em> on any item you consign with the Wyrd Distro.</li>
+                    <li>You reserve the right to change, at any time, the <em>Sale Price</em> and <em>Wholesale Price</em> on any item you consign with the Wyrd Distro.</li>
+                    <li>Wyrd Distro reserves the right to implement said price change within two weeks of notification.</li>
+                    <li>Wyrd Distro reserves the right to add a consignment fee to the final price of any item consigned with Wyrd Distro. This fee will be approximately $1-2 but may change over time to account for inflation, business requirements, and other outside influencers. Wyrd Distro is committed to keeping the fee as low as possible and calculated to cover only Wyrd Distro's costs.</li>
+                  </ol>
+                  <h2 id="consigned-items">Consigned Items</h2>
+                  <ol style="list-style-type: decimal">
+                    <li>You agree to send consigned items to the Wyrd Distro HQ at your expense.</li>
+                    <li>You reserve the right to request the return of any consigned products at any time.</li>
+                    <li>You agree that returned items are shipped to you at your expense.</li>
+                  </ol>
+                  <h2 id="payment-of-fees">Payment of Fees</h2>
+                  <ol style="list-style-type: decimal">
+                    <li>You reserve the right to request payment of outstanding funds at any time.</li>
+                    <li>Wyrd Distro reserves the right to process payment requests in 2-week durations.</li>
+                    <li>All fees are exclusive of all federal, provincial, state or other governmental sales, goods and services, harmonized or other taxes, fees or charges now in force or enacted in the future (“Taxes”). If you are a resident of Canada , you are responsible for all applicable Taxes that arise from or as a result of your subscription to a Plan. These Taxes are based on the rates applicable to the Canadian billing address you provided to us. Such amounts are in addition to payment for the Plan and will be billed to your credit card. If you are exempt from payment of such Taxes, you must provide us with an original certificate that satisfies applicable legal requirements attesting to tax-exempt status. Tax exemption will only apply from and after the date we receive such a certificate.</li>
+                    <li>If you are not a resident of Canada and not subject to Canadian Goods and Services Tax/Harmonized Sales Tax (GST/HST) in respect of the service, you must provide us with a statement by email to <code>distro [at] weirdcanada [dot] com</code> that 1) you are not a resident of Canada 2) you are not GST/HST registered and 3) to the extent that you are an individual and not a corporation or other legal entity, you were not physically present in Canada when the service is made. The statement should also include your complete home and/or business location address. If you do not provide such information, you will be charged for Taxes on the Plan which will be billed to your credit card until after such time that you provide us with the information described to us.</li>
+                    <li>To the extent that you are a non-resident individual and not a corporation or other legal entity, and your location of usage shifts to a place in Canada when the service is made, you must advise us immediately by email to the address provided above.</li>
+                    <li>Wyrd Distro does not provide refunds.</li>
+                  </ol>
+                  <h2 id="account-terms">Account Terms</h2>
+                  <ol style="list-style-type: decimal">
+                    <li>You must be 16 years or older to use this Service.</li>
+                    <li>You must provide your full legal name, current address, a valid email address, and any other information needed in order to complete the signup process.</li>
+                    <li>You are responsible for keeping your password secure. Wyrd Distro cannot and will not be liable for any loss or damage from your failure to maintain the security of your account and password.</li>
+                    <li>You may not use the Wyrd Distro service for any illegal or unauthorized purpose nor may you, in the use of the Service, violate any laws in your jurisdiction (including but not limited to copyright laws) as well as the laws of Canada and the Province of Ontario.</li>
+                    <li>You are responsible for all activity and content (data, graphics, photos, links) that is uploaded under your Wyrd Distro account.</li>
+                    <li>You must not transmit any worms or viruses or any code of a destructive nature.</li>
+                    <li>A breach or violation of any of the Account Terms as determined in the sole discretion of Wyrd Distro will result in an immediate termination of your services.</li>
+                  </ol>
+                  <h2 id="general-conditions">General Conditions</h2>
+                  <ol style="list-style-type: decimal">
+                    <li>Questions about the Terms of Service should be sent to <code>distro [at] weirdcanada [dot] com</code>.</li>
+                  </ol>
+                  <h2 id="wyrd-distro-rights">Wyrd Distro Rights</h2>
+                  <ol style="list-style-type: decimal">
+                    <li>Wyrd Distro reserves the right to modify or terminate the Wyrd Distro service for any reason, without notice at any time.</li>
+                    <li>Wyrd Distro reserves the right to refuse service to anyone for any reason at any time. Wyrd Distro is committed to openness and transperancy and will engage in dialogue whenever such action is taken.</li>
+                    <li>Wyrd Distro may, but have no obligation to, remove Content and Accounts containing Content that we determine in our sole discretion are unlawful, offensive, threatening, libelous, defamatory, pornographic, obscene or otherwise objectionable or violates any party’s intellectual property or these Terms of Service.</li>
+                    <li>Verbal or written abuse of any kind (including threats of abuse or retribution) of any Wyrd Distro customer, Wyrd Distro employee, member, or officer will result in immediate account termination.</li>
+                  </ol>
+                  <h2 id="cancellation-and-termination">Cancellation and Termination</h2>
+                  <ol style="list-style-type: decimal">
+                    <li>You may cancel your account at anytime by emailing <code>distro [at] weirdcanada [dot] com</code></li>
+                    <li>Once your account is cancelled all of your Content will be immediately deleted from the Service. Since deletion of all data is final please be sure that you do in fact want to cancel your account before doing so.</li>
+                    <li>If you cancel the Service in the middle of the month, you will receive one final invoice via email. Once that invoice has been paid you will not be charged again.</li>
+                    <li>We reserve the right to modify or terminate the Wyrd Distro service for any reason, without notice at any time.</li>
+                    <li>Fraud: Without limiting any other remedies, Wyrd Distro may suspend or terminate your account if we suspect that you (by conviction, settlement, insurance or escrow investigation, or otherwise) have engaged in fraudulent activity in connection with the Site.</li>
+                  </ol>
+                  <h2 id="limitation-of-liability">Limitation of Liability</h2>
+                  <ol style="list-style-type: decimal">
+                    <li>You expressly understand and agree that Wyrd Distro shall not be liable for any direct, indirect, incidental, special, consequential or exemplary damages, including but not limited to, damages for loss of profits, goodwill, use, data or other intangible losses resulting from the use of or inability to use the service.</li>
+                    <li>In no event shall Wyrd Distro or our suppliers be liable for lost profits or any special, incidental or consequential damages arising out of or in connection with our site, our services or this agreement (however arising including negligence). You agree to indemnify and hold us and (as applicable) our parent, subsidiaries, affiliates, Wyrd Distro partners, officers, directors, agents, and employees, harmless from any claim or demand, including reasonable attorneys’ fees, made by any third party due to or arising out of your breach of this Agreement or the documents it incorporates by reference, or your violation of any law or the rights of a third party.</li>
+                    <li>Your use of the Service is at your sole risk. The Service is provided on an ”as is“ and ”as available“ basis without any warranty or condition, express, implied or statutory.</li>
+                    <li>Wyrd Distro does not warrant that the service will be uninterrupted, timely, secure, or error-free.</li>
+                    <li>Wyrd Distro does not warrant that the results that may be obtained from the use of the service will be accurate or reliable.</li>
+                    <li>Wyrd Distro does not warrant that the quality of any products, services, information, or other material purchased or obtained by you through the Service will meet your expectations, or that any errors in the Service will be corrected.</li>
+                  </ol>
+
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-default" data-dismiss="modal">close</button>

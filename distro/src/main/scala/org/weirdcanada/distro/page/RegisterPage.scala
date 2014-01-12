@@ -30,13 +30,19 @@ class RegisterPage(service: Service) extends DistroPage {
   var paypalEmail = ""
   var usesPaypal = false
   var acceptTerms = false
-    
+
+  /**
+   * Method to update an email address
+   */
   def updateEmailAddress(newValue: String, fnAssign: String => Unit) = {
     // TODO: perform basic validation (e.g. matches regex?, no domain name misspellings?, already registered,? etc)
     fnAssign(newValue)
     JsCmds.Noop
   }
 
+  /**
+   * Server-side code to handle the paypal toggle checkbox.
+   */
   private val paypalToggle: Boolean => JsCmd = b => {
     usesPaypal = b
     if(b)
@@ -45,13 +51,24 @@ class RegisterPage(service: Service) extends DistroPage {
       JsCmds.Run("""document.getElementById("paypal-email-input").setAttribute("disabled");""")
   }
 
+  /**
+   * Server-side code to handle the province selection
+   */
   private val handleProvinceSelect: String => JsCmd = (p) => {
     Province
       .getProvinceForSlug(p)
       .map { p => province = p.slug }
       match { 
-        case None => province = ""; JsCmds.Noop
-        case _ => JsCmds.Noop
+        case None => 
+          if(p.equals("other")) {
+            province = p
+            JsCmds.Run("""document.getElementById("province-other").className = "form-group";""")
+          } else {
+            province = ""
+            JsCmds.Run("""document.getElementById("province-other").className = "form-group hidden";""")
+          }
+        case _ => 
+          JsCmds.Run("""document.getElementById("province-other").className = "form-group hidden";""")
       }
   }
 
@@ -65,8 +82,8 @@ class RegisterPage(service: Service) extends DistroPage {
     "@address1" #> SHtml.ajaxText(address1, address1 = _) &
     "@address2" #> SHtml.ajaxText(address2, address2 = _) &
     "@city" #> SHtml.ajaxText(city, city = _) &
-    "@province" #> SHtml.ajaxEditableSelect(Seq(("", "(select)")) ++ Province.provinceNameTuples, Empty, handleProvinceSelect) &
-    //"@province" #> SHtml.ajaxText(province, province = _) & // TODO: drop down for Canada & US, text entry for all others?
+    "@province" #> SHtml.ajaxSelect(Seq(("", "(select)")) ++ Province.provinceNameTuples ++ Seq(("other", "(other)")), Empty, handleProvinceSelect) &
+    "@province-other" #> SHtml.ajaxText(province, province = _) &
     "@postal-code" #> SHtml.ajaxText(postalCode, postalCode = _) & // TODO: validate for US & Canada?
     "@country" #> SHtml.ajaxText(country, country = _) & // TODO: drop down
     "@phone-number" #> SHtml.ajaxText(phoneNumber, phoneNumber = _) &
