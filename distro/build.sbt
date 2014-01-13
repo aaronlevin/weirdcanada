@@ -44,7 +44,8 @@ libraryDependencies ++= {
     "joda-time"         % "joda-time"           % "2.2",
     "com.h2database"    % "h2"                  % "1.3.167",
     "org.specs2"        % "specs2_2.10"         % "2.1.1"            % "test",
-    "org.mockito"       % "mockito-all"         % "1.9.5"            % "test"
+    "org.mockito"       % "mockito-all"         % "1.9.5"            % "test",
+    "postgresql" % "postgresql" % "9.1-901.jdbc4"
   )
 }
 
