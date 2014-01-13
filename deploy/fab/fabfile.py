@@ -66,7 +66,7 @@ def start_admin_app():
 
 def start_distro_app():
     with cd('~/weirdcanada'):
-        run('dtach -n /tmp/weirdcanada-distro-session ~/weirdcanada/deploy/weirdcanada-distro')
+        run('dtach -A /tmp/weirdcanada-distro-session ~/weirdcanada/deploy/weirdcanada-distro')
 
 def restart_admin_app():
     run('jps | grep \'weirdcanada-admin\.jar\' | grep -oP \'^\d+\' | while read line; do kill -9 "$line"; done')
