@@ -10,7 +10,7 @@ import scala.xml.Text
 import net.liftweb.common.{Full, Failure}
 import net.liftweb.http.provider.HTTPCookie
 import net.liftweb.common.Empty
-import org.weirdcanada.common.util.Province
+import org.weirdcanada.common.util.{Country, Province}
 import org.weirdcanada.distro.data.{Account, UserRole}
 import org.weirdcanada.distro.service.Service
 
@@ -23,9 +23,9 @@ class RegisterPage(service: Service) extends DistroPage {
   var address1 = ""
   var address2 = ""
   var city = ""
-  var province = ""
+  var province = "alberta"
   var postalCode = ""
-  var country = ""
+  var country = "canada"
   var phoneNumber = ""
   var paypalEmail = ""
   var usesPaypal = false
@@ -72,6 +72,27 @@ class RegisterPage(service: Service) extends DistroPage {
       }
   }
 
+  /**
+   * Server-side code to handle the Country selection
+   */
+  private val handleCountrySelect: String => JsCmd = (c) => {
+    Country
+      .getCountryBySlug(c)
+      .map { c => country = c.slug }
+      match {
+        case None =>
+          if(c.equals("other")) {
+            country = c
+            JsCmds.Run("""document.getElementById("country-other").className = "form-group";""")
+          } else {
+            country = ""
+            JsCmds.Run("""document.getElementById("country-other").className = "form-group hidden";""")
+          }
+        case _ =>
+          JsCmds.Run("""document.getElementById("country-other").className = "form-group hidden";""")
+      }
+  }
+
 
   def render = {
     "@email-address" #> FocusOnLoad(SHtml.ajaxText(emailAddress, updateEmailAddress(_, emailAddress = _), "class" -> "form-control", "placeholder" -> "thomas@soft.org")) &
@@ -82,10 +103,11 @@ class RegisterPage(service: Service) extends DistroPage {
     "@address1" #> SHtml.ajaxText(address1, address1 = _) &
     "@address2" #> SHtml.ajaxText(address2, address2 = _) &
     "@city" #> SHtml.ajaxText(city, city = _) &
-    "@province" #> SHtml.ajaxSelect(Seq(("", "(select)")) ++ Province.provinceNameTuples ++ Seq(("other", "(other)")), Empty, handleProvinceSelect) &
+    "@province" #> SHtml.ajaxSelect(Province.provinceNameTuples ++ Seq(("other", "(other)")), Empty, handleProvinceSelect) &
     "@province-other" #> SHtml.ajaxText(province, province = _) &
     "@postal-code" #> SHtml.ajaxText(postalCode, postalCode = _) & // TODO: validate for US & Canada?
-    "@country" #> SHtml.ajaxText(country, country = _) & // TODO: drop down
+    "@country" #> SHtml.ajaxSelect(Country.countryTuples ++ Seq(("other", "(other)")), Empty, handleCountrySelect) &
+    "@country-other" #> SHtml.ajaxText(country, country = _) &
     "@phone-number" #> SHtml.ajaxText(phoneNumber, phoneNumber = _) &
     "@uses-paypal" #> SHtml.ajaxCheckbox(false, paypalToggle) &
     "@paypal-email" #> SHtml.ajaxText(paypalEmail, updateEmailAddress(_, paypalEmail = _)) &
