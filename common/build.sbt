@@ -4,7 +4,7 @@ name := "Weird Canada Common Ghetto"
 
 version := "0.0.1"
 
-organization := "org.weirdcanada.site"
+organization := "org.weirdcanada.common"
 
 scalaVersion := "2.10.3"
 

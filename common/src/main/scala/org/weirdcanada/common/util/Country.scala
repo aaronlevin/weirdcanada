@@ -1,5 +1,7 @@
 package org.weirdcanada.common.util
 
+import org.weirdcanada.macros.SealedTraitMacros
+
 /**
  * Thee countries of the world
  */

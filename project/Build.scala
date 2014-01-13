@@ -14,7 +14,7 @@ object MainProject extends Build {
  lazy val weirdcanadaDistro = Project(
     id = "distro",
     base = file("distro")
-    ) dependsOn(common % "compile->compile")
+  ) dependsOn(common % "compile->compile")
 
   lazy val dynamicForm = Project(
     id = "dynamicform",
@@ -24,6 +24,11 @@ object MainProject extends Build {
   lazy val common = Project(
     id = "common",
     base = file("common")
+  ) dependsOn(macros % "compile->compile")
+
+  lazy val macros = Project(
+    id = "macros",
+    base = file("macros")
   )
  
 }

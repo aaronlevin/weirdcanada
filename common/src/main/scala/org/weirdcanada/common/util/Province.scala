@@ -1,5 +1,7 @@
 package org.weirdcanada.common.util
 
+import org.weirdcanada.macros.SealedTraitMacros
+
 /**
  * Ye olde provinces of Canada
  */
