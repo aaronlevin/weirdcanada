@@ -10,8 +10,8 @@ sealed trait EmailTemplate {
   def subject: String
 }
 abstract class BaseEmailTemplate(val subject: String) extends EmailTemplate
-case class ConfirmRegistrationEmail(confirmUrl: String, firstName: String) extends BaseEmailTemplate("Registration Confirmation")
-case class PaymentRequestEmail(name: String, accountUrl: String, unofficialBalance: BigDecimal, paymentId: Long) extends BaseEmailTemplate("Payment Request")
+case class ConfirmRegistrationEmail(confirmUrl: String, firstName: String) extends BaseEmailTemplate("Wyrd Distro - Registration Confirmation")
+case class PaymentRequestEmail(name: String, accountUrl: String, unofficialBalance: BigDecimal, paymentId: Long) extends BaseEmailTemplate("Wyrd Distro - Payment Request")
 
 
 class EmailManager(config: Config, emailFactory: EmailFactory) {

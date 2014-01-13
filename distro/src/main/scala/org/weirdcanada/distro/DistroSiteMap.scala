@@ -1,6 +1,7 @@
 package org.weirdcanada.distro
 
 import net.liftweb.sitemap.{Loc, SiteMap, Menu}
+import Loc.LocGroup
 import net.liftweb.common._
 import net.liftweb.http._
 import org.weirdcanada.distro.page.AccountPage
@@ -23,13 +24,25 @@ class DistroSiteMapBuilder(service: Service) {
       Menu.i("Dashboard") / "admin" / "dashboard" >> mustBeAdmin,
       Menu.i("Accounts") / "admin" / "account-list" >> mustBeAdmin,
       AccountPage.toMenu(service),
+      Menu.i("Add a New Record") / "admin" / "add-records" 
+        >> mustBeAdmin
+        >> LocGroup("actions"),
 
       Menu.i("Request Payment") / "request-payment"
         >> mustBeLoggedIn
         >> Loc.Hidden
-        >> Loc.EarlyResponse(() => requestPaymentResponse),
+        >> Loc.EarlyResponse(() => requestPaymentResponse)
+        >> LocGroup("actions"),
 
-      Menu.i("My Account") / "my-account" >> mustBeLoggedIn,
+      Menu.i("Request Return") / "request-return"
+        >> mustBeLoggedIn
+        >> Loc.Hidden
+        >> Loc.EarlyResponse(() => requestPaymentResponse)
+        >> LocGroup("actions"),
+
+      Menu.i("My Account") / "my-account" 
+        >> mustBeLoggedIn
+        >> LocGroup("actions"),
 
       Menu.i("Logout") / "logout" >> mustBeLoggedIn
         >> Loc.EarlyResponse(() => {
