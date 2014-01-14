@@ -106,10 +106,10 @@ class RegisterPage(service: Service) extends DistroPage {
     "@address2" #> SHtml.ajaxText(address2, address2 = _) &
     "@city" #> SHtml.ajaxText(city, city = _) &
     "@province" #> SHtml.ajaxSelect(Province.provinceNameTuples ++ Seq(("other", "(other)")), Empty, handleProvinceSelect) &
-    "@province-other" #> SHtml.ajaxText(province, province = _) &
+    "@province-other" #> SHtml.ajaxText("", province = _) &
     "@postal-code" #> SHtml.ajaxText(postalCode, postalCode = _) & // TODO: validate for US & Canada?
     "@country" #> SHtml.ajaxSelect(Country.countryTuples ++ Seq(("other", "(other)")), Empty, handleCountrySelect) &
-    "@country-other" #> SHtml.ajaxText(country, country = _) &
+    "@country-other" #> SHtml.ajaxText("", country = _) &
     "@phone-number" #> SHtml.ajaxText(phoneNumber, phoneNumber = _) &
     "@uses-paypal" #> SHtml.ajaxCheckbox(false, paypalToggle) &
     "@paypal-email" #> SHtml.ajaxText(paypalEmail, updateEmailAddress(_, paypalEmail = _)) &
