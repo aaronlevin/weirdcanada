@@ -91,7 +91,7 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
               <p>Unfortunately you haven't sold any items yet, so we don't have any delicious data for you :( Never fear! We'd like to help! Please visit <a href="http://distro.weirdcanada.com/faq">this page</a> for some tips!</p>
           }
           <p>(psst! here is what the dashboard will look like when you get some sales!)</p>
-          <img src="http://weird-canada-images.s3.amazonaws.com/distro-screencap.png" width="300"/>
+          <img src="https://weird-canada-images.s3.amazonaws.com/distro-screencap.png" width="300"/>
         </div>
       } else
         chartMemoize
