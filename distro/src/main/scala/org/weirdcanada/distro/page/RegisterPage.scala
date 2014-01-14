@@ -17,6 +17,7 @@ import org.weirdcanada.distro.service.Service
 class RegisterPage(service: Service) extends DistroPage {
   var emailAddress = ""
   var password = ""
+  var passwordConfirmation = ""
   var firstName = ""
   var lastName = ""
   var organization = ""
@@ -97,6 +98,7 @@ class RegisterPage(service: Service) extends DistroPage {
   def render = {
     "@email-address" #> FocusOnLoad(SHtml.ajaxText(emailAddress, updateEmailAddress(_, emailAddress = _), "class" -> "form-control", "placeholder" -> "thomas@soft.org")) &
     "@password" #> SHtml.ajaxText(password, password = _, "type" -> "password") &
+    "@password-confirm" #> SHtml.ajaxText(passwordConfirmation, passwordConfirmation = _, "type" -> "password") &
     "@first-name" #> SHtml.ajaxText(firstName, firstName = _) &
     "@last-name" #> SHtml.ajaxText(lastName, lastName = _) &
     "@organization" #> SHtml.ajaxText(organization, organization = _) &
@@ -135,7 +137,8 @@ class RegisterPage(service: Service) extends DistroPage {
     Rule("phone-number", "phone number must not be empty", () => phoneNumber.length >= 10),
     Rule("phone-number", "expecting phone number in ###-###-#### format", () => phoneNumber match { case NorthAmericanPhoneNumber(_, _, _) => true case "" => true case _ => false}),
     Rule("paypal-email", "Paypal email address is invalid", () => if(usesPaypal) service.AccountManager.isValidEmailAddress(paypalEmail) else true),
-    Rule("tos", "Ho! You must agree to the Terms of Service", () => acceptTerms)
+    Rule("tos", "Ho! You must agree to the Terms of Service", () => acceptTerms),
+    Rule("password-confirm", "", () => password == passwordConfirmation)
   )
   
   def setError(field: String, message: String) = {
