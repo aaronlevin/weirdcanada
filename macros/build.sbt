@@ -1,5 +1,3 @@
-import AssemblyKeys._
-
 name := "Weird Canada Macros"
 
 version := "0.0.1"
