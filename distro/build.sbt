@@ -39,13 +39,15 @@ lazy val customAssemblySettings: Seq[Project.Setting[_]] =
     baseAssemblySettings ++ 
     inTask(assembly)(mainClass := Some("org.weirdcanada.distro.server.WeirdCanadaDistroServer")) ++
     assemblyMergeSettings ++
-    assemblyNoTestSetting
+    assemblyNoTestSetting ++
+    Seq(jarName in assembly := "weirdcanada-distro-assembly-1.0.jar")
   ) ++
   inConfig(AlbumApp)(
     baseAssemblySettings ++ 
     inTask(assembly)(mainClass := Some("org.weirdcanada.distro.tools.AlbumApp")) ++
     assemblyMergeSettings ++
-    assemblyNoTestSetting
+    assemblyNoTestSetting ++
+    Seq(jarName in assembly := "weirdcanada-albumapp-assembly-1.0.jar")
   )
 
 seq(customAssemblySettings: _*)
