@@ -17,26 +17,44 @@ unmanagedResourceDirectories in Test <+= (baseDirectory) { _ / "src/main/webapp"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 
-assemblySettings
 
-mainClass in assembly := Some("org.weirdcanada.distro.server.WeirdCanadaDistroServer")
+val Server = config("server") extend(Compile)
 
-test in assembly := {}
+val AlbumApp = config("albumapp") extend(Compile)
 
-mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
+lazy val assemblyMergeSettings = Seq(
+  mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
   {
     case "about.html" => MergeStrategy.discard
     case x => old(x)
-  }
-}
+  }}
+)
+
+lazy val assemblyNoTestSetting = Seq(
+  test in assembly := {}
+)
+
+lazy val customAssemblySettings: Seq[Project.Setting[_]] =
+  inConfig(Server)(
+    baseAssemblySettings ++ 
+    inTask(assembly)(mainClass := Some("org.weirdcanada.distro.server.WeirdCanadaDistroServer")) ++
+    assemblyMergeSettings ++
+    assemblyNoTestSetting
+  ) ++
+  inConfig(AlbumApp)(
+    baseAssemblySettings ++ 
+    inTask(assembly)(mainClass := Some("org.weirdcanada.distro.tools.AlbumApp")) ++
+    assemblyMergeSettings ++
+    assemblyNoTestSetting
+  )
+
+seq(customAssemblySettings: _*)
 
 libraryDependencies ++= {
   val liftVersion = "2.5"
   Seq(
     "net.liftweb"       %% "lift-webkit"        % liftVersion        % "compile",
     "net.liftweb"       %% "lift-mapper"        % liftVersion        % "compile",
-    "net.liftmodules"   %% "lift-jquery-module_2.5" % "2.3",
-    "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016" % "container,test" artifacts Artifact("javax.servlet", "jar", "jar"),
     "ch.qos.logback"    % "logback-classic"     % "1.0.6",
     "joda-time"         % "joda-time"           % "2.2",
     "com.h2database"    % "h2"                  % "1.3.167",

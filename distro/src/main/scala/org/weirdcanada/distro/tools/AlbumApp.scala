@@ -92,6 +92,7 @@ object AlbumApp extends App with Loggable {
   }
   
   (new AlbumApp(Args())).apply
+
 }
 
 import AlbumApp._

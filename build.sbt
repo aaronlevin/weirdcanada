@@ -1,3 +1,5 @@
+import AssemblyKeys._
+
 lazy val site =
   project
     .in(file("site"))
