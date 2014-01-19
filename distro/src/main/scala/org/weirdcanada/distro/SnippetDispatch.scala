@@ -22,5 +22,6 @@ object SnippetDispatch {
     case "Chart" | "chart" => new ChartSnippet(service)
     case "PageView" | "pageview" => new PageViewSnippet(service)
     case "HasRole" | "hasrole" => new HasRoleSnippet(service)
+    case "AddArtistPage" => new AddArtistPage(service)
   }
 }
