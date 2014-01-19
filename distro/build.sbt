@@ -18,7 +18,7 @@ unmanagedResourceDirectories in Test <+= (baseDirectory) { _ / "src/main/webapp"
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 
 
-val Server = config("server") extend(Compile)
+val Portal = config("portal") extend(Compile)
 
 val AlbumApp = config("albumapp") extend(Compile)
 
@@ -35,7 +35,7 @@ lazy val assemblyNoTestSetting = Seq(
 )
 
 lazy val customAssemblySettings: Seq[Project.Setting[_]] =
-  inConfig(Server)(
+  inConfig(Portal)(
     baseAssemblySettings ++ 
     inTask(assembly)(mainClass := Some("org.weirdcanada.distro.server.WeirdCanadaDistroServer")) ++
     assemblyMergeSettings ++

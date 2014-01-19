@@ -51,22 +51,20 @@ def update_cronjobs():
 def build_admin():
     with cd('~/weirdcanada'):
         run('./sbt site/compile')
-        run('./sbt site/assembly')
-        run('cp site/target/scala-2.10/weirdcanada-admin-assembly-0.0.1.jar deploy/jars/weirdcanada-admin.jar')
+        run('./sbt site/build')
 
 def build_distro():
     with cd('~/weirdcanada'):
         run('./sbt distro/compile')
-        run('./sbt distro/assembly')
-        run('cp distro/target/scala-2.10/weirdcanada-distro-assembly-1.0.jar deploy/jars/weirdcanada-distro.jar')
+        run('./sbt distro/portal:build')
 
 def start_admin_app():
-    with cd('~/weirdcanada'):
-        run('dtach -n /tmp/weirdcanada-admin-session ~/weirdcanada/deploy/weirdcanada-admin')
+    with cd('~/weirdcanada/site'):
+        run('dtach -n /tmp/weirdcanada-admin-session ~/weirdcanada/site/bin/weirdcanada-admin')
 
 def start_distro_app():
-    with cd('~/weirdcanada'):
-        run('dtach -n /tmp/weirdcanada-distro-session ~/weirdcanada/deploy/weirdcanada-distro')
+    with cd('~/weirdcanada/distro'):
+        run('dtach -n /tmp/weirdcanada-distro-session ~/weirdcanada/distro/bin/weirdcanada-distro')
 
 def restart_admin_app():
     run('jps | grep \'weirdcanada-admin\.jar\' | grep -oP \'^\d+\' | while read line; do kill -9 "$line"; done')
