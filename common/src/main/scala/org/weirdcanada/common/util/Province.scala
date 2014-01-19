@@ -22,6 +22,7 @@ case object PrinceEdwardIsland extends Province { val name = "Prince Edward Isla
 case object Yukon extends Province { val name = "Yukon"; val slug = "yukon"; val postalCode = "YK" }
 case object NorthwestTerritories extends Province { val name = "Northwest Territories"; val slug = "northwest-territories"; val postalCode = "NT" }
 case object Nunavut extends Province { val name = "Nunavut"; val slug = "nunavut"; val postalCode = "NU" }
+case object NovaScotia extends Province { val name = "Nova Scotia"; val slug = "nova-scotia"; val postalCode = "NS" }
 
 /**
  * Various helper methods relating to provinces
