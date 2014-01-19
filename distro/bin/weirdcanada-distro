@@ -1,0 +1,18 @@
+#!/bin/bash
+# get current directory of script
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+cd "$DIR"
+cd ..
+
+if [[ -z "$@" ]]; then
+  java -server -Xmx800m -XX:MaxPermSize=200m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSIncrementalPacing -XX:ParallelGCThreads=2 -Drun.mode=production -jar jars/weirdcanada-distro.jar
+else
+  java -server -Xmx512m -XX:MaxPermSize=200m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSIncrementalPacing -XX:ParallelGCThreads=2 -jar jars/weirdcanada-distro.jar "$@"
+fi

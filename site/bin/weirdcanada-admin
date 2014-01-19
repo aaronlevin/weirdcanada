@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# For production: just called deploy/weird-distro
+# For testing / local: pass in `-Drun.mode=test` and whatever other flags
+
+if [[ -z "$@" ]]; then
+  java -server -Xmx512m -XX:MaxPermSize=200m -Drun.mode=production -jar deploy/jars/weirdcanada-admin.jar
+else
+  java -server -Xmx512m -XX:MaxPermSize=200m -jar deploy/jars/weirdcanada-admin.jar "$@"
+fi
