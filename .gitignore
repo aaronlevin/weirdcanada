@@ -1,4 +1,6 @@
 *.class
+*.key
+*.crt
 *.swp
 *.jar
 *.un~
