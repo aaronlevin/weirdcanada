@@ -11,8 +11,4 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 cd "$DIR"
 cd ..
 
-if [[ -z "$@" ]]; then
-  java -server -Xmx800m -XX:MaxPermSize=200m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSIncrementalPacing -XX:ParallelGCThreads=2 -Drun.mode=production -jar jars/weirdcanada-distro.jar
-else
-  java -server -Xmx800m -XX:MaxPermSize=200m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSIncrementalPacing -XX:ParallelGCThreads=2 -jar jars/weirdcanada-distro.jar "$@"
-fi
+java -server -Xmx512m -XX:MaxPermSize=200m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSIncrementalPacing -XX:ParallelGCThreads=2 -jar jars/weirdcanada-albumapp.jar "$@"

@@ -21,6 +21,7 @@ import org.eclipse.jetty.server.handler.ContextHandler
 import org.eclipse.jetty.server.session.SessionHandler
 import org.eclipse.jetty.servlet.{DefaultServlet, FilterHolder, FilterMapping,
 ServletContextHandler, ServletHandler}
+import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.webapp.WebAppContext
 
 // scala
@@ -55,9 +56,15 @@ abstract class WeirdCanadaServer[A : ClassTag] {
 
   // Main
   def main(args: Array[String]) {
-    val server = new Server
+
+    val tp = new QueuedThreadPool()
+    tp.setMinThreads(10)
+    tp.setMaxThreads(200)
+
+    val server = new Server(tp)
     val httpServerConnector = getHttpConnector(server)
     server.setConnectors(Array(httpServerConnector))
+
 
     val context = new ServletContextHandler(ServletContextHandler.SESSIONS)
     context.setResourceBase("src/main/resources/%s".format(webAppName))
