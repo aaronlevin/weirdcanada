@@ -28,6 +28,16 @@ mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
   }
 }
 
+jarName in assembly := "weirdcanada-site.jar"
+
+TaskKey[Unit]("build", "Assembly and copy jars") <<= (baseDirectory, assembly) map { (bDir, fatJar) =>
+  println("Copying jars")
+  println(fatJar)
+  println("===>")
+  println(bDir / "jars" / fatJar.name)
+  IO.copyFile(fatJar, bDir / "jars" / fatJar.name)
+}
+
 libraryDependencies ++= {
   val liftVersion = "2.5-RC1"
   Seq(

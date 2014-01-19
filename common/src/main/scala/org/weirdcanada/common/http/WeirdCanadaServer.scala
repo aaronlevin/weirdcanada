@@ -18,7 +18,9 @@ import org.eclipse.jetty.server.{
 , Server
 , ServerConnector }
 import org.eclipse.jetty.server.handler.ContextHandler
-import org.eclipse.jetty.servlet.{DefaultServlet, FilterHolder, FilterMapping}
+import org.eclipse.jetty.server.session.SessionHandler
+import org.eclipse.jetty.servlet.{DefaultServlet, FilterHolder, FilterMapping,
+ServletContextHandler, ServletHandler}
 import org.eclipse.jetty.webapp.WebAppContext
 
 // scala
@@ -26,8 +28,8 @@ import scala.reflect.ClassTag
 
 abstract class WeirdCanadaServer[A : ClassTag] {
 
-  // defuat should be something like src/main/webapp
-  val webAppLocation: String
+  // defualt should be something like src/main/webapp
+  val webAppName: String
 
   val classTag = implicitly[ClassTag[A]]
 
@@ -57,9 +59,14 @@ abstract class WeirdCanadaServer[A : ClassTag] {
     val httpServerConnector = getHttpConnector(server)
     server.setConnectors(Array(httpServerConnector))
 
-    val context = new WebAppContext()
-    context.setServer(server)
-    context.setWar(webAppLocation)
+    val context = new ServletContextHandler(ServletContextHandler.SESSIONS)
+    context.setResourceBase("src/main/resources/%s".format(webAppName))
+    context.setContextPath("/")
+
+    context.getServletContext.getContextHandler.setMaxFormContentSize(10000000)
+    context.getSessionHandler.getSessionManager.setSessionIdPathParameterName("none")
+    context.getSessionHandler.getSessionManager.setMaxInactiveInterval(30*60)
+
 
     // Use lift to filter all requests
     val filter = new FilterHolder(classOf[net.liftweb.http.LiftFilter])
@@ -67,9 +74,7 @@ abstract class WeirdCanadaServer[A : ClassTag] {
     context.addFilter(filter, "/*", EnumSet.of(DispatcherType.REQUEST))
     context.addServlet(classOf[DefaultServlet], "/")
 
-    val contextHandler: ContextHandler = new ContextHandler();
-    contextHandler.setHandler(context)
-    server.setHandler(contextHandler)
+    server.setHandler(context)
 
     try {
       println(">>> XXX STARTING EMBEDDED JETTY SERVER, PRESS ANY KEY TO STOP")
@@ -91,7 +96,7 @@ abstract class WeirdCanadaServer[A : ClassTag] {
 object WeirdCanadaServer {
 
   def apply[A : ClassTag](appLocation: String): WeirdCanadaServer[A] = new WeirdCanadaServer[A] {
-    lazy val webAppLocation = appLocation
+    lazy val webAppName = appLocation
   }
 
 }
