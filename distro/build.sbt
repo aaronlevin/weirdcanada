@@ -40,14 +40,16 @@ lazy val customAssemblySettings: Seq[Project.Setting[_]] =
     inTask(assembly)(mainClass := Some("org.weirdcanada.distro.server.WeirdCanadaDistroServer")) ++
     assemblyMergeSettings ++
     assemblyNoTestSetting ++
-    Seq(jarName in assembly := "weirdcanada-distro-assembly-1.0.jar")
+    Seq(jarName in assembly := "weirdcanada-distro.jar") ++
+    Seq(buildTask)
   ) ++
   inConfig(AlbumApp)(
     baseAssemblySettings ++ 
     inTask(assembly)(mainClass := Some("org.weirdcanada.distro.tools.AlbumApp")) ++
     assemblyMergeSettings ++
     assemblyNoTestSetting ++
-    Seq(jarName in assembly := "weirdcanada-albumapp-assembly-1.0.jar")
+    Seq(jarName in assembly := "weirdcanada-albumapp.jar") ++
+    Seq(buildTask)
   )
 
 seq(customAssemblySettings: _*)
@@ -66,3 +68,8 @@ libraryDependencies ++= {
   )
 }
 
+lazy val buildTask =
+  TaskKey[Unit]("build", "Assemble and copy jars") <<= (baseDirectory, assembly) map { (bDir, fatJar) =>
+    println("Copying %s\n==> %s".format(fatJar, bDir / "jars" / fatJar.name))
+    IO.copyFile(fatJar, bDir / "jars" / fatJar.name)
+  }
