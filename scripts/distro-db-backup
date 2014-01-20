@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# get current directory of script
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+source "$DIR"/bash_variables
+
+DAY=`date '+%d'`
+NOW=`date +"%Y-%m-%d"`
+BACKUP_NAME="weirdcanad-distro-db-$DAY.dump"
+
+PGPASSWORD="$PGPASSWORD" pg_dump -Fc weirdcanada -U weirdcanada > "$BACKUP_NAME"
+s3cmd put "$BACKUP_NAME" "s3://wc-dump/$BACKUP_NAME"
+if [ "$?" = 0 ]; then
+  rm "$BACKUP_NAME"
+else
+  logger "Failure uploadingb up weirdcanada db"
+fi
