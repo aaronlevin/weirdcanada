@@ -9,6 +9,7 @@ import net.liftweb.sitemap._
 import net.liftweb.sitemap.Loc._
 import net.liftweb.mapper._
 import net.liftmodules.JQueryModule
+import org.weirdcanada.distro.RestAPI
 import org.weirdcanada.distro.page._
 import org.weirdcanada.distro.data._
 import org.weirdcanada.distro.snippet._
@@ -44,6 +45,8 @@ class Boot extends Bootable with Loggable {
     val emailFactory = EmailFactory.getSslEmailFactory(config)
     val shopifyClient = ShopifyClient(config)
     val service = new Service(config, emailFactory)
+
+    val restApi = new RestAPI(service)
     
     service.DatabaseManager.connect
     service.DatabaseManager.createSchema
@@ -58,7 +61,9 @@ class Boot extends Bootable with Loggable {
     // Build SiteMap
     def sitemap = DistroSiteMapBuilder(service).toSiteMap
     LiftRules.setSiteMapFunc(() => sitemap)
-
+    
+    // Add REST API
+    LiftRules.statelessDispatch.append(restApi)
 
     LiftSession.onSetupSession = (service.SessionManager.onSessionBegin _) :: LiftSession.onSetupSession
     LiftSession.onShutdownSession = (service.SessionManager.onSessionEnd _) :: LiftSession.onShutdownSession

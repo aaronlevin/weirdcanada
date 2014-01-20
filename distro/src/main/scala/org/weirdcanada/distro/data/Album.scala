@@ -98,4 +98,42 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
   }
 
   def findByTitle(title: String): List[Album] = Album.findAll(By(Album.title, title))
+
+  /**
+   * ADT for dynamic fields
+   */
+  case class AlbumData(
+    title: String,
+    url: String,
+    description: String,
+    sku: String,
+    shopifyId: Long
+  )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

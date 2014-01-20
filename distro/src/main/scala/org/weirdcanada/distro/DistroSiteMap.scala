@@ -32,6 +32,10 @@ class DistroSiteMapBuilder(service: Service) {
         >> mustBeAdmin
         >> LocGroup("actions"),
 
+      Menu.i("Add an Album") / "admin" / "add-album"
+        >> mustBeAdmin
+        >> LocGroup("actions"),
+
       Menu.i("Request Payment") / "request-payment"
         >> mustBeLoggedIn
         >> Loc.Hidden

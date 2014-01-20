@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+<title>Accounts</title>
+</head>
+<body class="lift:content_id=main">
+<div id="main" class="lift:surround?with=default;at=content">
+<script src="/bower_components/typeahead.js/dist/typeahead.min.js" data-lift="head"></script>
+  <script type="text/javascript">
+// <![CDATA[
+  $( document ).ready(function() {
+    $('.typeahead').typeahead({
+      name: 'artists',
+      remote: '/api/artist/%QUERY'
+    });
+  });
+  $('.typeahead.input-sm').siblings('input.tt-hint').addClass('hint-small');
+  $('.typeahead.input-lg').siblings('input.tt-hint').addClass('hint-large');
+  $('.typeahead').on('typeahead:selected', function (object, datum) {
+    // Example: {type: "typeahead:selected", timeStamp: 1377890016108, jQuery203017338529066182673: true, isTrigger: 3, namespace: ""...}
+    console.log(object);
+
+    // Datum containg value, tokens, and custom properties
+    // Example: {value: "@JakeHarding", tokens: ['Jake', 'Harding'], name: "Jake Harding", profileImageUrl: "https://twitter.com/JakeHaridng/profile_img"}
+      console.log(datum);
+  });
+// ]]>
+  </script>
+  <link href="/css/typeahead.css" rel="stylesheet" data-lift="head" />
+
+
+  <h1>Add an Artist</h1>
+
+  <div>
+
+    <form class="form-horizontal" role="form">
+
+      <div class="form-group" id="artist-name">
+        <label class="col-sm-2 control-label">Name</label>
+        <div class="col-sm-10">
+          <input class="form-control typeahead" placeholder="artist name" type="text" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="hidden form-group" id="artist-name-hidden">
+        <input name="artist-id-input" type="text">
+      </div>
+
+
+    </form>
+
+  </div>
+
+
+</div>
+</body>
+</html>

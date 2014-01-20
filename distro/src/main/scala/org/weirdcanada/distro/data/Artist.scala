@@ -1,5 +1,6 @@
 package org.weirdcanada.distro.data
 
+import net.liftweb.common.{Full}
 import net.liftweb.http.js.JsCmd
 import net.liftweb.mapper._
 import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasEmpty,HasFields}
@@ -39,6 +40,9 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] {
 
   def findByName(name: String): List[Artist] =
     Artist.findAll(By(Artist.name, name))
+
+  def findByPartialName(name: String): List[Artist] = 
+    Artist.findAll(Cmp(Artist.name, OprEnum.Like, Full("%" + name + "%"), None, Full("LOWER")) )
 
   def findByGeography(city: String, province: String) =
     Artist.findAll(By(Artist.city, city), By(Artist.province, province))

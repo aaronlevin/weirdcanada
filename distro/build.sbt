@@ -64,7 +64,8 @@ libraryDependencies ++= {
     "com.h2database"    % "h2"                  % "1.3.167",
     "org.specs2"        % "specs2_2.10"         % "2.1.1"            % "test",
     "org.mockito"       % "mockito-all"         % "1.9.5"            % "test",
-    "postgresql" % "postgresql" % "9.1-901.jdbc4"
+    "postgresql"        % "postgresql"          % "9.1-901.jdbc4",
+    "io.argonaut"       %% "argonaut"           % "6.0.1"
   )
 }
 
