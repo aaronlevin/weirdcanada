@@ -1,22 +1,21 @@
 package org.weirdcanada.distro.data
 
+import net.liftweb.http.js.JsCmd
 import net.liftweb.mapper._
-import org.weirdcanada.dynamicform.{BasicField, DynamicField, HasEmpty,HasFields}
+import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasEmpty,HasFields}
+import org.weirdcanada.common.util.{Country, Province}
+import scala.xml.NodeSeq
 import scalaz.Lens
 
 class Artist extends LongKeyedMapper[Artist] with IdPK with Geography with ManyToMany {
   def getSingleton = Artist
 
-  object Type extends Enumeration {
-    type Type = Value
-    val Musician, Band, Author, Illustrator = Value // TODO: more types?
-  }
 
   object name extends MappedString(this, 64) with DBIndexed
   object url extends MappedString(this, 256)
   object description extends MappedText(this)
   object imageUrl extends MappedString(this, 256)
-  object artistType extends MappedEnum(this, Type)
+  object artistType extends MappedEnum(this, Artist.Type)
   object social extends MappedText(this)
   
   object albums extends MappedManyToMany(ArtistsAlbums, ArtistsAlbums.album, ArtistsAlbums.artist, Artist)
@@ -37,12 +36,25 @@ case class ArtistData(
 
 // The companion object to the above Class
 object Artist extends Artist with LongKeyedMetaMapper[Artist] {
+
   def findByName(name: String): List[Artist] =
     Artist.findAll(By(Artist.name, name))
 
   def findByGeography(city: String, province: String) =
     Artist.findAll(By(Artist.city, city), By(Artist.province, province))
 
+  object Type extends Enumeration {
+    type Type = Value
+    val Musician, Band, Author, Illustrator = Value // TODO: more types?
+  }
+
+  implicit object ArtistEmpty extends HasEmpty[ArtistData] {
+    val empty: ArtistData = ArtistData("","","","","Band","","","alberta","canada")
+  }
+
+  /**
+   * Setup lenses for the fields on `ArtistData`
+   */
   val artistNameLens: Lens[ArtistData, String] = Lens.lensu( (a, n) => a.copy(name = n), (a) => a.name )
   val artistUrlLens: Lens[ArtistData, String] = Lens.lensu( (a, u) => a.copy(url = u), (a) => a.url )
   val artistDescriptionLens: Lens[ArtistData, String] = Lens.lensu( (a,d) =>
@@ -58,26 +70,41 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] {
   val artistCountryLens: Lens[ArtistData, String] = Lens.lensu( (a,c) =>
       a.copy(country = c), (a) => a.country)
 
+  /**
+   * Setup custom form-fields (text areas, selects)
+   */
+  import DynamicFormFieldRenderHelpers.{textAreaRender, selectRender}
+
+  private val provinceSelectOptions: Seq[(String, String)] = Province.provinceNameTuples
+  private val countrySelectOptions: Seq[(String, String)] = Country.countryTuples
+  private val artistTypeOptions: Seq[(String, String)] =
+    Seq(("Band", "Band"),("Author", "Author"), ("Illustrator", "Illustrator"))
+
+  private val provinceSelect: ArtistData => (String => JsCmd) => (NodeSeq => NodeSeq) =
+    selectRender(artistProvinceLens.get)("name=artist-province-input")(provinceSelectOptions) _
+  private val countrySelect: ArtistData => (String => JsCmd) => (NodeSeq => NodeSeq) =
+    selectRender(artistCountryLens.get)("name=artist-country-input")(countrySelectOptions) _
+  private val artistTypeSelect: ArtistData => (String => JsCmd) => (NodeSeq => NodeSeq) =
+    selectRender(artistTypeLens.get)("name=artist-type-input")(artistTypeOptions) _
+
+  private val descriptionTextArea = textAreaRender(artistDescriptionLens.get)("name=artist-description-input")("Description") _
+
   implicit object ArtistDataFields extends HasFields[ArtistData] {
     val fields: List[DynamicField[ArtistData]] = List(
       BasicField[ArtistData]("artist-name", artistNameLens),
       BasicField[ArtistData]("artist-url", artistUrlLens),
-      BasicField[ArtistData]("artist-description", artistDescriptionLens),
+      BasicField[ArtistData]("artist-description", artistDescriptionLens, Some(descriptionTextArea)),
       BasicField[ArtistData]("artist-image-url", artistImageUrlLens),
-      BasicField[ArtistData]("artist-type", artistTypeLens),
+      BasicField[ArtistData]("artist-type", artistTypeLens, Some(artistTypeSelect)),
       BasicField[ArtistData]("artist-social", artistSocialLens),
       BasicField[ArtistData]("artist-city", artistCityLens),
-      BasicField[ArtistData]("artist-province", artistProvinceLens),
-      BasicField[ArtistData]("artist-country", artistCountryLens)
+      BasicField[ArtistData]("artist-province", artistProvinceLens, Some(provinceSelect)),
+      BasicField[ArtistData]("artist-country", artistCountryLens, Some(countrySelect))
     )
   }
 
-  implicit object ArtistEmpty extends HasEmpty[ArtistData] {
-    val empty: ArtistData = ArtistData("","","","","","","","","")
-  }
-
   def fromData(data: ArtistData): Option[Artist] = {
-    val artistType = try {
+    val artistType: Option[Type.Type] = try {
       Some(Type.withName(data.artistType))
     } catch {
       case e: java.util.NoSuchElementException =>
@@ -92,7 +119,7 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] {
       .url(data.url)
       .description(data.description)
       .imageUrl(data.imageUrl)
-      //.artistType(t.value)
+      .artistType(t)
       .social(data.social)
       .city(data.city)
       .province(data.province)

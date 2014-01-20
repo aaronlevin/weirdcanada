@@ -1,6 +1,7 @@
 package org.weirdcanada.distro.page
 
 import net.liftweb.http.{DispatchSnippet, SHtml}
+import net.liftweb.util.ClearNodes
 import net.liftweb.util.Helpers._
 import net.liftweb.http.RequestVar
 import net.liftweb.http.js._
@@ -14,25 +15,26 @@ import org.weirdcanada.common.util.{Country, Province}
 import org.weirdcanada.distro.data.{Account, Artist, ArtistData, UserRole}
 import org.weirdcanada.distro.service.Service
 import org.weirdcanada.dynamicform.{DynamicFormCreator, HasEmpty}
-import scala.xml.Text
+import scala.xml.{NodeSeq, Text}
 
 class AddArtistPage(service: Service) extends DynamicFormCreator with DispatchSnippet {
 
   import Artist._
 
+
+  /** Dynamic Field stuff
+   */
   private object artistState extends RequestVar[ArtistData](implicitly[HasEmpty[ArtistData]].empty)
-
   def updateState = getUpdateAndSaveFuncForField[ArtistData](artistState)
-
   val renderFunction = renderField(artistState)
 
   /**
    * Function to save the artist
    */
-  val saveArtistFunc: () => JsCmd = () => {
+  private def saveArtistCombinator(setHtmlId: String, nodes: NodeSeq): () => JsCmd = () => {
     val data = artistState.is
     lazy val otherArtists = Artist.findByName(data.name)
-    lazy val newArtist = Artist.fromData(artistState.is) match {
+    lazy val newArtistJs = Artist.fromData(artistState.is) match {
       case None =>
         val msg = "Incorrect type (or other error)"
         val runString = """var yadda =
@@ -49,22 +51,32 @@ class AddArtistPage(service: Service) extends DynamicFormCreator with DispatchSn
         JsCmds.Run(runString)
 
     }
-
     if(otherArtists.isEmpty)
-      newArtist
+      newArtistJs
     else {
-      JsCmds.SetHtml("artist-save-error", (
-        "@newfield" #> SHtml.ajaxButton("Artist Already Exists: OK?", () => newArtist) &
-        "@cancelfield" #> SHtml.ajaxButton("Cancel", () => JsCmds.SetHtml("artist-save-error", Text(""))
+      JsCmds.Replace(setHtmlId, (
+        "@artist-save-group" #> ClearNodes & 
+        "@artist-duplicate-confirm" #> SHtml.ajaxButton(
+          "Artist Already Exists: OK?", 
+          () => newArtistJs & JsCmds.After(1500, JsCmds.SetHtml("artist-confirm-save", Text("")))
+        ) &
+        "@artist-cancel-save" #> SHtml.ajaxButton("Cancel", () => JsCmds.SetHtml("artist-confirm-save", Text(""))
       )).apply(
-        <span name="newfield"></span><span name="cancelfield"></span>
+        nodes
       ))
     }
 
   }
 
+  /**
+   * We explicitly pass the NodeSeq in to the save command so we can render the
+   * button below it
+   */
   def render = renderFunction andThen {
-    "@artist-save" #> SHtml.ajaxButton("save", saveArtistFunc, "onmouseup" -> "$('.error').remove(); $('.has-error').removeClass('has-error');")
+    "@artist-save-and-confirm" #>  { (ns: NodeSeq) =>
+      ("@artist-save" #> SHtml.ajaxButton("save", saveArtistCombinator("artist-confirm-save", ns)) &
+      "@artist-confirm-save *" #> ClearNodes)(ns)
+    }
   }
 
   def dispatch = {
