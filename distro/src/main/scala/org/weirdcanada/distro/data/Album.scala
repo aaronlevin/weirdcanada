@@ -1,6 +1,10 @@
 package org.weirdcanada.distro.data
 
 import net.liftweb.mapper._
+import org.weirdcanada.common.util.StringParsingUtil
+import StringParsingUtil.safeParse
+import org.weirdcanada.dynamicform.{BasicField, DynamicField, HasFields, HasEmpty, ManyRecordField}
+import scalaz.Lens
 
 class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToMany[Long, Album] {
   def getSingleton = Album
@@ -89,6 +93,26 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
       )
 }
 
+/**
+ * ADT for dynamic fields
+ */
+case class AlbumData(
+  title: String,
+  url: String,
+  description: String,
+  sku: String,
+  shopifyId: Long,
+  format: String,
+  isFirstPressing: Boolean,
+  releaseYear: Int,
+  catalogNumber: String,
+  imageUrl: String,
+  additionalImageUrls: List[String],
+  artistIds: List[Long],
+  publisherIds: List[Long],
+  tracks: Map[Int, TrackData]
+)
+
 // The companion object to the above Class
 object Album extends Album with LongKeyedMetaMapper[Album] {
 
@@ -100,40 +124,79 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
   def findByTitle(title: String): List[Album] = Album.findAll(By(Album.title, title))
 
   /**
-   * ADT for dynamic fields
+   * Lenses for dynamic fields
    */
-  case class AlbumData(
-    title: String,
-    url: String,
-    description: String,
-    sku: String,
-    shopifyId: Long
-  )
+  private val albumTitleLens: Lens[AlbumData, String] = Lens.lensu( (a, t) => a.copy(title = t), (a) => a.title )
+  private val albumUrlLens: Lens[AlbumData, String] = Lens.lensu( (a, u) => a.copy(url = u), (a) => a.url )
+  private val albumDescriptionLens: Lens[AlbumData, String] = Lens.lensu( (a, d) => a.copy(description = d), (a) => a.description )
+  private val albumSkuLens: Lens[AlbumData, String] = Lens.lensu( (a, s) => a.copy(sku = s), (a) => a.sku )
+  private val albumShopifyIdLens: Lens[AlbumData, String] = 
+    Lens.lensu( (a, s) => a.copy(shopifyId = safeParse[Long](s).getOrElse { 0L }), (a) => a.shopifyId.toString )
+  private val albumFormatLens: Lens[AlbumData, String] = Lens.lensu( (a,f) => a.copy(format = f), (a) => a.format )
+  private val albumPressingLens: Lens[AlbumData, String] = 
+    Lens.lensu( (a,p) => a.copy(isFirstPressing = safeParse[Boolean](p).getOrElse { true }), (a) => a.isFirstPressing.toString)
+  private val albumReleaseYearLens: Lens[AlbumData, String] = 
+    Lens.lensu( (a,r) => a.copy(releaseYear = safeParse[Int](r).getOrElse { 0 }), (a) => a.releaseYear.toString )
+  private val albumCatalogNumberLens: Lens[AlbumData, String] = Lens.lensu( (a,c) => a.copy(catalogNumber = c), (a) => a.catalogNumber)
+  private val albumImageUrlLens: Lens[AlbumData, String] = Lens.lensu( (a,i) => a.copy(imageUrl = i), (a) => a.imageUrl )
+  private val albumAdditionalImageUrlsLens: Lens[AlbumData, String] =
+    Lens.lensu( (a,is) => a.copy(additionalImageUrls = is.split(',').toList.map { _.trim }), (a) => a.additionalImageUrls.mkString(","))
+  private val albumArtistIdsLens: Lens[AlbumData, String] =
+    Lens.lensu( 
+      (a,is) => a.copy(artistIds = is.split(',').toList.flatMap { safeParse[Long] }),
+      (a) => a.artistIds.mkString(",")
+    )
+  private val albumPublisherIdsLens: Lens[AlbumData, String] = Lens.lensu( 
+      (a,is) => a.copy(publisherIds = is.split(',').toList.flatMap { safeParse[Long] }),
+      (a) => a.publisherIds.mkString(",")
+    )
 
+  private val albumTracksLens: Lens[AlbumData, Map[Int, TrackData]] = Lens.lensu((a,t) => a.copy(tracks = t), (a) => a.tracks)
 
+  import Track._
 
+  /**
+   * Witness to the `HasFields` type class
+   */
+  implicit object AlbumDataFields extends HasFields[AlbumData] {
+    val fields: List[DynamicField[AlbumData]] = List(
+      BasicField[AlbumData]("album-title", albumTitleLens),
+      BasicField[AlbumData]("album-url", albumUrlLens),
+      BasicField[AlbumData]("album-description", albumDescriptionLens),
+      BasicField[AlbumData]("album-sku", albumSkuLens),
+      BasicField[AlbumData]("album-shopifyid", albumShopifyIdLens),
+      BasicField[AlbumData]("album-format", albumFormatLens),
+      BasicField[AlbumData]("album-pressing", albumPressingLens),
+      BasicField[AlbumData]("album-releaseyear", albumReleaseYearLens),
+      BasicField[AlbumData]("album-catalognumber", albumCatalogNumberLens),
+      BasicField[AlbumData]("album-imageurl", albumImageUrlLens),
+      BasicField[AlbumData]("album-additionalimageurls", albumAdditionalImageUrlsLens),
+      BasicField[AlbumData]("album-artistids", albumArtistIdsLens),
+      BasicField[AlbumData]("album-publisherids", albumPublisherIdsLens),
+      ManyRecordField[AlbumData, TrackData]("album-track", albumTracksLens)
+    )
+  }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  /**
+   * Witness to the HasEmpty typeclass
+   */
+  implicit object AlbumDataEmpty extends HasEmpty[AlbumData] {
+    val empty = AlbumData(
+      title = "",
+      url = "",
+      description = "",
+      sku = "",
+      shopifyId = 0,
+      format = "",
+      isFirstPressing = true,
+      releaseYear = 0,
+      catalogNumber = "",
+      imageUrl = "",
+      additionalImageUrls = Nil,
+      artistIds = Nil,
+      publisherIds = Nil,
+      tracks = Map.empty[Int, TrackData]
+    )
+  }
 
 }
