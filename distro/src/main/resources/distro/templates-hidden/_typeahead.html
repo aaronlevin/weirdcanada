@@ -1,0 +1,42 @@
+<div>
+
+  <div class="form-group" name="typeahead">
+    <label class="col-sm-2 control-label" name="typeahead-label">typeahead Label</label>
+    <div class="col-sm-8">
+      <input class="form-control" type="text" name="typeahead-input">
+    </div>
+    <div class="col-sm-2">
+      <!-- Button to trigger modal -->
+      <button type="button" name="typeahead-modal-button" data-toggle="modal" data-target="#myModal">Add</button>
+    </div>
+  </div>
+
+  <!-- Modal for new form -->
+  <div class="modal fade" id="myModal" name="typeahead-modal" role="dialog"> 
+
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel" name="typeahead-modal-title">Title</h4>
+        </div>
+        <div class="modal-body">
+          <div name="typeahead-modal-form"></div> 
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" name="typeahead-modal-save">Save changes</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Hidden form to capture id -->
+  <div name="typeahead-hidden" class="hidden">
+    <input type="text" name="typeahead-hidden-input">
+  </div>
+
+
+</div>
+

@@ -1,7 +1,7 @@
 package org.weirdcanada.dynamicform
 
 // Scala
-import scala.xml.{NodeSeq, Text}
+import scala.xml.{NodeSeq, Text, Unparsed}
 
 // Lift
 import net.liftweb._
@@ -233,6 +233,61 @@ case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens
         makeNameAdd(None, name) #> addRecordMemoize &
         makeNameAdd(None, name) #> items.map { case (i, b) => renderAtIndex(i) } &
         "#%s-elements [id]".format(label(None, name)) #> "%s-elements".format(label(outerName, name))
+    }
+
+  }
+}
+
+/**
+ * Typeahead field with Modal-add support (whoop!). If the item doesn't appear in the Typeahead results, add it!
+ *
+ * @param name The name of the field
+ * @param typeaheadLabel the label that will appear at the typeahead
+ * @param template For type `B`, what to do with B once we've added it.
+ * @param lens Quite often you'll need to send an ID from the result of the Typeahead into a hidden form field. This 
+ * lens should 'lens' over that field.
+ * @param sideEffectB what do we do with B after we've added a new one? We're passed a function that can curry over the `uid` in-case we want to update a template. 
+ */
+case class TypeaheadField[A, B : HasFields : HasEmpty](
+  name: String, 
+  typeaheadLabel: String, 
+  template: List[String], 
+  sideEffectB: String => B => JsCmd,
+  lens: Lens[A,String]
+) extends DynamicField[A] with DynamicFormCreator {
+
+  import DynamicField.{FormStateUpdate, label, makeName}
+
+  def render[C](formStateUpdater: FormStateUpdate[C], state: C)(outerLens: Lens[C,A], outerName: Option[String]): NodeSeq => NodeSeq = {
+
+    val fullLens = outerLens >=> lens
+
+    def updateFunc(state: C)(string: String): C = fullLens.set(state,string) 
+    def getFunc(state: C): String = fullLens.get(state)
+
+    val jsCmd = () => Noop
+    val fieldUpdateFunc = formStateUpdater(updateFunc)(jsCmd)
+    val uid = label(outerName, name)
+
+    /**
+     * For the B form we need to pretend like this is a new Snippet
+     */
+    object bState extends RequestVar[B](implicitly[HasEmpty[B]].empty)
+    def bUpdateState = getUpdateAndSaveFuncForField[B](bState)
+    val bRenderFunction = renderField(bState)
+
+    makeName(outerName, name) #> {
+      "@typeahead-label *" #> typeaheadLabel &
+      "@typeahead-input [id]" #> uid &
+      "@typeahead-modal-button [data-target]" #> "#%s-modal".format(uid) &
+      "@typeahead-modal [id]" #> "%s-modal".format(uid) &
+      "@typeahead-modal-save" #> SHtml.ajaxButton("Save", () => sideEffectB(uid)(bState.is)) &
+      "@typeahead-hidden-input" #>  SHtml.ajaxText("", false, fieldUpdateFunc, "id" -> (uid + "-hidden")) &
+      "@typeahead-modal-form" #> Templates(template).map { bRenderFunction } andThen { (ns: NodeSeq) => 
+        ns ++ <script>{Unparsed(""" 
+          wc.typeaheadWrapper('#%s', function(datum) { $('#%s-hidden').val(datum.id); $('#%s-hidden').blur(); }, '/api/artist/%%QUERY');
+        """.format(uid, uid, uid))}</script>
+      }
     }
 
   }

@@ -29,3 +29,17 @@ For a sub-form named `NAME`:
 
 
 The idea is it keep only the most basic things in the embeded form (i.e. fields). The rest of the chrome resides outside. 
+
+## Convention for Typeahead Forms
+
+There now includes a TYpeahead form for data types that have a One-To-Many relationship with another data type. These forms produce a typeahead form field that will search an API end-point for an item using Twitter's [Typeahead](http://twitter.github.io/typeahead.js/) library. It makes the following assumptions:
+
+- Datums returned from typeahead include an `id` member. 
+- You provide a lens `Lens[String, A]` where the string is the id member of the datum (quite often some kind of id).
+- Given the `name` of your `TypeaheadField` you use the following template in your form:
+
+    <div name="NAME">
+      <div data-lift="embed?what=_typeahead"></div>
+    </div>
+
+- You also provide a method to do the side effect for when you need to add a new ember (i.e. when the typeahead search doesn't result in anything).
