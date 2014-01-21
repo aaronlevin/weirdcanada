@@ -3,7 +3,7 @@ package org.weirdcanada.distro.data
 import net.liftweb.mapper._
 import org.weirdcanada.common.util.StringParsingUtil
 import StringParsingUtil.safeParse
-import org.weirdcanada.dynamicform.{BasicField, DynamicField, HasFields, HasEmpty, ManyRecordField}
+import org.weirdcanada.dynamicform.{BasicField, DynamicField, HasFields, HasEmpty, ManyRecordField, TypeaheadField}
 import scalaz.Lens
 
 class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToMany[Long, Album] {
@@ -154,6 +154,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
   private val albumTracksLens: Lens[AlbumData, Map[Int, TrackData]] = Lens.lensu((a,t) => a.copy(tracks = t), (a) => a.tracks)
 
   import Track._
+  import Artist._
 
   /**
    * Witness to the `HasFields` type class
@@ -173,7 +174,14 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
       BasicField[AlbumData]("album-additionalimageurls", albumAdditionalImageUrlsLens),
       BasicField[AlbumData]("album-artistids", albumArtistIdsLens),
       BasicField[AlbumData]("album-publisherids", albumPublisherIdsLens),
-      ManyRecordField[AlbumData, TrackData]("album-track", albumTracksLens)
+      ManyRecordField[AlbumData, TrackData]("album-track", albumTracksLens),
+      TypeaheadField[AlbumData, ArtistData](
+        name = "album-artist", 
+        typeaheadLabel = "Add Artist", 
+        template = "templates-hidden" :: "_add_artist" :: Nil, 
+        sideEffectB = insertArtistSideEffect,
+        lens = albumTitleLens
+      )
     )
   }
 

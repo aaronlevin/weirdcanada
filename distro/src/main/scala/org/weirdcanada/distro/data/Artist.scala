@@ -1,10 +1,11 @@
 package org.weirdcanada.distro.data
 
 import net.liftweb.common.{Full}
-import net.liftweb.http.js.JsCmd
+import net.liftweb.http.js.{JsCmd, JsCmds}
 import net.liftweb.mapper._
 import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasEmpty,HasFields}
-import org.weirdcanada.common.util.{Country, Province}
+import org.weirdcanada.common.util.{Country, Province, StringParsingUtil}
+import StringParsingUtil.safeParse
 import scala.xml.NodeSeq
 import scalaz.Lens
 
@@ -23,6 +24,9 @@ class Artist extends LongKeyedMapper[Artist] with IdPK with Geography with ManyT
   object publishers extends MappedManyToMany(ArtistsPublishers, ArtistsPublishers.publisher, ArtistsPublishers.artist, Artist)
 }
 
+/**
+ * ADT for Artist data
+ */
 case class ArtistData(
   name: String, 
   url: String, 
@@ -34,6 +38,11 @@ case class ArtistData(
   province: String,
   country: String
 )
+
+/**
+ * ADT for Autocomplete artist data (used in dynamic form)
+ */
+case class ArtistAutocompleteData(id: Long)
 
 // The companion object to the above Class
 object Artist extends Artist with LongKeyedMetaMapper[Artist] {
@@ -56,6 +65,10 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] {
     val empty: ArtistData = ArtistData("","","","","Band","","","alberta","canada")
   }
 
+  implicit object ArtistAutocompleteEmpty extends HasEmpty[ArtistAutocompleteData] {
+    val empty = ArtistAutocompleteData(0)
+  }
+
   /**
    * Setup lenses for the fields on `ArtistData`
    */
@@ -75,6 +88,12 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] {
       a.copy(country = c), (a) => a.country)
 
   /**
+   * Setup lenses for ArtistAutocomplete
+   */
+  val artistAutocompleteIdLens: Lens[ArtistAutocompleteData, String] = 
+    Lens.lensu( (a,s) => a.copy(id = safeParse[Long](s).getOrElse{ 0L }), (a) => a.id.toString )
+
+  /**
    * Setup custom form-fields (text areas, selects)
    */
   import DynamicFormFieldRenderHelpers.{textAreaRender, selectRender}
@@ -84,11 +103,11 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] {
   private val artistTypeOptions: Seq[(String, String)] =
     Seq(("Band", "Band"),("Author", "Author"), ("Illustrator", "Illustrator"))
 
-  private val provinceSelect: ArtistData => (String => JsCmd) => (NodeSeq => NodeSeq) =
+  private val provinceSelect: String => ArtistData => (String => JsCmd) => (NodeSeq => NodeSeq) =
     selectRender(artistProvinceLens.get)("name=artist-province-input")(provinceSelectOptions) _
-  private val countrySelect: ArtistData => (String => JsCmd) => (NodeSeq => NodeSeq) =
+  private val countrySelect: String => ArtistData => (String => JsCmd) => (NodeSeq => NodeSeq) =
     selectRender(artistCountryLens.get)("name=artist-country-input")(countrySelectOptions) _
-  private val artistTypeSelect: ArtistData => (String => JsCmd) => (NodeSeq => NodeSeq) =
+  private val artistTypeSelect: String => ArtistData => (String => JsCmd) => (NodeSeq => NodeSeq) =
     selectRender(artistTypeLens.get)("name=artist-type-input")(artistTypeOptions) _
 
   private val descriptionTextArea = textAreaRender(artistDescriptionLens.get)("name=artist-description-input")("Description") _
@@ -104,6 +123,15 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] {
       BasicField[ArtistData]("artist-city", artistCityLens),
       BasicField[ArtistData]("artist-province", artistProvinceLens, Some(provinceSelect)),
       BasicField[ArtistData]("artist-country", artistCountryLens, Some(countrySelect))
+    )
+  }
+
+  /**
+   * For the ArtistAutocomplete we want to render it in a certain way
+   */
+  implicit object ArtistAutocompleteDataFields extends HasFields[ArtistAutocompleteData] {
+    val fields: List[DynamicField[ArtistAutocompleteData]] = List(
+      BasicField[ArtistAutocompleteData]("artist-autocomplete-id", artistAutocompleteIdLens)
     )
   }
 
@@ -130,5 +158,13 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] {
       .country(data.country)
       .saveMe
     }
+  }
+
+  /**
+   * For use in Typeahead forms
+   */
+  def insertArtistSideEffect(uid: String)(data: ArtistData): JsCmd = fromData(data) match {
+    case None => JsCmds.Alert("failed to insert artist")
+    case Some(a) => JsCmds.Alert("Succesfully inserted artist with Id: %s".format(a.id.is))
   }
 }

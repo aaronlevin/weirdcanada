@@ -23,5 +23,6 @@ object SnippetDispatch {
     case "PageView" | "pageview" => new PageViewSnippet(service)
     case "HasRole" | "hasrole" => new HasRoleSnippet(service)
     case "AddArtistPage" => new AddArtistPage(service)
+    case "AddAlbumPage" => new AddAlbumPage(service)
   }
 }

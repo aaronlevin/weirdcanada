@@ -1,7 +1,12 @@
 package org.weirdcanada.distro.data
 
-import net.liftweb.mapper._
 import java.math.MathContext
+import net.liftweb.mapper._
+import org.weirdcanada.common.util.StringParsingUtil
+import StringParsingUtil.safeParse
+import org.weirdcanada.dynamicform.{BasicField, DynamicField, HasFields, HasEmpty}
+import scalaz.Lens
+
 
 class Track extends LongKeyedMapper[Track] with IdPK {
   def getSingleton = Track
@@ -15,5 +20,41 @@ class Track extends LongKeyedMapper[Track] with IdPK {
   object album extends MappedLongForeignKey(this, Album)
 }
 
+/**
+ * ADT for track data
+ */
+case class TrackData(name: String, number: Int, url: String, s3Url: String)
+
 // The companion object to the above Class
-object Track extends Track with LongKeyedMetaMapper[Track]
+object Track extends Track with LongKeyedMetaMapper[Track] {
+
+
+  /**
+   * Lenses for Dynamic Fields
+   */
+  val trackNameLens: Lens[TrackData, String] = Lens.lensu( (t,n) => t.copy(name = n), (t) => t.name )
+  val trackNumberLens: Lens[TrackData, String] = 
+    Lens.lensu( (t,n) => t.copy(number = safeParse[Int](n).getOrElse { 0 }), (t) => t.number.toString )
+  val trackUrlLens: Lens[TrackData, String] = Lens.lensu( (t,u) => t.copy(url = u), (t) => t.url )
+  val trackS3UrlLens: Lens[TrackData, String] = Lens.lensu( (t,u) => t.copy(s3Url = u), (t) => t.s3Url )
+
+  /**
+   * Witness to the `HasFields` Type Class
+   */
+  implicit object TrackDataFields extends HasFields[TrackData] {
+    val fields: List[DynamicField[TrackData]] = List(
+      BasicField[TrackData]("track-name", trackNameLens),
+      BasicField[TrackData]("track-number", trackNumberLens),
+      BasicField[TrackData]("track-url", trackUrlLens),
+      BasicField[TrackData]("track-s3url", trackS3UrlLens)
+    )
+  }
+
+  /**
+   * Witness to the `HasEmpty` type class
+   */
+  implicit object TrackDataEmpty extends HasEmpty[TrackData] {
+    val empty = TrackData("", 0, "", "")
+  }
+}
+

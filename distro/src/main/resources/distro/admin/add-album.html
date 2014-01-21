@@ -14,44 +14,164 @@
       name: 'artists',
       remote: '/api/artist/%QUERY'
     });
-  });
-  $('.typeahead.input-sm').siblings('input.tt-hint').addClass('hint-small');
-  $('.typeahead.input-lg').siblings('input.tt-hint').addClass('hint-large');
-  $('.typeahead').on('typeahead:selected', function (object, datum) {
-    // Example: {type: "typeahead:selected", timeStamp: 1377890016108, jQuery203017338529066182673: true, isTrigger: 3, namespace: ""...}
-    console.log(object);
+    $('.typeahead.input-sm').siblings('input.tt-hint').addClass('hint-small');
+    $('.typeahead.input-lg').siblings('input.tt-hint').addClass('hint-large');
+    $('.typeahead').on('typeahead:selected', function (object, datum) {
+      // Example: {type: "typeahead:selected", timeStamp: 1377890016108, jQuery203017338529066182673: true, isTrigger: 3, namespace: ""...}
+      console.log(object);
 
-    // Datum containg value, tokens, and custom properties
-    // Example: {value: "@JakeHarding", tokens: ['Jake', 'Harding'], name: "Jake Harding", profileImageUrl: "https://twitter.com/JakeHaridng/profile_img"}
+      // Datum containg value, tokens, and custom properties
+      // Example: {value: "@JakeHarding", tokens: ['Jake', 'Harding'], name: "Jake Harding", profileImageUrl: "https://twitter.com/JakeHaridng/profile_img"}
       console.log(datum);
+
+      var currentArtistsInput = document.getElementById("album-artistids-input");
+      var currentArtists = currentArtistsInput.value;
+      if ( currentArtists == "" || currentArtists === undefined ) {
+        currentArtistsInput.value = datum.id;
+      } else {
+        currentArtistsInput.value = currentArtists + "," + datum.id;
+      }
+      $("#album-artistids-input").blur();
+    });
   });
 // ]]>
   </script>
   <link href="/css/typeahead.css" rel="stylesheet" data-lift="head" />
 
+  <script src="/bower_components/bootstrap-sass/js/modal.js" data-lift="head"></script>
 
-  <h1>Add an Artist</h1>
+  <h1>Add an Album</h1>
 
   <div>
 
-    <form class="form-horizontal" role="form">
+    <form class="form-horizontal" role="form" data-lift="AddAlbumPage.render?eager_eval=true">
 
-      <div class="form-group" id="artist-name">
-        <label class="col-sm-2 control-label">Name</label>
-        <div class="col-sm-10">
+     <div class="form-group" id="artist-name">
+        <label class="col-sm-2 control-label">Artist</label>
+        <div class="col-sm-8">
           <input class="form-control typeahead" placeholder="artist name" type="text" autocomplete="off">
+        </div>
+        <div class="col-sm-2">
+          <button type="submit">Add Artist</button>
         </div>
       </div>
 
-      <div class="hidden form-group" id="artist-name-hidden">
-        <input name="artist-id-input" type="text">
+      <div class="form-group" id="album-title">
+        <label class="col-sm-2 control-label">Title</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" id="album-title-input" name="album-title-input">
+        </div>
+      </div>
+
+      <div class="form-group" id="album-url">
+        <label class="col-sm-2 control-label">Album URL</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" name="album-url-input">
+        </div>
+      </div>
+
+      <div class="form-group" id="album-description">
+        <label class="col-sm-2 control-label">Description</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" name="album-description-input">
+        </div>
+      </div>
+
+      <div class="form-group" id="album-sku">
+        <label class="col-sm-2 control-label">SKU</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" name="album-sku-input">
+        </div>
+      </div>
+
+      <div class="form-group" id="album-shopifyid">
+        <label class="col-sm-2 control-label">ShopifyId</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" name="album-shopifyid-input">
+        </div>
+      </div>
+
+      <div class="form-group" id="album-format">
+        <label class="col-sm-2 control-label">Format</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" name="album-format-input">
+        </div>
+      </div>
+
+      <div class="form-group" id="album-pressing">
+        <label class="col-sm-2 control-label">First Pressing?</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" name="album-pressing-input">
+        </div>
+      </div>
+
+      <div class="form-group" id="album-releaseyear">
+        <label class="col-sm-2 control-label">Release Year</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" name="album-releaseyear-input">
+        </div>
+      </div>
+
+      <div class="form-group" id="album-catalognumber">
+        <label class="col-sm-2 control-label">Catalog Number</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" name="album-catalognumber-input">
+        </div>
+      </div>
+
+      <div class="form-group" id="album-additionalimageurls">
+        <label class="col-sm-2 control-label">Additional Image Urls</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" name="album-additionalimageurls-input">
+        </div>
+      </div>
+
+      <div class="form-group hidden" id="album-artistids">
+        <label class="col-sm-2 control-label">Artist Ids</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" id="album-artistids-input" name="album-artistids-input">
+        </div>
+      </div>
+
+      <div class="form-group" id="album-publisherids">
+        <label class="col-sm-2 control-label">Publisher Ids</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" name="album-publisherids-input">
+        </div>
+      </div>
+
+      <div name="album-artist">
+        <div data-lift="embed?what=_typeahead"></div>
       </div>
 
 
+      <div name="add-album-track" class="panel panel-default">
+
+        <!-- MANY ONLY: the name of the sub-form, with number for iteration -->
+        <div class="panel-heading">
+          <h4>Track #<span name="album-track-number">0</span></h4>
+        </div>
+
+        <div class="panel-body">
+          <!-- needed on all sub-forms -->
+
+          <div data-lift="embed?what=_add_track"></div>
+
+
+          <div class="col-sm-4 col-sm-offset-2">
+            <!-- MANY ONLY -->
+            <p><button type="button" name="album-track-add">+</button> | <button type="button" name="album-track-remove">-</button></p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- MANY ONLY -->
+      <div id="album-track-elements"></div>
+      
     </form>
 
   </div>
-
 
 </div>
 </body>
