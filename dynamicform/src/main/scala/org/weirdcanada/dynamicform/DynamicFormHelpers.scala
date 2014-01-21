@@ -88,10 +88,10 @@ trait DynamicFormHelpers {
 
 object DynamicFormFieldRenderHelpers {
 
-  def textAreaRender[A](accessor: A => String)(selector: String)(filler: String)(current: A)(updateFunc: String => JsCmd): NodeSeq => NodeSeq =
+  def textAreaRender[A](accessor: A => String)(selector: String)(filler: String)(uid: String)(current: A)(updateFunc: String => JsCmd): NodeSeq => NodeSeq =
     selector #> SHtml.ajaxTextarea(accessor(current), updateFunc, "placeholder" -> filler, "class" -> "form-control")
 
-  def selectRender[A](accessor: A => String)(selector: String)(selectOptions: Seq[(String,String)])(current: A)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = {
+  def selectRender[A](accessor: A => String)(selector: String)(selectOptions: Seq[(String,String)])(uid: String)(current: A)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = {
     val currentValue: Box[String] = accessor(current) match {
       case "" => Empty
       case value @ _ => Full(value)

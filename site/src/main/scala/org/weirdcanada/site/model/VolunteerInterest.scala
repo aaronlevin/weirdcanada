@@ -66,7 +66,7 @@ object VolunteerInterest {
      ("music-sourcing", "Music Sourcing")
    )
   
-  private def interestsSelectRenderer(current: VolunteerInterest)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = {
+  private def interestsSelectRenderer(uid: String)(current: VolunteerInterest)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = {
     val currentValue: Box[String] = volunteerInterestInterestLens.get(current) match {
       case "" => Empty
       case int @ _ => Full(int)

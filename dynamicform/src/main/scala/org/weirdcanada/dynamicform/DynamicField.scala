@@ -43,7 +43,7 @@ sealed trait DynamicField[A] {
  * @param name The name of the field
  * @param lens a lens from the field type `A` to String (for updating the field from string input)
  */
-case class BasicField[A](name: String, lens: Lens[A,String], transformer: Option[A => (String => JsCmd) => (NodeSeq => NodeSeq)] = None) extends DynamicField[A] {
+case class BasicField[A](name: String, lens: Lens[A,String], transformer: Option[String => A => (String => JsCmd) => (NodeSeq => NodeSeq)] = None) extends DynamicField[A] {
   import DynamicField.{makeName,makeNameAdd,makeInput, FormStateUpdate, label}
 
   /*
@@ -77,8 +77,8 @@ case class BasicField[A](name: String, lens: Lens[A,String], transformer: Option
     val jsCmd = () => Noop
     val fieldUpdateFunc: String => JsCmd = formStateUpdater(updateFunc)(jsCmd)
     transformer match {
-      case None => BasicField.defaultTransformer(name, fieldUpdateFunc, getFunc(state))
-      case Some(transformer) => transformer(outerLens.get(state))(fieldUpdateFunc)
+      case None => BasicField.defaultTransformer(outerName, name, fieldUpdateFunc, getFunc(state))
+      case Some(transformer) => transformer(label(outerName, name))(outerLens.get(state))(fieldUpdateFunc)
     }
   }
 }
@@ -88,10 +88,13 @@ case class BasicField[A](name: String, lens: Lens[A,String], transformer: Option
  */
 object BasicField {
 
-  import DynamicField.{makeInput}
+  import DynamicField.{makeInput, label}
 
-  def defaultTransformer(name: String, updateFunc: String => JsCmd, value: => String): NodeSeq => NodeSeq = 
-    makeInput(None, name) #> SHtml.ajaxText("", updateFunc, "value" -> value) 
+  def defaultTransformer(outerName: Option[String], name: String, updateFunc: String => JsCmd, value: => String): NodeSeq => NodeSeq = {
+    val inputName = makeInput(None, name)
+    val uid = label(outerName, name)
+    inputName #> SHtml.ajaxText("", updateFunc, "value" -> value, "id" -> uid) 
+  }
 
 }
 
@@ -138,7 +141,7 @@ case class RecordField[A, B : HasFields](name: String, lens: Lens[A,B]) extends 
  * @param indexedChromeRendering a function to render the visual data surrounding the many record field (updates for each entry)
  */
 case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens[A, Map[Int,B]], indexedChromeRendering: Option[Int => (NodeSeq => NodeSeq)] = None) extends DynamicField[A] {
-  import DynamicField.{makeAdd, makeName, makeNameAdd, label, FormStateUpdate,optionLens}
+  import DynamicField.{makeAdd, makeName, makeNameAdd, indexedLabel, label, FormStateUpdate,optionLens}
   val bRecord = implicitly[HasFields[B]]
 
   /*
@@ -210,7 +213,7 @@ case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens
         .fields
         .foldLeft( identity[NodeSeq]_ ){ (acc, field) =>
            val newLens: Lens[C, B] = lensAtIndex(index)
-           acc andThen field.render(formStateUpdater, state)(newLens, Some(label(outerName,name)))
+           acc andThen field.render(formStateUpdater, state)(newLens, Some(indexedLabel(outerName,index, name)))
          } andThen
       makeName(None, "%s-add [onclick]".format(name)) #> SHtml.onEvent( (s: String) => addNewRecordForm(index+1)() ) &
       makeName(None, "%s-remove [onclick]".format(name)) #> SHtml.onEvent( (s: String) => removeRecordFromForm(index)(s) )
@@ -242,8 +245,14 @@ object DynamicField {
         
   type FormStateUpdate[A] = (A => String => A) => (() => JsCmd) => (String => JsCmd)
         
+  /**
+   * This should be unique for the entire form
+   */
   def label(outerName: Option[String], name: String): String =
     "%s%s".format(outerName.map{ _ + "-"}.getOrElse(""), name)
+
+  def indexedLabel(outerName: Option[String], index: Int, name: String): String = 
+    "%s%s-%s".format(outerName.map { _ + "-" }.getOrElse(""),name, index)
         
   def makeName(outerName: Option[String], name: String): String =
     "name=%s".format(label(outerName, name))

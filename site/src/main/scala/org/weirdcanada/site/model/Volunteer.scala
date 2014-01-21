@@ -74,17 +74,17 @@ object Volunteer {
   // Helper function to create text areas
   import DynamicFormFieldRenderHelpers.{textAreaRender, selectRender}
 
-  private def birthdayRenderer(current: Volunteer)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = 
+  private def birthdayRenderer(uid: String)(current: Volunteer)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = 
     "name=volunteer-birthday-input" #> SHtml.ajaxText(
       (new DateTime).toString("yyyy-MM-dd"), updateFunc, "id" -> "birthday", "value" -> volunteerBirthdayLens.get(current)
     )
 
   private val genderSelectOptions: Seq[(String, String)] = Seq(("", "(select gender)"),("male", "Male"), ("female", "Female"), ("other", "Other"))
-  private def genderSelectRenderer: Volunteer => (String => JsCmd) => (NodeSeq => NodeSeq) = 
+  private def genderSelectRenderer: String => Volunteer => (String => JsCmd) => (NodeSeq => NodeSeq) = 
     selectRender(volunteerGenderLens.get)("name=volunteer-gender-input")(genderSelectOptions) _
 
   val provinceSelectOptions: Seq[(String,String)] = Seq(("","(select province)"),("bc","British Columbia"),("ab","Alberta"),("sk","Saskatchewan"),("mb","Manitoba"),("on","Ontario"),("qc","Quebec"),("nb","New Brunswick"),("ns","Nova Scotia"),("nl","Newfoundland and Labrador"),("yk","Yukon"),("nt", "Northwest Territories"),("nu", "Nunavut"))
-  private def provinceSelectRenderer: Volunteer => (String => JsCmd) => (NodeSeq => NodeSeq) = 
+  private def provinceSelectRenderer: String => Volunteer => (String => JsCmd) => (NodeSeq => NodeSeq) = 
     selectRender(volunteerProvinceLens.get)("name=volunteer-province-input")(provinceSelectOptions) _
 
   private val addressArea = textAreaRender(volunteerAddressLens.get)("name=volunteer-address-input")("Address") _
