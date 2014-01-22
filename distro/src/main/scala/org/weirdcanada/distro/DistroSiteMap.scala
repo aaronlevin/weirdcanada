@@ -32,6 +32,10 @@ class DistroSiteMapBuilder(service: Service) {
         >> mustBeAdmin
         >> LocGroup("actions"),
 
+      Menu.i("Add a Publisher") / "admin" / "add-publisher"
+        >> mustBeAdmin
+        >> LocGroup("actions"),
+
       Menu.i("Add an Album") / "admin" / "add-album"
         >> mustBeAdmin
         >> LocGroup("actions"),
