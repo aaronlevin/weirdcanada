@@ -250,6 +250,7 @@ case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens
 case class TypeaheadField[A, B : HasFields : HasEmpty](
   name: String, 
   typeaheadLabel: String, 
+  apiEndpoint: String,
   template: List[String], 
   sideEffectB: String => B => JsCmd,
   lens: Lens[A,String]
@@ -282,7 +283,7 @@ case class TypeaheadField[A, B : HasFields : HasEmpty](
     "@typeahead-modal-save" #> SHtml.ajaxButton("Save", () => sideEffectB(uid)(bState.is)) &
     "@typeahead-hidden-input" #>  SHtml.ajaxText("", false, fieldUpdateFunc, "id" -> (uid + "-hidden")) &
     "@typeahead-modal-form" #> Templates(template).map { bRenderFunction } &
-    "@typeahead-script-handler *" #> Unparsed("""wc.typeaheadWrapper('#%s', function(datum) { $('#%s-hidden').val(datum.id); $('#%s-hidden').blur(); }, '/api/artist/%%QUERY');""".format(uid, uid, uid))
+    "@typeahead-script-handler *" #> Unparsed("""wc.typeaheadWrapper('#%s', function(datum) { $('#%s-hidden').val(datum.id); $('#%s-hidden').blur(); }, '%s');""".format(uid, uid, uid, apiEndpoint))
 
   }
 }
@@ -302,6 +303,7 @@ case class TypeaheadField[A, B : HasFields : HasEmpty](
 case class ManyTypeaheadField[A, B : HasFields : HasEmpty](
   name: String,
   typeaheadLabel: String,
+  apiEndpoint: String, 
   template: List[String],
   sideEffectB: String => B => JsCmd,
   manyLens: Lens[A, Map[Int, String]]
@@ -318,7 +320,7 @@ case class ManyTypeaheadField[A, B : HasFields : HasEmpty](
 
     def indexedRenderer(index: Int):NodeSeq => NodeSeq = 
       "@many-%s-number".format(name) #> index &
-      makeName(outerName, name) #> TypeaheadField[C,B](label(outerName, name) + "-" + index.toString, typeaheadLabel, template, sideEffectB, lensAtIndex(index)).render(formStateUpdater, state)(lensId[C], outerName)     
+      makeName(outerName, name) #> TypeaheadField[C,B](label(outerName, name) + "-" + index.toString, typeaheadLabel, apiEndpoint, template, sideEffectB, lensAtIndex(index)).render(formStateUpdater, state)(lensId[C], outerName)     
 
     ManyRecordField[A, String]("many-%s".format(name), manyLens, Some(indexedRenderer _)).render(formStateUpdater, state)(outerLens, outerName)
   }

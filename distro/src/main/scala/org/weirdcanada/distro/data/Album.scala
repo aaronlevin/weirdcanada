@@ -178,6 +178,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
       ManyTypeaheadField[AlbumData, ArtistData](
         name = "album-artist", 
         typeaheadLabel = "Add Artist", 
+        apiEndpoint = "/api/artist/%Query",
         template = "templates-hidden" :: "_add_artist" :: Nil, 
         sideEffectB = insertArtistSideEffect,
         manyLens = albumArtistIdsLens
