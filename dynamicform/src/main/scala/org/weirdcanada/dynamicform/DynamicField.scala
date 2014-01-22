@@ -5,13 +5,15 @@ import scala.xml.{NodeSeq, Text, Unparsed}
 
 // Lift
 import net.liftweb._
+import common._
 import http._
 import js.{JsCmd, JsCmds}
 import JsCmds.{After, Alert, Replace, Run, Noop}
-import common._
+import util.ClearNodes
 import util.Helpers._
 
 // 3rd party
+import scalaz.{\/, -\/, \/-}
 import scalaz.Lens
 import scalaz.Lens.{mapVLens, lensId}
 
@@ -270,9 +272,14 @@ case class TypeaheadField[A, B : HasFields : HasEmpty](
     val uid = label(outerName, name)
 
     /**
-     * For the B form we need to pretend like this is a new Snippet
+     * For the B form we need to pretend like this is a new Snippet. 
+     * RequestVar's are scoped to this function so we need to override the
+     * `nameSalt`. 
+     * See: http://liftweb.net/api/25/api/#net.liftweb.http.RequestVar
      */
-    object bState extends RequestVar[B](implicitly[HasEmpty[B]].empty)
+    object bState extends RequestVar[B](implicitly[HasEmpty[B]].empty) {
+      override val __nameSalt: String = (new Object).hashCode.toString
+    }
     def bUpdateState = getUpdateAndSaveFuncForField[B](bState)
     val bRenderFunction = renderField(bState)
 
@@ -326,6 +333,60 @@ case class ManyTypeaheadField[A, B : HasFields : HasEmpty](
   }
 
 }
+
+/**
+ * DEAD CODE - would be nice to use this some day. Need access to the RequestVar, though
+case class ConfirmAndSave[A](
+  name: String,
+  buttonText: String,
+  confirmationCondition: A => Boolean,
+  validateAndSaveEffect: String => A => \/[String, JsCmd]
+) extends DynamicField[A] {
+
+  import DynamicField.{FormStateUpdate, label, makeName}
+
+  private def errorEffect(uid: String, errorMsg: String): JsCmd = {
+    val js = """(function() { var wcx = document.getElementById("%s-validation-error"); wcx.className = wcx.className + " has-error;})();""".format(uid)
+    JsCmds.Run(js) & 
+    JsCmds.SetHtml("%s-validation-error".format(uid), <span class="help-block error">{errorMsg}</span>)
+  }
+
+
+  def render[C](formStateUpdater: FormStateUpdate[C], state: C)(outerLens: Lens[C,A], outerName: Option[String]): NodeSeq => NodeSeq = {
+    //val a = outerLens.get(state)
+    val uid = label(outerName, name)
+    def saveEffect(ns: NodeSeq): () => JsCmd = () => confirmationCondition(a) match {
+
+      case false => validateAndSaveEffect("%s-confirm-save".format(uid))(a) match {
+        case -\/(errorMsg) => errorEffect(uid, errorMsg)
+        case \/-(jsFunc) => jsFunc
+      }
+
+      case true => validateAndSaveEffect(uid)(a) match {
+        case -\/(errorMsg) => errorEffect(uid, errorMsg)
+        case \/-(jsCmd) => 
+          val confirmationNodes: NodeSeq = 
+            ("%s-save-group".format(uid) #> ClearNodes &
+            "%s-confirm".format(uid) #> SHtml.ajaxButton(
+              buttonText, 
+              () => jsCmd
+            ) & 
+            "%s-cancel".format(uid) #> SHtml.ajaxButton("Cancel", () => JsCmds.SetHtml("%s-confirm".format(uid), Text("")))
+          ).apply(ns)
+
+          JsCmds.Replace("%s-confirm-save", confirmationNodes)
+        }
+    }
+    "%s-validate-and-save".format(uid) #> { (ns: NodeSeq) => 
+      ("%s-save".format(uid) #> SHtml.ajaxButton("Save", saveEffect(ns)) &
+      "%s-confirm-save".format(uid) #> ClearNodes)(ns)
+    }
+  }
+
+
+}*/
+
+  
 
 /*
  * Companion object to the `DynamicField` trait. Supplies many helper methods
