@@ -24,5 +24,6 @@ object SnippetDispatch {
     case "HasRole" | "hasrole" => new HasRoleSnippet(service)
     case "AddArtistPage" => new AddArtistPage(service)
     case "AddAlbumPage" => new AddAlbumPage(service)
+    case "AddPublisherPage" => new AddPublisherPage(service)
   }
 }

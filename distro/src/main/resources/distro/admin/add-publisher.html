@@ -1,46 +1,46 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
-  <title>Accounts</title>
-</head>
-<body class="lift:content_id=main">
-  <div id="main" class="lift:surround?with=default;at=content">
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+    <title>Accounts</title>
+  </head>
+  <body class="lift:content_id=main">
+    <div id="main" class="lift:surround?with=default;at=content">
 
-    <h1>Add a publisher</h1>
+      <h1>Add a publisher</h1>
 
-    <div data-lift="AddPublisherPage?eager_eval=true">
+      <div data-lift="AddPublisherPage?eager_eval=true">
 
-      <form class="form-horizontal" role="form">
+        <form class="form-horizontal" role="form">
 
 
-        <div data-lift="embed?what=_add_publisher"></div>
+          <div data-lift="embed?what=_add_publisher"></div>
 
-        <!--
-        <div name="publisher-save-and-confirm" id="publisher-save-and-confirm">
-          <div class="form-group" id="publisher-save" name="publisher-save-group">
-            <div class="col-sm-offset-2 col-sm-10">
-              <button type="submit" name="publisher-save" id="publisher-save">
+          <!-- save and confirm -->
+          <div name="publisher-save-and-confirm" id="publisher-save-and-confirm">
+            <div class="form-group" id="publisher-save" name="publisher-save-group">
+              <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" name="publisher-save" id="publisher-save">
+              </div>
+              <div id="publisher-save-error" class="col-sm-offset-2 col-sm-10"></div>
             </div>
-            <div id="publisher-save-error" class="col-sm-offset-2 col-sm-10"></div>
+
+            <div class="form-group" id="publisher-confirm-save" name="publisher-confirm-save">
+              <div class="col-sm-offset-2 col-sm-4">
+                <button type="submit" name="publisher-duplicate-confirm">
+              </div>
+              <div class="col-sm-4">
+                <button type="submit" name="publisher-cancel-save">
+              </div>
+            </div>
+
           </div>
+          <!-- /save and confirm -->
 
-          <div class="form-group" id="publisher-confirm-save" name="publisher-confirm-save">
-            <div class="col-sm-offset-2 col-sm-4">
-              <button type="submit" name="publisher-duplicate-confirm">
-            </div>
-            <div class="col-sm-4">
-              <button type="submit" name="publisher-cancel-save">
-            </div>
-          </div>
+        </form>
 
-        </div>
-        -->
-
-      </form>
+      </div>
 
     </div>
-
-  </div>
-</body>
+  </body>
 </html>

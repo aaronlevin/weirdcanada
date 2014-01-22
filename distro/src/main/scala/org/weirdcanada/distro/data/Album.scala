@@ -143,8 +143,8 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
   private val albumAdditionalImageUrlsLens: Lens[AlbumData, String] =
     Lens.lensu( (a,is) => a.copy(additionalImageUrls = is.split(',').toList.map { _.trim }), (a) => a.additionalImageUrls.mkString(","))
   private val albumArtistIdsLens: Lens[AlbumData, Map[Int, String]] = Lens.lensu(
-    (a, mis) => a.copy(publisherIds = mis),
-    (a) => a.publisherIds
+    (a, mis) => a.copy(artistIds = mis),
+    (a) => a.artistIds
   )
   private val albumPublisherIdsLens: Lens[AlbumData, Map[Int, String]] = Lens.lensu( 
     (a, mis) => a.copy(publisherIds = mis),
@@ -155,6 +155,8 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
 
   import Track._
   import Artist._
+  //import Publisher._
+  import Publisher.{insertPublisherSideEffect, PublisherDataFields, PublisherDataEmpty}
 
   /**
    * Witness to the `HasFields` type class
@@ -172,9 +174,6 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
       BasicField[AlbumData]("album-catalognumber", albumCatalogNumberLens),
       BasicField[AlbumData]("album-imageurl", albumImageUrlLens),
       BasicField[AlbumData]("album-additionalimageurls", albumAdditionalImageUrlsLens),
-      //BasicField[AlbumData]("album-artistids", albumArtistIdsLens),
-      //BasicField[AlbumData]("album-publisherids", albumPublisherIdsLens),
-      ManyRecordField[AlbumData, TrackData]("album-track", albumTracksLens),
       ManyTypeaheadField[AlbumData, ArtistData](
         name = "album-artist", 
         typeaheadLabel = "Add Artist", 
@@ -182,7 +181,16 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
         template = "templates-hidden" :: "_add_artist" :: Nil, 
         sideEffectB = insertArtistSideEffect,
         manyLens = albumArtistIdsLens
-      )
+      ),
+      ManyTypeaheadField[AlbumData, PublisherData](
+        name = "album-publisher", 
+        typeaheadLabel = "Add Publisher", 
+        apiEndpoint = "/api/publisher/%Query",
+        template = "templates-hidden" :: "_add_publisher" :: Nil, 
+        sideEffectB = insertPublisherSideEffect,
+        manyLens = albumPublisherIdsLens
+      ),
+     ManyRecordField[AlbumData, TrackData]("album-track", albumTracksLens)
     )
   }
 

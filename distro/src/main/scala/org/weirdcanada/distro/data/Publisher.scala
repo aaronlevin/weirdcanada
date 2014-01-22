@@ -43,6 +43,23 @@ object Publisher extends Publisher with LongKeyedMetaMapper[Publisher] {
   def findByPartialName(name: String): List[Publisher] = 
     Publisher.findAll(Cmp(Publisher.name, OprEnum.Like, Full("%" + name + "%"), None, Full("LOWER")))
 
+  def fromData(data: PublisherData): Option[Publisher] = {
+    try { 
+      Some(Publisher
+        .create
+        .name(data.name)
+        .url(data.url)
+        .description(data.description)
+        .imageUrl(data.imageUrl)
+        .social(data.social)
+        .city(data.city)
+        .province(data.province)
+        .country(data.country)
+        .saveMe)
+    } catch {
+      case _ : Throwable => None
+    }
+  }
   /**
    * Setup lenses for the fields on `PublisherData`.
    */
@@ -86,6 +103,14 @@ object Publisher extends Publisher with LongKeyedMetaMapper[Publisher] {
       BasicField[PublisherData]("publisher-province", publisherProvinceLens, Some(provinceSelect)),
       BasicField[PublisherData]("publisher-country", publisherCountryLens, Some(countrySelect))
     )
+  }
+
+  /**
+   * For use in Typeahead forms
+   */
+  def insertPublisherSideEffect(uid: String)(data: PublisherData): JsCmd = fromData(data) match {
+    case None => JsCmds.Alert("failed to insert publisher")
+    case Some(a) => JsCmds.Alert("Succesfully inserted publisher with Id: %s".format(a.id.is))
   }
 
 }

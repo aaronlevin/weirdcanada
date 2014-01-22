@@ -88,20 +88,6 @@
         </div>
       </div>
 
-      <div class="form-group hidden" id="album-artistids">
-        <label class="col-sm-2 control-label">Artist Ids</label>
-        <div class="col-sm-10">
-          <input class="form-control" type="text" id="album-artistids-input" name="album-artistids-input">
-        </div>
-      </div>
-
-      <div class="form-group" id="album-publisherids">
-        <label class="col-sm-2 control-label">Publisher Ids</label>
-        <div class="col-sm-10">
-          <input class="form-control" type="text" name="album-publisherids-input">
-        </div>
-      </div>
-
       <!-- Album Artists -->
       <div name="add-many-album-artist" class="panel panel-default">
 
@@ -125,6 +111,30 @@
       </div>
       <div id="many-album-artist-elements"></div>
       <!-- /Album Artists -->
+
+      <!-- Album Publishers -->
+      <div name="add-many-album-publisher" class="panel panel-default">
+
+        <div class="panel-heading">
+          <h4>Publisher #<span name="many-album-publisher-number">0</span></h4>
+        </div>
+
+        <div class="panel-body">
+
+          <div name="album-publisher">
+            <div data-lift="embed?what=_typeahead"></div>
+          </div>
+
+          <div class="col-sm-4 col-sm-offset-2">
+            <p><button type="button" name="many-album-publisher-add">+</button> | <button type="button" name="many-album-publisher-remove">-</button></p>
+          </div>
+
+        </div>
+
+
+      </div>
+      <div id="many-album-publisher-elements"></div>
+      <!-- /Album Publishers -->
 
 
       <div name="add-album-track" class="panel panel-default">

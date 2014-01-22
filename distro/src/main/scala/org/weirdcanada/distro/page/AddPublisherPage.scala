@@ -29,56 +29,56 @@ class AddPublisherPage(service: Service) extends DynamicFormCreator with Dispatc
   val renderFunction = renderField(publisherState)
 
   /**
-   * Function to save the artist
-   *
-  private def saveArtistCombinator(setHtmlId: String, nodes: NodeSeq): () => JsCmd = () => {
-    val data = artistState.is
-    lazy val otherArtists = Artist.findByName(data.name)
-    lazy val newArtistJs = Artist.fromData(artistState.is) match {
+   * Function to save the publisher
+   */
+  private def savePublisherCombinator(setHtmlId: String, nodes: NodeSeq): () => JsCmd = () => {
+    val data = publisherState.is
+    lazy val otherPublishers = Publisher.findByName(data.name)
+    lazy val newPublisherJs = Publisher.fromData(publisherState.is) match {
       case None =>
         val msg = "Incorrect type (or other error)"
         val runString = """var yadda =
-          document.getElementById("artist-type"); yadda.className =
+          document.getElementById("publisher-type"); yadda.className =
             yadda.className + " has-error";"""
         JsCmds.Run(runString) & 
-        JsCmds.SetHtml("artist-type-error", <span class="help-block error">{msg}</span>)
-      case Some(artist) =>
+        JsCmds.SetHtml("publisher-type-error", <span class="help-block error">{msg}</span>)
+      case Some(publisher) =>
         val runString = """
-          var yadda = document.getElementById("artist-save");
+          var yadda = document.getElementById("publisher-save");
           yadda.className = yadda.className + " has-success"; 
-          document.getElementById("artist-save-error").innerHTML = "Successfully added artist id %s";
-        """.format(artist.id.is)
+          document.getElementById("publisher-save-error").innerHTML = "Successfully added publisher id %s";
+        """.format(publisher.id.is)
         JsCmds.Run(runString)
 
     }
-    if(otherArtists.isEmpty)
-      newArtistJs
+    if(otherPublishers.isEmpty)
+      newPublisherJs
     else {
       JsCmds.Replace(setHtmlId, (
-        "@artist-save-group" #> ClearNodes & 
-        "@artist-duplicate-confirm" #> SHtml.ajaxButton(
-          "Artist Already Exists: OK?", 
-          () => newArtistJs & JsCmds.After(1500, JsCmds.SetHtml("artist-confirm-save", Text("")))
+        "@publisher-save-group" #> ClearNodes & 
+        "@publisher-duplicate-confirm" #> SHtml.ajaxButton(
+          "Publisher Already Exists: OK?", 
+          () => newPublisherJs & JsCmds.After(1500, JsCmds.SetHtml("publisher-confirm-save", Text("")))
         ) &
-        "@artist-cancel-save" #> SHtml.ajaxButton("Cancel", () => JsCmds.SetHtml("artist-confirm-save", Text(""))
+        "@publisher-cancel-save" #> SHtml.ajaxButton("Cancel", () => JsCmds.SetHtml("publisher-confirm-save", Text(""))
       )).apply(
         nodes
       ))
     }
 
-  }*/
+  }
+
 
   /**
    * We explicitly pass the NodeSeq in to the save command so we can render the
    * button below it
    */
-  def render = renderFunction 
-  /*andThen {
-    "@artist-save-and-confirm" #>  { (ns: NodeSeq) =>
-      ("@artist-save" #> SHtml.ajaxButton("save", saveArtistCombinator("artist-confirm-save", ns)) &
-      "@artist-confirm-save *" #> ClearNodes)(ns)
+  def render = renderFunction andThen {
+    "@publisher-save-and-confirm" #>  { (ns: NodeSeq) =>
+      ("@publisher-save" #> SHtml.ajaxButton("save", savePublisherCombinator("publisher-confirm-save", ns)) &
+      "@publisher-confirm-save *" #> ClearNodes)(ns)
     }
-  }*/
+  }
 
   def dispatch = {
     case "render" => render
