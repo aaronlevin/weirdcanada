@@ -3,8 +3,9 @@ package org.weirdcanada.distro.data
 import net.liftweb.mapper._
 import org.weirdcanada.common.util.StringParsingUtil
 import StringParsingUtil.safeParse
-import org.weirdcanada.dynamicform.{BasicField, DynamicField, HasFields, HasEmpty, ManyRecordField, TypeaheadField}
+import org.weirdcanada.dynamicform.{BasicField, DynamicField, HasFields, HasEmpty, ManyRecordField, ManyTypeaheadField}
 import scalaz.Lens
+import Lens.lensId
 
 class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToMany[Long, Album] {
   def getSingleton = Album
@@ -108,8 +109,8 @@ case class AlbumData(
   catalogNumber: String,
   imageUrl: String,
   additionalImageUrls: List[String],
-  artistIds: List[Long],
-  publisherIds: List[Long],
+  artistIds: Map[Int, String],
+  publisherIds: Map[Int, String],
   tracks: Map[Int, TrackData]
 )
 
@@ -141,15 +142,14 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
   private val albumImageUrlLens: Lens[AlbumData, String] = Lens.lensu( (a,i) => a.copy(imageUrl = i), (a) => a.imageUrl )
   private val albumAdditionalImageUrlsLens: Lens[AlbumData, String] =
     Lens.lensu( (a,is) => a.copy(additionalImageUrls = is.split(',').toList.map { _.trim }), (a) => a.additionalImageUrls.mkString(","))
-  private val albumArtistIdsLens: Lens[AlbumData, String] =
-    Lens.lensu( 
-      (a,is) => a.copy(artistIds = is.split(',').toList.flatMap { safeParse[Long] }),
-      (a) => a.artistIds.mkString(",")
-    )
-  private val albumPublisherIdsLens: Lens[AlbumData, String] = Lens.lensu( 
-      (a,is) => a.copy(publisherIds = is.split(',').toList.flatMap { safeParse[Long] }),
-      (a) => a.publisherIds.mkString(",")
-    )
+  private val albumArtistIdsLens: Lens[AlbumData, Map[Int, String]] = Lens.lensu(
+    (a, mis) => a.copy(publisherIds = mis),
+    (a) => a.publisherIds
+  )
+  private val albumPublisherIdsLens: Lens[AlbumData, Map[Int, String]] = Lens.lensu( 
+    (a, mis) => a.copy(publisherIds = mis),
+    (a) => a.publisherIds
+  )
 
   private val albumTracksLens: Lens[AlbumData, Map[Int, TrackData]] = Lens.lensu((a,t) => a.copy(tracks = t), (a) => a.tracks)
 
@@ -172,15 +172,15 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
       BasicField[AlbumData]("album-catalognumber", albumCatalogNumberLens),
       BasicField[AlbumData]("album-imageurl", albumImageUrlLens),
       BasicField[AlbumData]("album-additionalimageurls", albumAdditionalImageUrlsLens),
-      BasicField[AlbumData]("album-artistids", albumArtistIdsLens),
-      BasicField[AlbumData]("album-publisherids", albumPublisherIdsLens),
+      //BasicField[AlbumData]("album-artistids", albumArtistIdsLens),
+      //BasicField[AlbumData]("album-publisherids", albumPublisherIdsLens),
       ManyRecordField[AlbumData, TrackData]("album-track", albumTracksLens),
-      TypeaheadField[AlbumData, ArtistData](
+      ManyTypeaheadField[AlbumData, ArtistData](
         name = "album-artist", 
         typeaheadLabel = "Add Artist", 
         template = "templates-hidden" :: "_add_artist" :: Nil, 
         sideEffectB = insertArtistSideEffect,
-        lens = albumTitleLens
+        manyLens = albumArtistIdsLens
       )
     )
   }
@@ -201,8 +201,8 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
       catalogNumber = "",
       imageUrl = "",
       additionalImageUrls = Nil,
-      artistIds = Nil,
-      publisherIds = Nil,
+      artistIds = Map.empty[Int, String],
+      publisherIds = Map.empty[Int, String],
       tracks = Map.empty[Int, TrackData]
     )
   }
