@@ -99,7 +99,6 @@ object BasicField {
 }
 
 
-
 /* 
  * A Field of type `A` that encompasses a Structure of cardinality 1 for type `B`. 
  * Type `B` must implement the `HasFields` typeclass (ensuring that `B` has fields to render)
@@ -310,29 +309,16 @@ case class ManyTypeaheadField[A, B : HasFields : HasEmpty](
 
   import DynamicField.{FormStateUpdate, label, makeName, optionLens}
 
-  /*
-   * Not sure why I have to do this, but it won't compile. the import doesn't work.
-   * TODO: FIX
-   */
-  implicit object StringPrimitive extends HasFields[String] {
-    val fields: List[DynamicField[String]] = List(
-      BasicField[String]("primitive-string", lensId[String])
-    )
-  }
-
-  import DynamicFieldPrimitives.{StringPrimitiveEmpty}
-
   def render[C](formStateUpdater: FormStateUpdate[C], state: C)(outerLens: Lens[C,A], outerName: Option[String]): NodeSeq => NodeSeq = {
 
+    import DynamicFieldPrimitives.{StringPrimitive, StringPrimitiveEmpty}
+
     def lensAtIndex(index: Int): Lens[C,String] = 
-      outerLens >=> manyLens >=> mapVLens(index) >=> optionLens[String](StringPrimitiveEmpty)
+      outerLens >=> manyLens >=> mapVLens(index) >=> optionLens[String]
 
-    def indexedRenderer(index: Int):NodeSeq => NodeSeq = {
-      println("xxx Indexed renderer - index = %s , name = %s , outerName = %s".format(index, name, outerName))
-
-     "@many-%s-number".format(name) #> index &
+    def indexedRenderer(index: Int):NodeSeq => NodeSeq = 
+      "@many-%s-number".format(name) #> index &
       makeName(outerName, name) #> TypeaheadField[C,B](label(outerName, name) + "-" + index.toString, typeaheadLabel, template, sideEffectB, lensAtIndex(index)).render(formStateUpdater, state)(lensId[C], outerName)     
-    }
 
     ManyRecordField[A, String]("many-%s".format(name), manyLens, Some(indexedRenderer _)).render(formStateUpdater, state)(outerLens, outerName)
   }
@@ -393,20 +379,4 @@ object DynamicField {
   )
 }
 
-/**
- * In case you need a multi field of a primitive
- */
-object DynamicFieldPrimitives {
 
-  lazy val stringLens: Lens[String,String] = Lens.lensu( (str,s) => s, (s) => s)
-
-  implicit object StringPrimitive extends HasFields[String] {
-    val fields: List[DynamicField[String]] = List(
-      BasicField[String]("primitive-string", stringLens)
-    )
-  }
-
-  implicit object StringPrimitiveEmpty extends HasEmpty[String] {
-    val empty: String = ""
-  }
-}
