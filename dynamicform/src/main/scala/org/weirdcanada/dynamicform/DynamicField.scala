@@ -288,6 +288,18 @@ case class TypeaheadField[A, B : HasFields : HasEmpty](
   }
 }
 
+/**
+ * Similar to a `Typeahead` field, this is the "many" version. Rendering of the Typeahead is 
+ * delegated to a regular `TypeaheadField` composed in a `ManyRecordField` underneath (using
+ * `ManyRecordField`s indexed chrome rendering).
+ *
+ * @param name The name of the field
+ * @param typeaheadLabel the label that will appear at the typeahead
+ * @param template For type `B`, what to do with B once we've added it.
+ * @param manyLens Quite often you'll need to send an ID from the result of the Typeahead into a hidden form field. This 
+ * lens should 'lens' over that field. Since there are possibly many of these, we follow the map convention.
+ * @param sideEffectB what do we do with B after we've added a new one? We're passed a function that can curry over the `uid` in-case we want to update a template. 
+ */
 case class ManyTypeaheadField[A, B : HasFields : HasEmpty](
   name: String,
   typeaheadLabel: String,
@@ -308,7 +320,8 @@ case class ManyTypeaheadField[A, B : HasFields : HasEmpty](
     )
   }
 
-    import DynamicFieldPrimitives.{StringPrimitiveEmpty}
+  import DynamicFieldPrimitives.{StringPrimitiveEmpty}
+
   def render[C](formStateUpdater: FormStateUpdate[C], state: C)(outerLens: Lens[C,A], outerName: Option[String]): NodeSeq => NodeSeq = {
 
     def lensAtIndex(index: Int): Lens[C,String] = 
@@ -324,7 +337,6 @@ case class ManyTypeaheadField[A, B : HasFields : HasEmpty](
     ManyRecordField[A, String]("many-%s".format(name), manyLens, Some(indexedRenderer _)).render(formStateUpdater, state)(outerLens, outerName)
   }
 
-
 }
 
 /*
@@ -332,36 +344,6 @@ case class ManyTypeaheadField[A, B : HasFields : HasEmpty](
  */   
 object DynamicField {
 
-  /**
-   * DEAD CODE?
-   *
-   * Auto-box `DynamicFields` to automagically turn them into `ManyRecordField`s
-   */
-  case class Wrapper[A](elem: A)
-  def liftMany[A : HasFields : HasEmpty, B : HasFields : HasEmpty](field: DynamicField[A], lens: Lens[A, Map[Int, B]]): ManyRecordField[A,Wrapper[B]] = {
-    /**
-     * Create new getters and setters that wrap and unpack the values
-     */
-    val wrappedSetter: (A, Map[Int, Wrapper[B]]) => A = (a, wrappedMap) => 
-      lens.set(a, wrappedMap.map { case (i,wb) => (i, wb.elem) })
-    val wrappedGetter: A => Map[Int, Wrapper[B]] = (a: A) => 
-      lens.get(a).map { case (i,b) => (i, Wrapper[B](b)) }
-
-    val newLens: Lens[A, Map[Int, Wrapper[B]]] = Lens.lensu(wrappedSetter, wrappedGetter)
-
-    implicit val wrappedFields = new HasFields[Wrapper[B]] {
-      val fields: List[DynamicField[Wrapper[B]]] = List(
-        RecordField[Wrapper[B],B]("wrapped", Lens.lensu( (w,b) => Wrapper[B](b), (w) => w.elem ) )
-      )
-    }
-    implicit val wrappedEmpty = new HasEmpty[Wrapper[B]] {
-      val empty: Wrapper[B] = Wrapper[B](implicitly[HasEmpty[B]].empty)
-    }
-
-    ManyRecordField[A, Wrapper[B]]("many", newLens)
-  }
-
-       
   type FormStateUpdate[A] = (A => String => A) => (() => JsCmd) => (String => JsCmd)
         
   /**
