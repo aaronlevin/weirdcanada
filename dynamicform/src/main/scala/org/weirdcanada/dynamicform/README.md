@@ -45,3 +45,35 @@ There now includes a TYpeahead form for data types that have a One-To-Many relat
 ```
 
 - You also provide a method to do the side effect for when you need to add a new ember (i.e. when the typeahead search doesn't result in anything).
+
+## Convention for ManyTypeahead Forms
+
+This is similar to `Typeahead` forms, except you can have many of them! Hooray!
+
+The form convention is:
+
+```
+<div name="add-many-NAME" class="panel panel-default">
+
+  <div class="panel-heading">
+    <h4>Typeahead label #<span name="many-NAME-number">0</span></h4>
+  </div>
+
+  <div class="panel-body">
+
+    <div name="NAME">
+      <div data-lift="embed?what=_typeahead"></div>
+    </div>
+
+    <div class="col-sm-4 col-sm-offset-2">
+      <p><button type="button" name="many-NAME-add">+</button> | <button type="button" name="many-NAME-remove">-</button></p>
+    </div>
+
+  </div>
+
+
+</div>
+<div id="many-NAME-elements"></div>
+```
+
+The reason for the appearance of `many` is that we delegate rendering of each `Typeahead` to a regular `Typeahead` form, so we need a way to differentiate the outer form from the inner forms. 

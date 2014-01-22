@@ -276,28 +276,92 @@ case class TypeaheadField[A, B : HasFields : HasEmpty](
     def bUpdateState = getUpdateAndSaveFuncForField[B](bState)
     val bRenderFunction = renderField(bState)
 
-    makeName(outerName, name) #> {
-      "@typeahead-label *" #> typeaheadLabel &
-      "@typeahead-input [id]" #> uid &
-      "@typeahead-modal-button [data-target]" #> "#%s-modal".format(uid) &
-      "@typeahead-modal [id]" #> "%s-modal".format(uid) &
-      "@typeahead-modal-save" #> SHtml.ajaxButton("Save", () => sideEffectB(uid)(bState.is)) &
-      "@typeahead-hidden-input" #>  SHtml.ajaxText("", false, fieldUpdateFunc, "id" -> (uid + "-hidden")) &
-      "@typeahead-modal-form" #> Templates(template).map { bRenderFunction } andThen { (ns: NodeSeq) => 
-        ns ++ <script>{Unparsed(""" 
-          wc.typeaheadWrapper('#%s', function(datum) { $('#%s-hidden').val(datum.id); $('#%s-hidden').blur(); }, '/api/artist/%%QUERY');
-        """.format(uid, uid, uid))}</script>
-      }
-    }
+    "@typeahead-label *" #> typeaheadLabel &
+    "@typeahead-input [id]" #> uid &
+    "@typeahead-modal-button [data-target]" #> "#%s-modal".format(uid) &
+    "@typeahead-modal [id]" #> "%s-modal".format(uid) &
+    "@typeahead-modal-save" #> SHtml.ajaxButton("Save", () => sideEffectB(uid)(bState.is)) &
+    "@typeahead-hidden-input" #>  SHtml.ajaxText("", false, fieldUpdateFunc, "id" -> (uid + "-hidden")) &
+    "@typeahead-modal-form" #> Templates(template).map { bRenderFunction } &
+    "@typeahead-script-handler *" #> Unparsed("""wc.typeaheadWrapper('#%s', function(datum) { $('#%s-hidden').val(datum.id); $('#%s-hidden').blur(); }, '/api/artist/%%QUERY');""".format(uid, uid, uid))
 
   }
+}
+
+case class ManyTypeaheadField[A, B : HasFields : HasEmpty](
+  name: String,
+  typeaheadLabel: String,
+  template: List[String],
+  sideEffectB: String => B => JsCmd,
+  manyLens: Lens[A, Map[Int, String]]
+) extends DynamicField[A] with DynamicFormCreator {
+
+  import DynamicField.{FormStateUpdate, label, makeName, optionLens}
+
+  /*
+   * Not sure why I have to do this, but it won't compile. the import doesn't work.
+   * TODO: FIX
+   */
+  implicit object StringPrimitive extends HasFields[String] {
+    val fields: List[DynamicField[String]] = List(
+      BasicField[String]("primitive-string", lensId[String])
+    )
+  }
+
+    import DynamicFieldPrimitives.{StringPrimitiveEmpty}
+  def render[C](formStateUpdater: FormStateUpdate[C], state: C)(outerLens: Lens[C,A], outerName: Option[String]): NodeSeq => NodeSeq = {
+
+    def lensAtIndex(index: Int): Lens[C,String] = 
+      outerLens >=> manyLens >=> mapVLens(index) >=> optionLens[String](StringPrimitiveEmpty)
+
+    def indexedRenderer(index: Int):NodeSeq => NodeSeq = {
+      println("xxx Indexed renderer - index = %s , name = %s , outerName = %s".format(index, name, outerName))
+
+     "@many-%s-number".format(name) #> index &
+      makeName(outerName, name) #> TypeaheadField[C,B](label(outerName, name) + "-" + index.toString, typeaheadLabel, template, sideEffectB, lensAtIndex(index)).render(formStateUpdater, state)(lensId[C], outerName)     
+    }
+
+    ManyRecordField[A, String]("many-%s".format(name), manyLens, Some(indexedRenderer _)).render(formStateUpdater, state)(outerLens, outerName)
+  }
+
+
 }
 
 /*
  * Companion object to the `DynamicField` trait. Supplies many helper methods
  */   
 object DynamicField {
-        
+
+  /**
+   * DEAD CODE?
+   *
+   * Auto-box `DynamicFields` to automagically turn them into `ManyRecordField`s
+   */
+  case class Wrapper[A](elem: A)
+  def liftMany[A : HasFields : HasEmpty, B : HasFields : HasEmpty](field: DynamicField[A], lens: Lens[A, Map[Int, B]]): ManyRecordField[A,Wrapper[B]] = {
+    /**
+     * Create new getters and setters that wrap and unpack the values
+     */
+    val wrappedSetter: (A, Map[Int, Wrapper[B]]) => A = (a, wrappedMap) => 
+      lens.set(a, wrappedMap.map { case (i,wb) => (i, wb.elem) })
+    val wrappedGetter: A => Map[Int, Wrapper[B]] = (a: A) => 
+      lens.get(a).map { case (i,b) => (i, Wrapper[B](b)) }
+
+    val newLens: Lens[A, Map[Int, Wrapper[B]]] = Lens.lensu(wrappedSetter, wrappedGetter)
+
+    implicit val wrappedFields = new HasFields[Wrapper[B]] {
+      val fields: List[DynamicField[Wrapper[B]]] = List(
+        RecordField[Wrapper[B],B]("wrapped", Lens.lensu( (w,b) => Wrapper[B](b), (w) => w.elem ) )
+      )
+    }
+    implicit val wrappedEmpty = new HasEmpty[Wrapper[B]] {
+      val empty: Wrapper[B] = Wrapper[B](implicitly[HasEmpty[B]].empty)
+    }
+
+    ManyRecordField[A, Wrapper[B]]("many", newLens)
+  }
+
+       
   type FormStateUpdate[A] = (A => String => A) => (() => JsCmd) => (String => JsCmd)
         
   /**
