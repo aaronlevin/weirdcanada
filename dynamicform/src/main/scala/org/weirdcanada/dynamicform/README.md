@@ -38,8 +38,10 @@ There now includes a TYpeahead form for data types that have a One-To-Many relat
 - You provide a lens `Lens[String, A]` where the string is the id member of the datum (quite often some kind of id).
 - Given the `name` of your `TypeaheadField` you use the following template in your form:
 
-    <div name="NAME">
-      <div data-lift="embed?what=_typeahead"></div>
-    </div>
+```
+<div name="NAME">
+  <div data-lift="embed?what=_typeahead"></div>
+</div>
+```
 
 - You also provide a method to do the side effect for when you need to add a new ember (i.e. when the typeahead search doesn't result in anything).
