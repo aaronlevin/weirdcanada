@@ -39,11 +39,6 @@ case class ArtistData(
   country: String
 )
 
-/**
- * ADT for Autocomplete artist data (used in dynamic form)
- */
-case class ArtistAutocompleteData(id: Long)
-
 // The companion object to the above Class
 object Artist extends Artist with LongKeyedMetaMapper[Artist] {
 
@@ -65,10 +60,6 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] {
     val empty: ArtistData = ArtistData("","","","","Band","","","alberta","canada")
   }
 
-  implicit object ArtistAutocompleteEmpty extends HasEmpty[ArtistAutocompleteData] {
-    val empty = ArtistAutocompleteData(0)
-  }
-
   /**
    * Setup lenses for the fields on `ArtistData`
    */
@@ -86,12 +77,6 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] {
   val artistProvinceLens: Lens[ArtistData, String] = Lens.lensu( (a, p) => a.copy(province = p), (a) => a.province )
   val artistCountryLens: Lens[ArtistData, String] = Lens.lensu( (a,c) =>
       a.copy(country = c), (a) => a.country)
-
-  /**
-   * Setup lenses for ArtistAutocomplete
-   */
-  val artistAutocompleteIdLens: Lens[ArtistAutocompleteData, String] = 
-    Lens.lensu( (a,s) => a.copy(id = safeParse[Long](s).getOrElse{ 0L }), (a) => a.id.toString )
 
   /**
    * Setup custom form-fields (text areas, selects)
@@ -123,15 +108,6 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] {
       BasicField[ArtistData]("artist-city", artistCityLens),
       BasicField[ArtistData]("artist-province", artistProvinceLens, Some(provinceSelect)),
       BasicField[ArtistData]("artist-country", artistCountryLens, Some(countrySelect))
-    )
-  }
-
-  /**
-   * For the ArtistAutocomplete we want to render it in a certain way
-   */
-  implicit object ArtistAutocompleteDataFields extends HasFields[ArtistAutocompleteData] {
-    val fields: List[DynamicField[ArtistAutocompleteData]] = List(
-      BasicField[ArtistAutocompleteData]("artist-autocomplete-id", artistAutocompleteIdLens)
     )
   }
 
