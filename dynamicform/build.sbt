@@ -24,7 +24,7 @@ libraryDependencies ++= {
     "org.specs2"        %% "specs2"             % "1.13"           % "test",
     "com.h2database"    % "h2"                  % "1.3.167",
     "postgresql"        % "postgresql"          % "9.1-901.jdbc4",
-    "org.scalaz"        %% "scalaz-core" % "7.0.3",
+    "org.scalaz"        %% "scalaz-core" % "7.0.5",
     "joda-time"         % "joda-time"           % "2.2",
     "org.joda"          % "joda-convert"        % "1.2"
   )
