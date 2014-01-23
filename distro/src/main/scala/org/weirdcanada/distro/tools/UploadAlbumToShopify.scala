@@ -10,6 +10,9 @@ import net.liftweb.common.Full
 import scala.io.Source
 import org.weirdcanada.distro.util.AnyExtensions._
 import org.weirdcanada.distro.util.IdList
+import org.weirdcanada.distro.api.shopify.PersistentProduct
+import org.weirdcanada.distro.data.Publisher
+import org.weirdcanada.distro.api.shopify.Metafield
 
 object UploadAlbumToShopify extends App with Loggable {
   val config = Config.fromLiftProps
@@ -77,12 +80,25 @@ class UploadAlbumToShopify(album: Album, shopify: Shopify) {
       album.publishers.headOption.map(_.name.is).getOrElse(DEFAULT_VENDOR) // Vendor -- arbitrarily choose the first publisher
     )
   }
-  
+
+  def setPublisherMetafield(publishers: List[Publisher]) =
+    (product: PersistentProduct) => {
+      shopify.addProductMetafield(
+        product.id,
+        Metafield(
+          "publishers",
+          publishers.map(_.name.is).mkString(","),
+          "weirdcanada"
+        )
+      )
+      
+      product
+    }
   
   def upload = {
     val product = shopifyProductFromAlbum(album)
     
-    album.shopifyId.is match {
+    (album.shopifyId.is match {
       case 0 =>
         shopify.addProduct(product) |>
           (pp => println("Created Shopify product #%s from album #%s (%s)".format(pp.id, album.id.is, album.title.is))) |>
@@ -91,6 +107,7 @@ class UploadAlbumToShopify(album: Album, shopify: Shopify) {
       case existingShopifyId =>
         shopify.updateProduct(existingShopifyId, product) |>
           (pp => println("Updated Shopify product #%s from album #%s (%s)".format(pp.id, album.id.is, album.title.is)))
-    }
+    }) |>
+      setPublisherMetafield(album.publishers.toList)
   }
 }
