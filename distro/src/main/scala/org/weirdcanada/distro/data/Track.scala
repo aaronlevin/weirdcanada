@@ -23,7 +23,7 @@ class Track extends LongKeyedMapper[Track] with IdPK {
 /**
  * ADT for track data
  */
-case class TrackData(name: String, number: Int, url: String, s3Url: String)
+case class TrackData(name: String, number: Int, url: String, price: BigDecimal, s3Url: String)
 
 // The companion object to the above Class
 object Track extends Track with LongKeyedMetaMapper[Track] {
@@ -36,6 +36,10 @@ object Track extends Track with LongKeyedMetaMapper[Track] {
   val trackNumberLens: Lens[TrackData, String] = 
     Lens.lensu( (t,n) => t.copy(number = safeParse[Int](n).getOrElse { 0 }), (t) => t.number.toString )
   val trackUrlLens: Lens[TrackData, String] = Lens.lensu( (t,u) => t.copy(url = u), (t) => t.url )
+  val trackPriceLens: Lens[TrackData, String] = Lens.lensu(
+    (t,d) => t.copy(price = safeParse[BigDecimal](d).getOrElse { 0.0 }),
+    (t) => t.price.toString
+  )
   val trackS3UrlLens: Lens[TrackData, String] = Lens.lensu( (t,u) => t.copy(s3Url = u), (t) => t.s3Url )
 
   /**
@@ -46,6 +50,7 @@ object Track extends Track with LongKeyedMetaMapper[Track] {
       BasicField[TrackData]("track-name", trackNameLens),
       BasicField[TrackData]("track-number", trackNumberLens),
       BasicField[TrackData]("track-url", trackUrlLens),
+      BasicField[TrackData]("track-price", trackPriceLens),
       BasicField[TrackData]("track-s3url", trackS3UrlLens)
     )
   }
@@ -54,7 +59,18 @@ object Track extends Track with LongKeyedMetaMapper[Track] {
    * Witness to the `HasEmpty` type class
    */
   implicit object TrackDataEmpty extends HasEmpty[TrackData] {
-    val empty = TrackData("", 0, "", "")
+    val empty = TrackData("", 0, "", 0.0, "")
   }
+
+  def fromData(data: TrackData)(album: Album): Track =
+    Track
+      .create
+      .name(data.name)
+      .number(data.number)
+      .url(data.url)
+      .price(data.price)
+      .s3Url(data.s3Url)
+      .album(album)
+      .saveMe
 }
 
