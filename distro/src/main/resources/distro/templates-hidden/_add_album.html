@@ -1,0 +1,144 @@
+<div>
+  <div class="form-group" id="album-title">
+    <label class="col-sm-2 control-label">Title</label>
+    <div class="col-sm-10">
+      <input class="form-control" type="text" id="album-title-input" name="album-title-input">
+    </div>
+  </div>
+
+  <div class="form-group" id="album-url">
+    <label class="col-sm-2 control-label">Album URL</label>
+    <div class="col-sm-10">
+      <input class="form-control" type="text" name="album-url-input">
+    </div>
+  </div>
+
+  <div class="form-group" id="album-description">
+    <label class="col-sm-2 control-label">Description</label>
+    <div class="col-sm-10">
+      <input class="form-control" type="text" name="album-description-input">
+    </div>
+  </div>
+
+  <div class="form-group" id="album-sku">
+    <label class="col-sm-2 control-label">SKU</label>
+    <div class="col-sm-10">
+      <input class="form-control" type="text" name="album-sku-input">
+    </div>
+  </div>
+
+  <div class="form-group" id="album-shopifyid">
+    <label class="col-sm-2 control-label">ShopifyId</label>
+    <div class="col-sm-10">
+      <input class="form-control" type="text" name="album-shopifyid-input">
+    </div>
+  </div>
+
+  <div class="form-group" id="album-format">
+    <label class="col-sm-2 control-label">Format</label>
+    <div class="col-sm-10">
+      <input class="form-control" type="text" name="album-format-input">
+    </div>
+  </div>
+
+  <div class="form-group" id="album-pressing">
+    <label class="col-sm-2 control-label">First Pressing?</label>
+    <div class="col-sm-10">
+      <input class="form-control" type="text" name="album-pressing-input">
+    </div>
+  </div>
+
+  <div class="form-group" id="album-releaseyear">
+    <label class="col-sm-2 control-label">Release Year</label>
+    <div class="col-sm-10">
+      <input class="form-control" type="text" name="album-releaseyear-input">
+    </div>
+  </div>
+
+  <div class="form-group" id="album-catalognumber">
+    <label class="col-sm-2 control-label">Catalog Number</label>
+    <div class="col-sm-10">
+      <input class="form-control" type="text" name="album-catalognumber-input">
+    </div>
+  </div>
+  <div class="form-group" id="album-additionalimageurls">
+    <label class="col-sm-2 control-label">Additional Image Urls</label>
+    <div class="col-sm-10">
+      <input class="form-control" type="text" name="album-additionalimageurls-input">
+    </div>
+  </div>
+
+  <!-- Album Artists -->
+  <div name="add-many-album-artist" class="panel panel-default">
+
+    <div class="panel-heading">
+      <h4>Artist #<span name="many-album-artist-number">0</span></h4>
+    </div>
+
+    <div class="panel-body">
+
+      <div name="album-artist">
+        <div data-lift="embed?what=_typeahead"></div>
+      </div>
+
+      <div class="col-sm-4 col-sm-offset-2">
+        <p><button type="button" name="many-album-artist-add">+</button> | <button type="button" name="many-album-artist-remove">-</button></p>
+      </div>
+
+    </div>
+
+
+  </div>
+  <div id="many-album-artist-elements"></div>
+  <!-- /Album Artists -->
+
+  <!-- Album Publishers -->
+  <div name="add-many-album-publisher" class="panel panel-default">
+
+    <div class="panel-heading">
+      <h4>Publisher #<span name="many-album-publisher-number">0</span></h4>
+    </div>
+
+    <div class="panel-body">
+
+      <div name="album-publisher">
+        <div data-lift="embed?what=_typeahead"></div>
+      </div>
+
+      <div class="col-sm-4 col-sm-offset-2">
+        <p><button type="button" name="many-album-publisher-add">+</button> | <button type="button" name="many-album-publisher-remove">-</button></p>
+      </div>
+
+    </div>
+
+
+  </div>
+  <div id="many-album-publisher-elements"></div>
+  <!-- /Album Publishers -->
+
+
+  <div name="add-album-track" class="panel panel-default">
+
+    <!-- MANY ONLY: the name of the sub-form, with number for iteration -->
+    <div class="panel-heading">
+      <h4>Track #<span name="album-track-number">0</span></h4>
+    </div>
+
+    <div class="panel-body">
+      <!-- needed on all sub-forms -->
+
+      <div data-lift="embed?what=_add_track"></div>
+
+
+      <div class="col-sm-4 col-sm-offset-2">
+        <!-- MANY ONLY -->
+        <p><button type="button" name="album-track-add">+</button> | <button type="button" name="album-track-remove">-</button></p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MANY ONLY -->
+  <div id="album-track-elements"></div>
+
+</div>
