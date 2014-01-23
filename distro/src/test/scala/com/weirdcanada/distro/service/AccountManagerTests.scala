@@ -238,7 +238,7 @@ object AccountManager_requestPaymentTests extends Specification with Mockito {
       there was no(mockEmailManager).send(any[String], any[EmailTemplate])    
     }
     
-    "Notify admin for validated accounts with adequate balance" in {
+    /*"Notify admin for validated accounts with adequate balance" in {
       val mockEmailManager = mock[EmailManager]
       val accountManager = new AccountManager(config, mockEmailManager)
       val account = Account.create.email("foo@bar").emailValidated(true).unofficialBalance(validBalance)
@@ -246,6 +246,6 @@ object AccountManager_requestPaymentTests extends Specification with Mockito {
       accountManager.requestPayment(account)
       
       there was one(mockEmailManager).send(_eq(config.paymentRequestEmail), any[PaymentRequestEmail])    
-    }
+    }*/
   }
 }

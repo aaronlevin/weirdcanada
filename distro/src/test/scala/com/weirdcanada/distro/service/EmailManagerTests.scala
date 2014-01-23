@@ -46,7 +46,7 @@ object EmailManager_Tests extends Specification with Mockito {
     "contain confirmation link and name" in {
       emailManager.send(toAddress, ConfirmRegistrationEmail(confirmUrl, name))
       
-      there was one(mockEmailFactory).send(_eq(toAddress), _eq(config.smtpUsername), _eq("Registration Confirmation"), nodeSeqContains(confirmUrl, name))
+      there was one(mockEmailFactory).send(_eq(toAddress), _eq(config.smtpUsername), _eq("Wyrd Distro - Registration Confirmation"), nodeSeqContains(confirmUrl, name))
     }
   }
   
@@ -58,7 +58,7 @@ object EmailManager_Tests extends Specification with Mockito {
     "contain account name, url and balance" in {
       emailManager.send(config.paymentRequestEmail, PaymentRequestEmail(name, accountUrl, balance, 1))
       
-      there was one(mockEmailFactory).send(_eq(config.paymentRequestEmail), _eq(config.smtpUsername), _eq("Payment Request"), nodeSeqContains(name, accountUrl, expectedBalanceString))
+      there was one(mockEmailFactory).send(_eq(config.paymentRequestEmail), _eq(config.smtpUsername), _eq("Wyrd Distro - Payment Request"), nodeSeqContains(name, accountUrl, expectedBalanceString))
     }
   }
 }
