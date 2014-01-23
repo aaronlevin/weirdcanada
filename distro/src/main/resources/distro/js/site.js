@@ -2,7 +2,7 @@ wc = {
   typeaheadWrapper: function(inputId, handleDatum, remoteUrl) {
     $( document ).ready(function() {
       $(inputId).typeahead({
-        name: 'artists',
+        name: inputId,
         remote: remoteUrl
         //remote: '/api/artist/%QUERY'
       });
