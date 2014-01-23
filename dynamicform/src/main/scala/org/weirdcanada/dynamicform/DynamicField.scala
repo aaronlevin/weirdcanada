@@ -44,6 +44,10 @@ sealed trait DynamicField[A] {
  * @constructor create a new `BasicField` of type `A`
  * @param name The name of the field
  * @param lens a lens from the field type `A` to String (for updating the field from string input)
+ *
+ * TODO: This should be `BasicField[A,D]` where the `String` in `lens` and
+ * `transformer` are paramterized by `D`. This way we can accomodate Fields of
+ * other types (checkbox, radio, etc.)
  */
 case class BasicField[A](name: String, lens: Lens[A,String], transformer: Option[String => A => (String => JsCmd) => (NodeSeq => NodeSeq)] = None) extends DynamicField[A] {
   import DynamicField.{makeName,makeNameAdd,makeInput, FormStateUpdate, label}
@@ -326,7 +330,7 @@ case class ManyTypeaheadField[A, B : HasFields : HasEmpty](
       outerLens >=> manyLens >=> mapVLens(index) >=> optionLens[String]
 
     def indexedRenderer(index: Int):NodeSeq => NodeSeq = 
-      "@many-%s-number".format(name) #> index &
+      "@many-%s-number *".format(name) #> index &
       makeName(outerName, name) #> TypeaheadField[C,B](label(outerName, name) + "-" + index.toString, typeaheadLabel, apiEndpoint, template, sideEffectB, lensAtIndex(index)).render(formStateUpdater, state)(lensId[C], outerName)     
 
     ManyRecordField[A, String]("many-%s".format(name), manyLens, Some(indexedRenderer _)).render(formStateUpdater, state)(outerLens, outerName)
