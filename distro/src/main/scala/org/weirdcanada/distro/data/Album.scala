@@ -1,9 +1,10 @@
 package org.weirdcanada.distro.data
 
+import net.liftweb.db.DefaultConnectionIdentifier
 import net.liftweb.mapper._
 import org.weirdcanada.common.util.StringParsingUtil
 import StringParsingUtil.safeParse
-import org.weirdcanada.dynamicform.{BasicField, DynamicField, HasFields, HasEmpty, ManyRecordField, ManyTypeaheadField}
+import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasFields, HasEmpty, ManyRecordField, ManyTypeaheadField}
 import scalaz.Lens
 import Lens.lensId
 
@@ -112,7 +113,14 @@ case class AlbumData(
   artistIds: Map[Int, String],
   publisherIds: Map[Int, String],
   tracks: Map[Int, TrackData]
-)
+) {
+
+  lazy val artistIdsList: List[Long] = 
+    artistIds.values.toList.flatMap { safeParse[Long](_).toList }
+
+  lazy val publisherIdsList: List[Long] = 
+    publisherIds.values.toList.flatMap { safeParse[Long](_).toList }
+}
 
 // The companion object to the above Class
 object Album extends Album with LongKeyedMetaMapper[Album] {
@@ -150,8 +158,18 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
     (a, mis) => a.copy(publisherIds = mis),
     (a) => a.publisherIds
   )
-
   private val albumTracksLens: Lens[AlbumData, Map[Int, TrackData]] = Lens.lensu((a,t) => a.copy(tracks = t), (a) => a.tracks)
+
+  import DynamicFormFieldRenderHelpers.{checkboxRender, selectRender}
+
+  private val albumFirstPressingCheckbox = 
+    checkboxRender(albumPressingLens.get)("@album-pressing-input") _
+
+  private val formatSequence: Seq[(String, String)] = 
+    Album.Type.values.toSeq.map { _.toString }.map { s => (s, s) }
+
+  private val albumFormatSelect =
+    selectRender(albumFormatLens.get)("name=album-format-input")(formatSequence) _
 
   import Track._
   import Artist._
@@ -168,8 +186,8 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
       BasicField[AlbumData]("album-description", albumDescriptionLens),
       BasicField[AlbumData]("album-sku", albumSkuLens),
       BasicField[AlbumData]("album-shopifyid", albumShopifyIdLens),
-      BasicField[AlbumData]("album-format", albumFormatLens),
-      BasicField[AlbumData]("album-pressing", albumPressingLens),
+      BasicField[AlbumData]("album-format", albumFormatLens, Some(albumFormatSelect)),
+      BasicField[AlbumData]("album-pressing", albumPressingLens, Some(albumFirstPressingCheckbox)),
       BasicField[AlbumData]("album-releaseyear", albumReleaseYearLens),
       BasicField[AlbumData]("album-catalognumber", albumCatalogNumberLens),
       BasicField[AlbumData]("album-imageurl", albumImageUrlLens),
@@ -177,7 +195,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
       ManyTypeaheadField[AlbumData, ArtistData](
         name = "album-artist", 
         typeaheadLabel = "Add Artist", 
-        apiEndpoint = "/api/artist/%Query",
+        apiEndpoint = "/api/artist/%QUERY",
         template = "templates-hidden" :: "_add_artist" :: Nil, 
         sideEffectB = insertArtistSideEffect,
         manyLens = albumArtistIdsLens
@@ -185,7 +203,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
       ManyTypeaheadField[AlbumData, PublisherData](
         name = "album-publisher", 
         typeaheadLabel = "Add Publisher", 
-        apiEndpoint = "/api/publisher/%Query",
+        apiEndpoint = "/api/publisher/%QUERY",
         template = "templates-hidden" :: "_add_publisher" :: Nil, 
         sideEffectB = insertPublisherSideEffect,
         manyLens = albumPublisherIdsLens
@@ -204,7 +222,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
       description = "",
       sku = "",
       shopifyId = 0,
-      format = "",
+      format = "Cassette",
       isFirstPressing = true,
       releaseYear = 0,
       catalogNumber = "",
@@ -214,6 +232,51 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
       publisherIds = Map.empty[Int, String],
       tracks = Map.empty[Int, TrackData]
     )
+  }
+
+  def fromData(data: AlbumData): Option[Album] = {
+    DB.use(DefaultConnectionIdentifier) {connection =>
+
+      val artistIds = data.artistIdsList
+      val publisherIds = data.publisherIdsList
+
+      println("xxx %s".format(data))
+      for {
+        format <- try {
+                        Some(Album.Type.withName(data.format))
+                      } catch {
+                        case _: java.util.NoSuchElementException => None
+                      }
+      } yield {
+
+        val artists = artistIds.flatMap { Artist.findByKey(_).toOption }
+        val publishers = publisherIds.flatMap { Publisher.findByKey(_).toOption }
+
+        val album =
+          Album
+            .create
+            .title(data.title)
+            .url(data.url)
+            .description(data.description)
+            .sku(data.sku)
+            .shopifyId(data.shopifyId)
+            .format(format)
+            .isFirstPressing(data.isFirstPressing)
+            .releaseYear(data.releaseYear)
+            .catalogNumber(data.catalogNumber)
+            .imageUrl(data.imageUrl)
+            .additionalImageUrls(data.additionalImageUrls.mkString(","))
+            .saveMe
+
+          /** side effects! **/
+          artists.foreach { album.artists += _ }
+          publishers.foreach { album.publishers += _ }
+          data.tracks.values.map { Track.fromData(_)(album) } // (track adds itself to an album)
+
+          album
+      }
+    }
+
   }
 
 }

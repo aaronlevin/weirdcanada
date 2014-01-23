@@ -204,7 +204,7 @@ class Shopify(config: Config) extends Loggable {
   }
   
   def addProductMetafield(productId: Long, metafield: Metafield) = {
-    post("/admin/products/%s/metafields.json", WrapperObject("metafield", metafield.toJValue).toJson) match {
+    post("/admin/products/%s/metafields.json".format(productId), WrapperObject("metafield", metafield.toJValue).toJson) match {
       case Metafield(result) => result
       case _ => sys.error("Failed to add metafield to product: %s".format(productId))
     }
