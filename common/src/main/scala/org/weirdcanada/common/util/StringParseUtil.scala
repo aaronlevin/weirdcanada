@@ -15,6 +15,7 @@ object StringParsingUtil {
   implicit object string2Int extends StringParsable[Int] { val op = (s: String) => s.toInt }
   implicit object string2Long extends StringParsable[Long] { val op = (s: String) => s.toLong }
   implicit object string2Double extends StringParsable[Double] { val op = (s: String) => s.toDouble }
+  implicit object string2BigDecimal extends StringParsable[BigDecimal] { val op = (s: String) => BigDecimal(s) }
   implicit object string2Boolean extends StringParsable[Boolean] { val op = (s: String) => s.toBoolean }
 
   /**
