@@ -99,6 +99,19 @@ object DynamicFormFieldRenderHelpers {
     selector #> SHtml.ajaxSelect(selectOptions, currentValue, updateFunc)
   }
 
+  def checkboxRender[A](accessor: A => String)(selector: String)(uid: String)(current: A)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = {
+    val currentValue: Boolean = try {
+      accessor(current).toBoolean
+    } catch {
+      case e: java.lang.IllegalArgumentException => false 
+    }
+
+    val booleanUpdateFunc: Boolean => JsCmd = (b) => updateFunc(b.toString)
+
+    selector #> SHtml.ajaxCheckbox(currentValue, booleanUpdateFunc)
+  }
+
+
 
     
 }
