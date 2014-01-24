@@ -4,7 +4,7 @@ import net.liftweb.sitemap.{Loc, Menu, SiteMap}
 import Loc.{LocGroup, LocSnippets, Snippet}
 import net.liftweb.common._
 import net.liftweb.http._
-import org.weirdcanada.distro.data.{Artist, ArtistData}
+import org.weirdcanada.distro.data.{Artist, ArtistData, Publisher, PublisherData}
 import org.weirdcanada.distro.page.{AccountPage}
 import org.weirdcanada.distro.page.snippet.EditArtistPage
 import org.weirdcanada.distro.service.Service
@@ -21,6 +21,12 @@ class DistroSiteMapBuilder(service: Service) {
     (tuple) => tuple._2.id.toString
   ) / "admin" / "edit-artist" >> mustBeAdmin >> LocGroup("actions")
 
+  val editPublisherPage = Menu.param[(Publisher,PublisherData)](
+    "EditPublisher",
+    "Edit Publisher",
+    id =>  Publisher.findByStringId(id).map { a => (a, Publisher.toData(a)) },
+    (tuple) => tuple._2.id.toString
+  ) / "admin" / "edit-publisher" >> mustBeAdmin >> LocGroup("actions")
 
   def toSiteMap =
     SiteMap(
@@ -48,6 +54,8 @@ class DistroSiteMapBuilder(service: Service) {
       Menu.i("Add a Publisher") / "admin" / "add-publisher"
         >> mustBeAdmin
         >> LocGroup("actions"),
+
+      editPublisherPage,
 
       Menu.i("Add an Album") / "admin" / "add-album"
         >> mustBeAdmin

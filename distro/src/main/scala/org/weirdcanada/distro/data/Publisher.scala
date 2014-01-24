@@ -7,6 +7,8 @@ import org.weirdcanada.common.util.{Country, Province}
 import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasEmpty,HasFields}
 import scala.xml.NodeSeq
 import scalaz.Lens
+import scalaz.\/
+import scalaz.{\/-,-\/} // Zoidberg
 
 class Publisher extends LongKeyedMapper[Publisher] with IdPK with Address with ManyToMany {
   def getSingleton = Publisher
@@ -22,6 +24,7 @@ class Publisher extends LongKeyedMapper[Publisher] with IdPK with Address with M
 }
 
 case class PublisherData(
+  id: Long,
   name: String,
   url: String,
   description: String,
@@ -42,11 +45,10 @@ object Publisher extends Publisher with LongKeyedMetaMapper[Publisher] with Mapp
 
   def findByPartialName(name: String): List[Publisher] = 
     Publisher.findAll(Cmp(Publisher.name, OprEnum.Like, Full("%" + name + "%"), None, Full("LOWER")))
-
-  def fromData(data: PublisherData): Option[Publisher] = {
-    try { 
-      Some(Publisher
-        .create
+  
+  private def setPublisherParamsFromData(data: PublisherData, publisher: Publisher): \/[String, Publisher] = try {
+    \/-(
+      publisher
         .name(data.name)
         .url(data.url)
         .description(data.description)
@@ -55,11 +57,34 @@ object Publisher extends Publisher with LongKeyedMetaMapper[Publisher] with Mapp
         .city(data.city)
         .province(data.province)
         .country(data.country)
-        .saveMe)
-    } catch {
-      case _ : Throwable => None
+      )
+  } catch {
+    case e: Throwable => -\/("Something terrible happened.\n%s".format(e))
+  }
+
+  def fromData(data: PublisherData): Option[Publisher] = {
+    val newPublisher = Publisher.create
+    setPublisherParamsFromData(data, newPublisher) match {
+      case \/-(publisher) => Some(publisher.saveMe)
+      case -\/(_) => None
     }
   }
+
+  def updateFromData(data: PublisherData, publisher: Publisher): \/[String, Publisher] = 
+    setPublisherParamsFromData(data, publisher).map { _.saveMe }
+
+  def toData(publisher: Publisher): PublisherData = PublisherData(
+    id = publisher.id.is,
+    name = publisher.name.is,
+    url = publisher.url.is, 
+    description = publisher.description.is,
+    imageUrl = publisher.imageUrl.is,
+    social = publisher.social.is,
+    city = publisher.city.is,
+    province = publisher.province.is,
+    country = publisher.country.is
+  )
+
   /**
    * Setup lenses for the fields on `PublisherData`.
    */
@@ -77,7 +102,7 @@ object Publisher extends Publisher with LongKeyedMetaMapper[Publisher] with Mapp
       p.copy(country = c), (p) => p.country)
 
   implicit object PublisherDataEmpty extends HasEmpty[PublisherData] {
-    val empty: PublisherData = PublisherData("","","","","","","","")
+    val empty: PublisherData = PublisherData(-1L, "","","","","","","","")
   }
 
   import DynamicFormFieldRenderHelpers.{textAreaRender, selectRender}
