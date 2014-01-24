@@ -213,7 +213,7 @@ case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens
      */
     def renderAtIndex(index: Int): NodeSeq => NodeSeq = {
       "%s [id]".format(makeNameAdd(None, name)) #> "%s-%s".format(makeAdd(outerName, name), index) andThen
-      indexedChromeRendering.map { _(index+1) }.getOrElse { makeName(None, "%s-number *".format(name)) #> (index+1) } andThen
+      indexedChromeRendering.map { _(index) }.getOrElse { makeName(None, "%s-number *".format(name)) #> (index+1) } andThen
       bRecord
         .fields
         .foldLeft( identity[NodeSeq]_ ){ (acc, field) =>
@@ -292,6 +292,9 @@ case class TypeaheadField[A, B : HasFields : HasEmpty](
     def bUpdateState = getUpdateAndSaveFuncForField[B](bState)
     val bRenderFunction = renderField(bState)
 
+    println("xxx cState: %s".format(cState))
+    println("xxx state: %s".format(state))
+
     "@typeahead-label *" #> typeaheadLabel &
     "@typeahead-input [id]" #> uid &
     "@typeahead-input [value]" #> bStateValue(cState) &
@@ -339,7 +342,7 @@ case class ManyTypeaheadField[A, B : HasFields : HasEmpty](
       outerLens >=> manyLens >=> mapVLens(index) >=> optionLens[String]
 
     def indexedRenderer(index: Int):NodeSeq => NodeSeq = 
-      "@many-%s-number *".format(name) #> index &
+      "@many-%s-number *".format(name) #> (index+1) &
       makeName(outerName, name) #> TypeaheadField[C,B](label(outerName, name) + "-" + index.toString, typeaheadLabel, apiEndpoint, template, sideEffectB, bStateValue, lensAtIndex(index)).render(formStateUpdater, state)(lensId[C], outerName)     
 
     ManyRecordField[A, String]("many-%s".format(name), manyLens, Some(indexedRenderer _)).render(formStateUpdater, state)(outerLens, outerName)
