@@ -30,7 +30,6 @@ class EditPublisherPage(publisherDataTuple: (Publisher, PublisherData)) extends 
   private val removeSuccessJs = """$('.has-success').removeClass('has-success');"""
 
   private def updatePublisherFunc(data: PublisherData, publisher: Publisher): JsCmd = {
-    println("xxx data: %s".format(data))
     Publisher.updateFromData(data, publisher) match {
       case \/-(_) =>
         JsCmds.Run(removeErrorJs + addSuccessJs) & 
