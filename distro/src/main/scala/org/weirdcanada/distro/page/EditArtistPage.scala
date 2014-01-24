@@ -9,7 +9,6 @@ import Loc.LocGroup
 import net.liftweb.util.Helpers._
 import org.weirdcanada.distro.DistroSiteMapBuilder
 import org.weirdcanada.distro.data.{Artist, ArtistData}
-import org.weirdcanada.distro.service.Service
 import org.weirdcanada.dynamicform.{DynamicFormCreator}
 import scala.xml.{NodeSeq, Text}
 import scalaz.\/
@@ -29,7 +28,7 @@ class EditArtistPage(artistDataTuple: (Artist, ArtistData)) extends DispatchSnip
   private val addSuccessJs = """(function() { var x = document.getElementById('artist-update'); x.className = x.className + " has-success";})();"""
   private val removeErrorJs = """$('.has-error').removeClass('has-error');"""
 
-  private def updateArtistFunc(data: ArtistData, artist: Artist): () => JsCmd = () => {
+  private def updateArtistFunc(data: ArtistData, artist: Artist): JsCmd = {
     Artist.updateFromData(data, artist) match {
       case \/-(_) => 
         JsCmds.Run(addSuccessJs) & 
@@ -48,7 +47,7 @@ class EditArtistPage(artistDataTuple: (Artist, ArtistData)) extends DispatchSnip
   val renderFunction = renderField(artistState)
 
   def render = renderFunction andThen {
-    "@artist-update-button" #> SHtml.ajaxButton("Update", updateArtistFunc(data,artist), "onclick" -> removeErrorJs)
+    "@artist-update-button" #> SHtml.ajaxButton("Update", () => updateArtistFunc(artistState.is,artist), "onclick" -> removeErrorJs)
   }
 
   def dispatch = {

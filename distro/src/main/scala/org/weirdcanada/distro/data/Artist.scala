@@ -148,7 +148,7 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] with MapperObjectU
   }
 
   def updateFromData(data: ArtistData, artist: Artist): \/[String, Artist] = {
-    setArtistParamsFromData(data, artist)
+    setArtistParamsFromData(data, artist).map { _.saveMe }
   }
 
   def toData(artist: Artist): ArtistData = ArtistData(
