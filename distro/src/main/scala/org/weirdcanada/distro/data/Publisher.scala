@@ -1,6 +1,6 @@
 package org.weirdcanada.distro.data
 
-import net.liftweb.common.{Full}
+import net.liftweb.common.{Box, Failure, Full}
 import net.liftweb.http.js.{JsCmd, JsCmds}
 import net.liftweb.mapper._
 import org.weirdcanada.common.util.{Country, Province}
@@ -33,7 +33,7 @@ case class PublisherData(
 )
 
 // The companion object to the above Class
-object Publisher extends Publisher with LongKeyedMetaMapper[Publisher] {
+object Publisher extends Publisher with LongKeyedMetaMapper[Publisher] with MapperObjectUtils[Publisher] {
   def findByName(name: String): List[Publisher] =
     Publisher.findAll(By(Publisher.name, name))
   

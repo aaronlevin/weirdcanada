@@ -177,6 +177,28 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
   import Publisher.{insertPublisherSideEffect, PublisherDataFields, PublisherDataEmpty}
 
   /**
+   * Witness to the HasEmpty typeclass
+   */
+  implicit object AlbumDataEmpty extends HasEmpty[AlbumData] {
+    val empty = AlbumData(
+      title = "",
+      url = "",
+      description = "",
+      sku = "",
+      shopifyId = 0,
+      format = "Cassette",
+      isFirstPressing = true,
+      releaseYear = 0,
+      catalogNumber = "",
+      imageUrl = "",
+      additionalImageUrls = Nil,
+      artistIds = Map.empty[Int, String],
+      publisherIds = Map.empty[Int, String],
+      tracks = Map.empty[Int, TrackData]
+    )
+  }
+
+  /**
    * Witness to the `HasFields` type class
    */
   implicit object AlbumDataFields extends HasFields[AlbumData] {
@@ -198,6 +220,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
         apiEndpoint = "/api/artist/%QUERY",
         template = "templates-hidden" :: "_add_artist" :: Nil, 
         sideEffectB = insertArtistSideEffect,
+        bStateValue = (s: String) => Artist.findByStringId(s).map { _.name.is}.toOption,
         manyLens = albumArtistIdsLens
       ),
       ManyTypeaheadField[AlbumData, PublisherData](
@@ -206,33 +229,13 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
         apiEndpoint = "/api/publisher/%QUERY",
         template = "templates-hidden" :: "_add_publisher" :: Nil, 
         sideEffectB = insertPublisherSideEffect,
+        bStateValue = (s: String) =>  Publisher.findByStringId(s).map { _.name.is}.toOption,
         manyLens = albumPublisherIdsLens
       ),
      ManyRecordField[AlbumData, TrackData]("album-track", albumTracksLens)
     )
   }
 
-  /**
-   * Witness to the HasEmpty typeclass
-   */
-  implicit object AlbumDataEmpty extends HasEmpty[AlbumData] {
-    val empty = AlbumData(
-      title = "",
-      url = "",
-      description = "",
-      sku = "",
-      shopifyId = 0,
-      format = "Cassette",
-      isFirstPressing = true,
-      releaseYear = 0,
-      catalogNumber = "",
-      imageUrl = "",
-      additionalImageUrls = Nil,
-      artistIds = Map.empty[Int, String],
-      publisherIds = Map.empty[Int, String],
-      tracks = Map.empty[Int, TrackData]
-    )
-  }
 
   def fromData(data: AlbumData): Option[Album] = {
     DB.use(DefaultConnectionIdentifier) {connection =>

@@ -43,7 +43,7 @@ case class ArtistData(
 )
 
 // The companion object to the above Class
-object Artist extends Artist with LongKeyedMetaMapper[Artist] {
+object Artist extends Artist with LongKeyedMetaMapper[Artist] with MapperObjectUtils[Artist] {
 
   def findByName(name: String): List[Artist] =
     Artist.findAll(By(Artist.name, name))
@@ -53,11 +53,6 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] {
 
   def findByGeography(city: String, province: String) =
     Artist.findAll(By(Artist.city, city), By(Artist.province, province))
-
-  def findByStringId(id: String): Box[Artist] = safeParse[Long](id) match {
-    case None => Failure("%s is not a valid Long".format(id))
-    case Some(i) => Artist.findByKey(i)
-  }
 
   object Type extends Enumeration {
     type Type = Value

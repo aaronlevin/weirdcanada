@@ -252,6 +252,8 @@ case class ManyRecordField[A, B : HasFields : HasEmpty](name: String, lens: Lens
  * @param lens Quite often you'll need to send an ID from the result of the Typeahead into a hidden form field. This 
  * lens should 'lens' over that field.
  * @param sideEffectB what do we do with B after we've added a new one? We're passed a function that can curry over the `uid` in-case we want to update a template. 
+ * @param bStateValue a method to fetch a `B` given a string and produce a
+ * string value presentable to the user (for within the input field)
  */
 case class TypeaheadField[A, B : HasFields : HasEmpty](
   name: String, 
@@ -259,6 +261,7 @@ case class TypeaheadField[A, B : HasFields : HasEmpty](
   apiEndpoint: String,
   template: List[String], 
   sideEffectB: String => B => JsCmd,
+  bStateValue: String => Option[String],
   lens: Lens[A,String]
 ) extends DynamicField[A] with DynamicFormCreator {
 
@@ -270,6 +273,8 @@ case class TypeaheadField[A, B : HasFields : HasEmpty](
 
     def updateFunc(state: C)(string: String): C = fullLens.set(state,string) 
     def getFunc(state: C): String = fullLens.get(state)
+
+    val cState: String = getFunc(state)
 
     val jsCmd = () => Noop
     val fieldUpdateFunc = formStateUpdater(updateFunc)(jsCmd)
@@ -289,10 +294,11 @@ case class TypeaheadField[A, B : HasFields : HasEmpty](
 
     "@typeahead-label *" #> typeaheadLabel &
     "@typeahead-input [id]" #> uid &
+    "@typeahead-input [value]" #> bStateValue(cState) &
     "@typeahead-modal-button [data-target]" #> "#%s-modal".format(uid) &
     "@typeahead-modal [id]" #> "%s-modal".format(uid) &
     "@typeahead-modal-save" #> SHtml.ajaxButton("Save", () => sideEffectB(uid)(bState.is)) &
-    "@typeahead-hidden-input" #>  SHtml.ajaxText("", false, fieldUpdateFunc, "id" -> (uid + "-hidden"), "value" -> getFunc(state)) &
+    "@typeahead-hidden-input" #>  SHtml.ajaxText("", false, fieldUpdateFunc, "id" -> (uid + "-hidden"), "value" -> cState) &
     "@typeahead-modal-form" #> Templates(template).map { bRenderFunction } &
     "@typeahead-script-handler *" #> Unparsed("""wc.typeaheadWrapper('#%s', function(datum) { $('#%s-hidden').val(datum.id); $('#%s-hidden').blur(); }, '%s');""".format(uid, uid, uid, apiEndpoint))
 
@@ -310,6 +316,8 @@ case class TypeaheadField[A, B : HasFields : HasEmpty](
  * @param manyLens Quite often you'll need to send an ID from the result of the Typeahead into a hidden form field. This 
  * lens should 'lens' over that field. Since there are possibly many of these, we follow the map convention.
  * @param sideEffectB what do we do with B after we've added a new one? We're passed a function that can curry over the `uid` in-case we want to update a template. 
+ * @param bStateValue a method to fetch a `B` given a string and produce another
+ * string to be viewed by the user
  */
 case class ManyTypeaheadField[A, B : HasFields : HasEmpty](
   name: String,
@@ -317,6 +325,7 @@ case class ManyTypeaheadField[A, B : HasFields : HasEmpty](
   apiEndpoint: String, 
   template: List[String],
   sideEffectB: String => B => JsCmd,
+  bStateValue: String => Option[String],
   manyLens: Lens[A, Map[Int, String]]
 ) extends DynamicField[A] with DynamicFormCreator {
 
@@ -331,7 +340,7 @@ case class ManyTypeaheadField[A, B : HasFields : HasEmpty](
 
     def indexedRenderer(index: Int):NodeSeq => NodeSeq = 
       "@many-%s-number *".format(name) #> index &
-      makeName(outerName, name) #> TypeaheadField[C,B](label(outerName, name) + "-" + index.toString, typeaheadLabel, apiEndpoint, template, sideEffectB, lensAtIndex(index)).render(formStateUpdater, state)(lensId[C], outerName)     
+      makeName(outerName, name) #> TypeaheadField[C,B](label(outerName, name) + "-" + index.toString, typeaheadLabel, apiEndpoint, template, sideEffectB, bStateValue, lensAtIndex(index)).render(formStateUpdater, state)(lensId[C], outerName)     
 
     ManyRecordField[A, String]("many-%s".format(name), manyLens, Some(indexedRenderer _)).render(formStateUpdater, state)(outerLens, outerName)
   }
