@@ -1,15 +1,26 @@
 package org.weirdcanada.distro
 
-import net.liftweb.sitemap.{Loc, SiteMap, Menu}
-import Loc.LocGroup
+import net.liftweb.sitemap.{Loc, Menu, SiteMap}
+import Loc.{LocGroup, LocSnippets, Snippet}
 import net.liftweb.common._
 import net.liftweb.http._
-import org.weirdcanada.distro.page.AccountPage
+import org.weirdcanada.distro.data.{Artist, ArtistData}
+import org.weirdcanada.distro.page.{AccountPage}
+import org.weirdcanada.distro.page.snippet.EditArtistPage
 import org.weirdcanada.distro.service.Service
+import scala.xml.NodeSeq
 
 class DistroSiteMapBuilder(service: Service) {
   implicit def svc = service
   import DistroSiteMapBuilder._
+
+  val editArtistPage = Menu.param[(Artist,ArtistData)](
+    "EditArtist",
+    "Edit Artist",
+    id =>  Artist.findByStringId(id).map { a => (a, Artist.toData(a)) },
+    (tuple) => tuple._2.id.toString
+  ) / "admin" / "edit-artist" >> mustBeAdmin >> LocGroup("actions")
+
 
   def toSiteMap =
     SiteMap(
@@ -31,6 +42,8 @@ class DistroSiteMapBuilder(service: Service) {
       Menu.i("Add an Artist") / "admin" / "add-artist"
         >> mustBeAdmin
         >> LocGroup("actions"),
+
+      editArtistPage,
 
       Menu.i("Add a Publisher") / "admin" / "add-publisher"
         >> mustBeAdmin

@@ -1,6 +1,6 @@
 package org.weirdcanada.distro.data
 
-import net.liftweb.common.{Full}
+import net.liftweb.common.{Box, Failure, Full}
 import net.liftweb.http.js.{JsCmd, JsCmds}
 import net.liftweb.mapper._
 import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasEmpty,HasFields}
@@ -8,6 +8,8 @@ import org.weirdcanada.common.util.{Country, Province, StringParsingUtil}
 import StringParsingUtil.safeParse
 import scala.xml.NodeSeq
 import scalaz.Lens
+import scalaz.{\/-,-\/} // Zoidberg
+import scalaz.\/
 
 class Artist extends LongKeyedMapper[Artist] with IdPK with Geography with ManyToMany {
   def getSingleton = Artist
@@ -28,6 +30,7 @@ class Artist extends LongKeyedMapper[Artist] with IdPK with Geography with ManyT
  * ADT for Artist data
  */
 case class ArtistData(
+  id: Long,
   name: String, 
   url: String, 
   description: String,
@@ -51,13 +54,18 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] {
   def findByGeography(city: String, province: String) =
     Artist.findAll(By(Artist.city, city), By(Artist.province, province))
 
+  def findByStringId(id: String): Box[Artist] = safeParse[Long](id) match {
+    case None => Failure("%s is not a valid Long".format(id))
+    case Some(i) => Artist.findByKey(i)
+  }
+
   object Type extends Enumeration {
     type Type = Value
     val Musician, Band, Author, Illustrator = Value // TODO: more types?
   }
 
   implicit object ArtistEmpty extends HasEmpty[ArtistData] {
-    val empty: ArtistData = ArtistData("","","","","Band","","","alberta","canada")
+    val empty: ArtistData = ArtistData(-1L, "","","","","Band","","","alberta","canada")
   }
 
   /**
@@ -111,30 +119,56 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] {
     )
   }
 
-  def fromData(data: ArtistData): Option[Artist] = {
-    val artistType: Option[Type.Type] = try {
-      Some(Type.withName(data.artistType))
+  private def setArtistParamsFromData(data: ArtistData, artist: Artist): \/[String, Artist] = {
+    try {
+      val t = Type.withName(data.artistType)
+      \/-(
+        artist
+          .name(data.name)
+          .url(data.url)
+          .description(data.description)
+          .imageUrl(data.imageUrl)
+          .artistType(t)
+          .social(data.social)
+          .city(data.city)
+          .province(data.province)
+          .country(data.country)
+      )
     } catch {
       case e: java.util.NoSuchElementException =>
-        None
+        -\/("Cannot find Artist Type for %s".format(data.artistType))
     }
 
-    artistType.map { t =>
+  }
 
-    Artist
-      .create
-      .name(data.name)
-      .url(data.url)
-      .description(data.description)
-      .imageUrl(data.imageUrl)
-      .artistType(t)
-      .social(data.social)
-      .city(data.city)
-      .province(data.province)
-      .country(data.country)
-      .saveMe
+  /**
+   * TODO: propagate option throughout program
+   */
+  def fromData(data: ArtistData): Option[Artist] = {
+    val newArtist = Artist.create
+    setArtistParamsFromData(data, newArtist) match {
+      case \/-(artist) => Some(artist.saveMe)
+      case -\/(_) => None
     }
   }
+
+  def updateFromData(data: ArtistData, artist: Artist): \/[String, Artist] = {
+    setArtistParamsFromData(data, artist)
+  }
+
+  def toData(artist: Artist): ArtistData = ArtistData(
+    id = artist.id.is, 
+    name = artist.name.is,
+    url = artist.url.is, 
+    description = artist.description.is,
+    imageUrl = artist.imageUrl.is,
+    artistType = artist.artistType.is.toString,
+    social = artist.social.is,
+    city = artist.city.is,
+    province = artist.province.is,
+    country = artist.country.is
+  )
+
 
   /**
    * For use in Typeahead forms

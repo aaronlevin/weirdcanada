@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+<title>Accounts</title>
+</head>
+<body class="lift:content_id=main">
+<div id="main" class="lift:surround?with=default;at=content">
+
+  <h1>Add an Artist</h1>
+
+  <div data-lift="EditArtistPage.render?eager_eval=true">
+
+    <form class="form-horizontal" role="form">
+
+      <div data-lift="embed?what=_add_artist"></div>
+
+      <!-- Update -->
+      <div class="form-group" id="artist-update">
+        <label class="col-sm-2 control-label">Update</label>
+        <div class="col-sm-10">
+          <button type="button" class="form-control btn btn-default" name="artist-update-button">Update</button>
+          <div id="artist-update-error"></div>
+        </div>
+      </div>
+      <!-- /Update -->
+
+
+
+    </form>
+
+  </div>
+
+
+</div>
+</body>
+</html>

@@ -51,9 +51,6 @@ class Boot extends Bootable with Loggable {
     service.DatabaseManager.connect
     service.DatabaseManager.createSchema
     
-    // where to search snippet
-    LiftRules.addToPackages("org.weirdcanada.distro.snippet")
-    LiftRules.addToPackages("org.weirdcanada.distro.page")
 
     // Snippets
     LiftRules.snippetDispatch.append(SnippetDispatch(service, shopifyClient))
@@ -64,6 +61,10 @@ class Boot extends Bootable with Loggable {
     
     // Add REST API
     LiftRules.statelessDispatch.append(restApi)
+
+    // where to search snippet
+    LiftRules.addToPackages("org.weirdcanada.distro.snippet")
+    LiftRules.addToPackages("org.weirdcanada.distro.page")
 
     LiftSession.onSetupSession = (service.SessionManager.onSessionBegin _) :: LiftSession.onSetupSession
     LiftSession.onShutdownSession = (service.SessionManager.onSessionEnd _) :: LiftSession.onShutdownSession
