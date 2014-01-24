@@ -7,6 +7,8 @@ import StringParsingUtil.safeParse
 import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasFields, HasEmpty, ManyRecordField, ManyTypeaheadField}
 import scalaz.Lens
 import Lens.lensId
+import scalaz.\/
+import scalaz.{\/-,-\/} // Zoidberg
 
 class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToMany[Long, Album] {
   def getSingleton = Album
@@ -99,6 +101,7 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
  * ADT for dynamic fields
  */
 case class AlbumData(
+  id: Long,
   title: String,
   url: String,
   description: String,
@@ -123,7 +126,7 @@ case class AlbumData(
 }
 
 // The companion object to the above Class
-object Album extends Album with LongKeyedMetaMapper[Album] {
+object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtils[Album] {
 
   object Type extends Enumeration {
     type Type = Value
@@ -181,6 +184,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
    */
   implicit object AlbumDataEmpty extends HasEmpty[AlbumData] {
     val empty = AlbumData(
+      id = -1L,
       title = "",
       url = "",
       description = "",
@@ -236,50 +240,118 @@ object Album extends Album with LongKeyedMetaMapper[Album] {
     )
   }
 
+  private def setAlbumParamsFromData(data: AlbumData, album: Album): \/[String, Album] = try {
+    val format = Album.Type.withName(data.format)
+    val artistIds = data.artistIdsList
+    val publisherIds = data.publisherIdsList
+
+    \/-(
+      album
+        .title(data.title)
+        .url(data.url)
+        .description(data.description)
+        .sku(data.sku)
+        .shopifyId(data.shopifyId)
+        .format(format)
+        .isFirstPressing(data.isFirstPressing)
+        .releaseYear(data.releaseYear)
+        .catalogNumber(data.catalogNumber)
+        .imageUrl(data.imageUrl)
+        .additionalImageUrls(data.additionalImageUrls.mkString(","))
+      )
+  } catch {
+    case _: java.util.NoSuchElementException => -\/("%s is not a valid format".format(data.format))
+  }
 
   def fromData(data: AlbumData): Option[Album] = {
     DB.use(DefaultConnectionIdentifier) {connection =>
 
-      val artistIds = data.artistIdsList
-      val publisherIds = data.publisherIdsList
+      val newAlbum = Album.create
+      
+      setAlbumParamsFromData(data, newAlbum) match {
+        case \/-(album) =>
+          val artists = 
+            data
+              .artistIds
+              .values
+              .flatMap { safeParse[Long] }
+              .flatMap { Artist.findByKey(_).toOption }
 
-      println("xxx %s".format(data))
-      for {
-        format <- try {
-                        Some(Album.Type.withName(data.format))
-                      } catch {
-                        case _: java.util.NoSuchElementException => None
-                      }
-      } yield {
-
-        val artists = artistIds.flatMap { Artist.findByKey(_).toOption }
-        val publishers = publisherIds.flatMap { Publisher.findByKey(_).toOption }
-
-        val album =
-          Album
-            .create
-            .title(data.title)
-            .url(data.url)
-            .description(data.description)
-            .sku(data.sku)
-            .shopifyId(data.shopifyId)
-            .format(format)
-            .isFirstPressing(data.isFirstPressing)
-            .releaseYear(data.releaseYear)
-            .catalogNumber(data.catalogNumber)
-            .imageUrl(data.imageUrl)
-            .additionalImageUrls(data.additionalImageUrls.mkString(","))
-            .saveMe
+          val publishers = 
+            data
+              .publisherIds
+              .values
+              .flatMap { safeParse[Long] }.flatMap { Publisher.findByKey(_).toOption }
 
           /** side effects! **/
           artists.foreach { album.artists += _ }
           publishers.foreach { album.publishers += _ }
           data.tracks.values.map { Track.fromData(_)(album) } // (track adds itself to an album)
 
-          album
+          Some(album.saveMe)
+
+        case -\/(_) => None
       }
     }
 
   }
+
+  // TODO: less queries
+  def updateFromData(data: AlbumData, album: Album): \/[String, Album] = 
+    DB.use(DefaultConnectionIdentifier) { connection =>
+
+      setAlbumParamsFromData(data, album).map { album =>
+        val currentArtistIds: Set[String] = album.artists.map { _.id.is.toString }.toSet
+        val currentPublisherIds: Set[String] = album.publishers.map { _.id.is.toString }.toSet
+
+        val newArtistIds = 
+          (data.artistIds.values.toSet &~ currentArtistIds).flatMap { safeParse[Long] }
+        val removeableArtistIds = 
+          (currentArtistIds &~ data.artistIds.values.toSet).flatMap { safeParse[Long] }
+
+        val newPublisherIds = 
+          (data.publisherIds.values.toSet &~ currentPublisherIds).flatMap { safeParse[Long] }
+        val removeablePublisherIds = 
+          (currentPublisherIds &~ data.publisherIds.values.toSet).flatMap { safeParse[Long] }
+
+
+        val newArtists = newArtistIds.flatMap { Artist.findByKey(_).toOption }
+        val removeableArtists = removeableArtistIds.flatMap { Artist.findByKey(_).toOption}
+
+        val newPublishers = newPublisherIds.flatMap { Publisher.findByKey(_).toOption }
+        val removeablePublishers = removeablePublisherIds.flatMap { Publisher.findByKey(_).toOption }
+
+        newArtists.foreach { album.artists += _ }
+        removeableArtists.foreach { album.artists -= _ }
+        newPublishers.foreach { album.publishers += _ }
+        removeablePublishers.foreach { album.publishers -= _ }
+
+        album.saveMe
+      }
+    }
+
+  def toData(album: Album): AlbumData =  DB.use(DefaultConnectionIdentifier) { connection =>
+    AlbumData(
+      id = album.id.is,
+      title = album.title.is,
+      url = album.url.is,
+      description = album.description.is,
+      sku = album.sku.is,
+      shopifyId = album.shopifyId.is,
+      format = album.format.is.toString,
+      isFirstPressing = album.isFirstPressing.is,
+      releaseYear = album.releaseYear.is,
+      catalogNumber = album.catalogNumber.is,
+      imageUrl = album.imageUrl.is,
+      additionalImageUrls = album.additionalImageUrls.is.split(',').toList,
+      artistIds = album.artists.map { _.id.is.toString }.zipWithIndex.map { _.swap }.toMap,
+      publisherIds = album.publishers.map { _.id.is.toString }.zipWithIndex.map { _.swap }.toMap,
+      tracks = album.tracks.map { Track.toData }.zipWithIndex.map { _.swap }.toMap
+    )
+  }
+
+
+
+
 
 }

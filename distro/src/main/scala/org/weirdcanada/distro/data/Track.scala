@@ -23,7 +23,7 @@ class Track extends LongKeyedMapper[Track] with IdPK {
 /**
  * ADT for track data
  */
-case class TrackData(name: String, number: Int, url: String, price: BigDecimal, s3Url: String)
+case class TrackData(id: Long, name: String, number: Int, url: String, price: BigDecimal, s3Url: String)
 
 // The companion object to the above Class
 object Track extends Track with LongKeyedMetaMapper[Track] {
@@ -59,7 +59,7 @@ object Track extends Track with LongKeyedMetaMapper[Track] {
    * Witness to the `HasEmpty` type class
    */
   implicit object TrackDataEmpty extends HasEmpty[TrackData] {
-    val empty = TrackData("", 0, "", 0.0, "")
+    val empty = TrackData(-1L, "", 0, "", 0.0, "")
   }
 
   def fromData(data: TrackData)(album: Album): Track =
@@ -72,5 +72,15 @@ object Track extends Track with LongKeyedMetaMapper[Track] {
       .s3Url(data.s3Url)
       .album(album)
       .saveMe
+
+  def toData(track: Track): TrackData = TrackData(
+    id = track.id.is,
+    name = track.name.is,
+    number = track.number.is,
+    url = track.url.is,
+    price = track.price.is,
+    s3Url = track.s3Url.is
+  )
+
 }
 
