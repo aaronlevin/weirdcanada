@@ -276,9 +276,9 @@ case class TypeaheadField[A, B : HasFields : HasEmpty](
     val uid = label(outerName, name)
 
     /**
-     * For the B form we need to pretend like this is a new Snippet. 
+     * For the B form we need to pretend like this is a new Snippet.
      * RequestVar's are scoped to this function so we need to override the
-     * `nameSalt`. 
+     * `nameSalt`.
      * See: http://liftweb.net/api/25/api/#net.liftweb.http.RequestVar
      */
     object bState extends RequestVar[B](implicitly[HasEmpty[B]].empty) {
@@ -292,7 +292,7 @@ case class TypeaheadField[A, B : HasFields : HasEmpty](
     "@typeahead-modal-button [data-target]" #> "#%s-modal".format(uid) &
     "@typeahead-modal [id]" #> "%s-modal".format(uid) &
     "@typeahead-modal-save" #> SHtml.ajaxButton("Save", () => sideEffectB(uid)(bState.is)) &
-    "@typeahead-hidden-input" #>  SHtml.ajaxText("", false, fieldUpdateFunc, "id" -> (uid + "-hidden")) &
+    "@typeahead-hidden-input" #>  SHtml.ajaxText("", false, fieldUpdateFunc, "id" -> (uid + "-hidden"), "value" -> getFunc(state)) &
     "@typeahead-modal-form" #> Templates(template).map { bRenderFunction } &
     "@typeahead-script-handler *" #> Unparsed("""wc.typeaheadWrapper('#%s', function(datum) { $('#%s-hidden').val(datum.id); $('#%s-hidden').blur(); }, '%s');""".format(uid, uid, uid, apiEndpoint))
 
