@@ -82,7 +82,7 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
   object artists extends MappedManyToMany(ArtistsAlbums, ArtistsAlbums.album, ArtistsAlbums.artist, Artist)
   object tracks extends MappedOneToMany(Track, Track.album, OrderBy(Track.number, Ascending))
 
-  object consignedItems extends MappedManyToMany(AlbumsConsignedItems, AlbumsConsignedItems.album, AlbumsConsignedItems.consignedItem, ConsignedItem)
+  object consignedItems extends MappedOneToMany(ConsignedItem, ConsignedItem.album, OrderBy(ConsignedItem.createdAt, Ascending))
 
   override def toString =
     "Album(id=%s, title=%s, sku=%s, format=%s, releaseYear=%s, catalogNumber=%s, shopifyId=%s)"
