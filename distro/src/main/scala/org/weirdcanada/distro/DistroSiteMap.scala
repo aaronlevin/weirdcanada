@@ -70,6 +70,10 @@ class DistroSiteMapBuilder(service: Service) {
 
       editAlbumPage,
 
+      Menu.i("Consign Item") / "admin" / "add-consigned-item"
+        >> mustBeAdmin
+        >> LocGroup("actions"),
+
       Menu.i("Request Payment") / "request-payment"
         >> mustBeLoggedIn
         >> Loc.Hidden

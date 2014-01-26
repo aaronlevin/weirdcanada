@@ -25,5 +25,6 @@ object SnippetDispatch {
     case "AddArtistPage" => new AddArtistPage(service)
     case "AddAlbumPage" => new AddAlbumPage(service)
     case "AddPublisherPage" => new AddPublisherPage(service)
+    case "AddConsignedItemPage" => new AddConsignedItemPage(service)
   }
 }

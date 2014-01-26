@@ -1,6 +1,7 @@
 package org.weirdcanada.distro.data
 
 import net.liftweb.db.DefaultConnectionIdentifier
+import net.liftweb.http.js.{JsCmd, JsCmds}
 import net.liftweb.mapper._
 import org.weirdcanada.common.util.StringParsingUtil
 import StringParsingUtil.safeParse
@@ -350,7 +351,13 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
     )
   }
 
-
+  /**
+   * For use in Typeahead forms
+   */
+  def insertAlbumSideEffect(uid: String)(data: AlbumData): JsCmd = fromData(data) match {
+    case None => JsCmds.Alert("failed to insert album")
+    case Some(a) => JsCmds.Alert("Succesfully inserted album with Id: %s".format(a.id.is))
+  }
 
 
 

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+  <title>Accounts</title>
+</head>
+<body class="lift:content_id=main">
+  <div id="main" class="lift:surround?with=default;at=content">
+
+    <h1>Add an Artist</h1>
+
+    <div data-lift="AddConsignedItemPage?eager_eval=true">
+
+      <form class="form-horizontal" role="form">
+
+
+        <div data-lift="embed?what=_add_consigneditem"></div>
+
+        <div name="consigneditem-save-and-confirm" id="consigneditem-save-and-confirm">
+          <div class="form-group" id="consigneditem-save" name="consigneditem-save-group">
+            <div class="col-sm-offset-2 col-sm-10">
+              <button type="submit" name="consigneditem-save" id="consigneditem-save">
+            </div>
+            <div id="consigneditem-save-error" class="col-sm-offset-2 col-sm-10"></div>
+          </div>
+
+          <div class="form-group" id="consigneditem-confirm-save" name="consigneditem-confirm-save">
+            <div class="col-sm-offset-2 col-sm-4">
+              <button type="submit" name="consigneditem-duplicate-confirm">
+            </div>
+            <div class="col-sm-4">
+              <button type="submit" name="consigneditem-cancel-save">
+            </div>
+          </div>
+
+        </div>
+
+
+      </form>
+
+  </div>
+
+
+  </div>
+</body>
+</html>
