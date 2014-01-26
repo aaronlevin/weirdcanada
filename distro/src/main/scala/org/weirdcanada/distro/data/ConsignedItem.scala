@@ -141,7 +141,7 @@ object ConsignedItem extends ConsignedItem with LongKeyedMetaMapper[ConsignedIte
   private val mediaSelect =
     selectRender(mediaConditionLens.get)("name=consigneditem-mediaCondition-input")(PhysicalCondition.conditionNameTuples) _
   private val notesArea = 
-    textAreaRender(additionalNotesLens.get)("name=consigneditem-additionalNotes-input")("Additional Notes") _
+    textAreaRender(additionalNotesLens.get)("name=consigneditem-additionalNotes-input")("") _
 
     import Album._
 
