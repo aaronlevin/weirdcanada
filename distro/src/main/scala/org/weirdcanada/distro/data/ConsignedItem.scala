@@ -6,7 +6,7 @@ import net.liftweb.mapper._
 import org.joda.time.DateTime
 import org.weirdcanada.common.util.{EnumerationUtils, PhysicalCondition, StringParsingUtil}
 import PhysicalCondition._
-import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasFields, HasEmpty, ManyRecordField, ManyTypeaheadField}
+import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasFields, HasEmpty, ManyRecordField, ManyTypeaheadField, TypeaheadField}
 import StringParsingUtil.safeParse
 import scalaz.Lens
 import scalaz.\/
@@ -141,6 +141,7 @@ object ConsignedItem extends ConsignedItem with LongKeyedMetaMapper[ConsignedIte
   private val mediaSelect =
     selectRender(mediaConditionLens.get)("name=consigneditem-mediaCondition-input")(PhysicalCondition.conditionNameTuples) _
 
+    import Album._
 
   /**
    * Witness to the `HasFields` typeclass
@@ -156,7 +157,15 @@ object ConsignedItem extends ConsignedItem with LongKeyedMetaMapper[ConsignedIte
       BasicField[ConsignedItemData]("consigneditem-wholesaleCost", wholesaleCostLens),
       BasicField[ConsignedItemData]("consigneditem-markUp", markUpLens),
       BasicField[ConsignedItemData]("consigneditem-consignorId", consignorIdLens),
-      BasicField[ConsignedItemData]("consigneditem-albumId", albumIdLens)
+      TypeaheadField[ConsignedItemData, AlbumData](
+        name = "consigneditem-albumId",
+        typeaheadLabel = "Add Album",
+        apiEndpoint = "/api/album/%QUERY",
+        template = "templates-hidden" :: "_add_album" :: Nil,
+        sideEffectB = Album.insertAlbumSideEffect,
+        bStateValue = (s: String) => Album.findByStringId(s).map { _.title.is}.toOption,
+        lens = consignorIdLens
+      )
     )
   }
 

@@ -292,9 +292,6 @@ case class TypeaheadField[A, B : HasFields : HasEmpty](
     def bUpdateState = getUpdateAndSaveFuncForField[B](bState)
     val bRenderFunction = renderField(bState)
 
-    println("xxx cState: %s".format(cState))
-    println("xxx state: %s".format(state))
-
     "@typeahead-label *" #> typeaheadLabel &
     "@typeahead-input [id]" #> uid &
     "@typeahead-input [value]" #> bStateValue(cState) &

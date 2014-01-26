@@ -1,5 +1,6 @@
 package org.weirdcanada.distro.data
 
+import net.liftweb.common.Full
 import net.liftweb.db.DefaultConnectionIdentifier
 import net.liftweb.http.js.{JsCmd, JsCmds}
 import net.liftweb.mapper._
@@ -13,6 +14,28 @@ import scalaz.{\/-,-\/} // Zoidberg
 
 class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToMany[Long, Album] {
   def getSingleton = Album
+
+
+  object title extends MappedString(this, 256)
+  object url extends MappedString(this, 256)
+  object description extends MappedText(this)
+  object sku extends MappedString(this, 32)
+  object shopifyId extends MappedLong(this)
+
+  object format extends MappedEnum(this, Album.Type)
+  object isFirstPressing extends MappedBoolean(this)
+  object releaseYear extends MappedInt(this)
+  object catalogNumber extends MappedString(this, 32)
+  object imageUrl extends MappedString(this, 256)
+  object additionalImageUrls extends MappedText(this) // Stored as a comma separated list or JSON // TODO: maybe extract the logic into a class?
+  
+  // it could be a "split label" release (i.e. more than one label collaborating), or it could be a re-release by a new label
+  object publishers extends MappedManyToMany(PublishersAlbums, PublishersAlbums.album, PublishersAlbums.publisher, Publisher)
+  
+  object artists extends MappedManyToMany(ArtistsAlbums, ArtistsAlbums.album, ArtistsAlbums.artist, Artist)
+  object tracks extends MappedOneToMany(Track, Track.album, OrderBy(Track.number, Ascending))
+
+  object consignedItems extends MappedOneToMany(ConsignedItem, ConsignedItem.album, OrderBy(ConsignedItem.createdAt, Ascending))
 
   /**
    * Convert the `Type` enum to a string
@@ -64,27 +87,6 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
     }
   }
 
-  object title extends MappedString(this, 256)
-  object url extends MappedString(this, 256)
-  object description extends MappedText(this)
-  object sku extends MappedString(this, 32)
-  object shopifyId extends MappedLong(this)
-
-  object format extends MappedEnum(this, Album.Type)
-  object isFirstPressing extends MappedBoolean(this)
-  object releaseYear extends MappedInt(this)
-  object catalogNumber extends MappedString(this, 32)
-  object imageUrl extends MappedString(this, 256)
-  object additionalImageUrls extends MappedText(this) // Stored as a comma separated list or JSON // TODO: maybe extract the logic into a class?
-  
-  // it could be a "split label" release (i.e. more than one label collaborating), or it could be a re-release by a new label
-  object publishers extends MappedManyToMany(PublishersAlbums, PublishersAlbums.album, PublishersAlbums.publisher, Publisher)
-  
-  object artists extends MappedManyToMany(ArtistsAlbums, ArtistsAlbums.album, ArtistsAlbums.artist, Artist)
-  object tracks extends MappedOneToMany(Track, Track.album, OrderBy(Track.number, Ascending))
-
-  object consignedItems extends MappedOneToMany(ConsignedItem, ConsignedItem.album, OrderBy(ConsignedItem.createdAt, Ascending))
-
   override def toString =
     "Album(id=%s, title=%s, sku=%s, format=%s, releaseYear=%s, catalogNumber=%s, shopifyId=%s)"
       .format(
@@ -135,6 +137,11 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
   }
 
   def findByTitle(title: String): List[Album] = Album.findAll(By(Album.title, title))
+
+  def findByPartialTitle(title: String): List[Album] = 
+    Album.findAll(
+      Cmp(Album.title, OprEnum.Like, Full("%" + title + "%"), None, Full("LOWER") )
+    )
 
   /**
    * Lenses for dynamic fields
@@ -331,6 +338,9 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
       }
     }
 
+  /**
+   * to data
+   */
   def toData(album: Album): AlbumData =  DB.use(DefaultConnectionIdentifier) { connection =>
     AlbumData(
       id = album.id.is,
@@ -352,7 +362,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
   }
 
   /**
-   * For use in Typeahead forms
+   * For use in Typeahead forms. cool
    */
   def insertAlbumSideEffect(uid: String)(data: AlbumData): JsCmd = fromData(data) match {
     case None => JsCmds.Alert("failed to insert album")

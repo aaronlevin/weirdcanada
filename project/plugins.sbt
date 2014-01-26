@@ -7,3 +7,6 @@ addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.5.2")
 
 //Enable the sbt eclipse plugin
 addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "2.4.0")
+
+// Jrebel plugin
+addSbtPlugin("fi.gekkio.sbtplugins" % "sbt-jrebel-plugin" % "0.10.0")

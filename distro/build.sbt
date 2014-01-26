@@ -41,6 +41,7 @@ lazy val customAssemblySettings: Seq[Project.Setting[_]] =
     assemblyMergeSettings ++
     assemblyNoTestSetting ++
     Seq(jarName in assembly := "weirdcanada-distro.jar") ++
+    jrebelSettings ++
     Seq(buildTask)
   ) ++
   inConfig(AlbumApp)(
