@@ -51,7 +51,7 @@ class ForgotPasswordPage(service: Service) extends DispatchSnippet {
               service.EmailManager.send(account.email.is, ForgotPasswordEmailTemplate(account.displayName, newPassword))
               properJs("Check your inbox for a new password!")
             } else 
-              properJs("Ah, what a beautiful email you have.")
+              JsCmds.Noop
         }
     }
 
