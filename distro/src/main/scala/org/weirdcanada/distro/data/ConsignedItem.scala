@@ -132,7 +132,7 @@ object ConsignedItem extends ConsignedItem with LongKeyedMetaMapper[ConsignedIte
     (c) => c.albumId.map { _.toString }.getOrElse { "" }
   )
 
-  import DynamicFormFieldRenderHelpers.{checkboxRender, selectRender}
+  import DynamicFormFieldRenderHelpers.{checkboxRender, selectRender, textAreaRender}
   /**
    * Select fields
    */
@@ -140,6 +140,8 @@ object ConsignedItem extends ConsignedItem with LongKeyedMetaMapper[ConsignedIte
     selectRender(coverConditionLens.get)("name=consigneditem-coverCondition-input")(PhysicalCondition.conditionNameTuples) _
   private val mediaSelect =
     selectRender(mediaConditionLens.get)("name=consigneditem-mediaCondition-input")(PhysicalCondition.conditionNameTuples) _
+  private val notesArea = 
+    textAreaRender(additionalNotesLens.get)("name=consigneditem-additionalNotes-input")("Additional Notes") _
 
     import Album._
 
@@ -150,7 +152,7 @@ object ConsignedItem extends ConsignedItem with LongKeyedMetaMapper[ConsignedIte
     val fields: List[DynamicField[ConsignedItemData]] = List(
       BasicField[ConsignedItemData]("consigneditem-coverCondition", coverConditionLens, Some(conditionSelect)),
       BasicField[ConsignedItemData]("consigneditem-mediaCondition", mediaConditionLens, Some(mediaSelect)),
-      BasicField[ConsignedItemData]("consigneditem-additionalNotes", additionalNotesLens),
+      BasicField[ConsignedItemData]("consigneditem-additionalNotes", additionalNotesLens, Some(notesArea)),
       BasicField[ConsignedItemData]("consigneditem-date", dateLens),
       BasicField[ConsignedItemData]("consigneditem-quantity", quantityLens),
       BasicField[ConsignedItemData]("consigneditem-customerCost", customerCostLens),
