@@ -43,6 +43,8 @@ class DistroSiteMapBuilder(service: Service) {
 
       Menu.i("Forgot Password") / "forgot-password" >> mustBeVisitor,
 
+      Menu.i("Update Password") / "update-password" >> mustBeLoggedIn,
+
       Menu.i("Check Your Inbox") / "check-your-inbox"
         >> mustBeLoggedIn
         >> Loc.Hidden,

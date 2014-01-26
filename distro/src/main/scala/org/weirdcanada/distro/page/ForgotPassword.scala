@@ -57,7 +57,7 @@ class ForgotPasswordPage(service: Service) extends DispatchSnippet {
 
   private def render =
     "@email" #> SHtml.ajaxText("", (s: String) => { emailAddress = s;  emailConfirm(false) }) &
-    "@send-email" #> SHtml.ajaxButton("Send New Password", () => emailConfirm(true) )
+    "@send-email" #> SHtml.ajaxButton("Email New Password", () => emailConfirm(true) )
 
 
 }

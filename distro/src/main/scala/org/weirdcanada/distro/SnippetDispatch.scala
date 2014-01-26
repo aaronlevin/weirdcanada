@@ -27,5 +27,6 @@ object SnippetDispatch {
     case "AddPublisherPage" => new AddPublisherPage(service)
     case "AddConsignedItemPage" => new AddConsignedItemPage(service)
     case "ForgotPasswordPage" => new ForgotPasswordPage(service)
+    case "UpdatePasswordPage" => new UpdatePasswordPage(service, service.SessionManager.current.account)
   }
 }
