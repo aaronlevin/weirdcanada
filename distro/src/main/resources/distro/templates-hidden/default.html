@@ -61,7 +61,10 @@
     <div class="container">
       <h1 class="title col-md-3"><a href="/" class="">Wyrd Distro</a></h1>
       <ul class="cart col-md-3 col-md-offset-6">
-        <span class="lift:Menu.builder"></span>
+        <li><span data-lift="Menu.item?name=Home">Home</span></li>
+        <li><span data-lift="Menu.item?name=Register">Register</span></li>
+        <li><span data-lift="Menu.item?name=Logout">Logout</span></li>
+        <!-- <span class="lift:Menu.builder"></span> -->
       </ul>
     </div>
     </header>
@@ -72,12 +75,12 @@
       </section>
       <nav class="col-md-3 salesActions">
       <h1>Actions</h1>
-      <ul>
+      <ul id="action-menu">
         <li><span data-lift="Menu.item?name=Request+Payment&a:class=btn+btn-sm+btn-success">Pay Me</span></li>
         <li><a href="mailto:distro@weirdcanada.com" class="btn btn-sm btn-default">Contact Wyrd Distro</a></li>
-        <li><span data-lift="Menu.item?name=Add+a+New+Record&a:class=btn+btn-sm+btn-default">Add a New Record</span></li>
-        <li><span data-lift="Menu.item?name=Request+Return&a:class=btn+btn-sm+btn-default">Request Return</span></li>
-        <li><span data-lift="Menu.item?name=My+Account&a:class=btn+btn-sm+btn-default">My Account</span></li>
+        <lift:Menu.group group="actions" a:class="btn btn-sm btn-default">
+          <li><menu:bind /></li>
+        </lift:Menu.group>
       </ul>
       <!-- <ul>
         <li><a href="/request-payment" class="btn btn-sm btn-success">Pay Me</a></li>

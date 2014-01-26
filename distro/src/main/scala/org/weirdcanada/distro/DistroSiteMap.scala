@@ -41,58 +41,62 @@ class DistroSiteMapBuilder(service: Service) {
 
       Menu.i("Register") / "register" >> mustBeVisitor,
 
-      Menu.i("Forgot Password") / "forgot-password" >> mustBeVisitor,
-
-      Menu.i("Update Password") / "update-password" >> mustBeLoggedIn,
 
       Menu.i("Check Your Inbox") / "check-your-inbox"
         >> mustBeLoggedIn
         >> Loc.Hidden,
 
-      Menu.i("Dashboard") / "admin" / "dashboard" >> mustBeAdmin,
-      Menu.i("Accounts") / "admin" / "account-list" >> mustBeAdmin,
-      AccountPage.toMenu(service),
-      Menu.i("Add a New Record") / "admin" / "add-records" 
-        >> mustBeAdmin
-        >> LocGroup("actions"),
-
-      Menu.i("Add an Artist") / "admin" / "add-artist"
-        >> mustBeAdmin
-        >> LocGroup("actions"),
-
-      editArtistPage,
-
-      Menu.i("Add a Publisher") / "admin" / "add-publisher"
-        >> mustBeAdmin
-        >> LocGroup("actions"),
-
-      editPublisherPage,
-
-      Menu.i("Add an Album") / "admin" / "add-album"
-        >> mustBeAdmin
-        >> LocGroup("actions"),
-
-      editAlbumPage,
-
-      Menu.i("Consign Item") / "admin" / "add-consigned-item"
-        >> mustBeAdmin
-        >> LocGroup("actions"),
-
-      Menu.i("Request Payment") / "request-payment"
-        >> mustBeLoggedIn
-        >> Loc.Hidden
-        >> Loc.EarlyResponse(() => requestPaymentResponse)
-        >> LocGroup("actions"),
-
+      // Actions
       Menu.i("Request Return") / "request-return"
         >> mustBeLoggedIn
         >> Loc.Hidden
         >> Loc.EarlyResponse(() => requestPaymentResponse)
         >> LocGroup("actions"),
 
-      Menu.i("My Account") / "my-account" 
+      Menu.i("Add an Artist") / "admin" / "add-artist"
+        >> mustBeAdmin
+        >> LocGroup("actions"),
+
+
+      Menu.i("Add a Publisher") / "admin" / "add-publisher"
+        >> mustBeAdmin
+        >> LocGroup("actions"),
+
+      Menu.i("Add an Album") / "admin" / "add-album"
+        >> mustBeAdmin
+        >> LocGroup("actions"),
+
+      Menu.i("Add Consign Item") / "admin" / "add-consigned-item"
+        >> mustBeAdmin
+        >> LocGroup("actions"),
+
+     Menu.i("My Account") / "my-account" 
         >> mustBeLoggedIn
         >> LocGroup("actions"),
+
+      Menu.i("Forgot Password") / "forgot-password" 
+        >> mustBeVisitor 
+        >> LocGroup("actions"),
+
+      Menu.i("Update Password") / "update-password" 
+        >> mustBeLoggedIn 
+        >> LocGroup("actions"),
+
+      editArtistPage,
+      editPublisherPage,
+      editAlbumPage,
+      AccountPage.toMenu(service),
+
+      Menu.i("Dashboard") / "admin" / "dashboard" >> mustBeAdmin,
+      Menu.i("Accounts") / "admin" / "account-list" >> mustBeAdmin,
+      Menu.i("Add a New Record") / "admin" / "add-records" 
+        >> mustBeAdmin,
+
+
+      Menu.i("Request Payment") / "request-payment"
+        >> mustBeLoggedIn
+        >> Loc.Hidden
+        >> Loc.EarlyResponse(() => requestPaymentResponse),
 
       Menu.i("Logout") / "logout" >> mustBeLoggedIn
         >> Loc.EarlyResponse(() => {
