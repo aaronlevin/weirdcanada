@@ -12,7 +12,9 @@ import net.liftweb.common.{Full, Failure}
 import net.liftweb.http.provider.HTTPCookie
 import net.liftweb.common.Empty
 import org.weirdcanada.common.util.{Country, Province}
+import org.weirdcanada.distro.api.shopify.{Shopify}
 import org.weirdcanada.distro.data.{Account, ConsignedItem, UserRole}
+import org.weirdcanada.distro.tools.UploadConsignedItemToShopify
 import ConsignedItem.ConsignedItemData
 import org.weirdcanada.distro.service.Service
 import org.weirdcanada.dynamicform.{DynamicFormCreator, HasEmpty}
@@ -21,6 +23,9 @@ import scala.xml.{NodeSeq, Text}
 class AddConsignedItemPage(service: Service) extends DynamicFormCreator with DispatchSnippet {
 
   import ConsignedItem._
+
+  lazy val shopify = new Shopify(service.config)
+  var uploadToShopify = false
 
 
   /** Dynamic Field stuff
@@ -44,11 +49,14 @@ class AddConsignedItemPage(service: Service) extends DynamicFormCreator with Dis
         JsCmds.Run(runString) & 
         JsCmds.SetHtml("consigneditem-type-error", <span class="help-block error">{msg}</span>)
       case Some(consignedItem) =>
+        if( uploadToShopify )
+          (new UploadConsignedItemToShopify(consignedItem, shopify)).upload
+
         val runString = """
           var yadda = document.getElementById("consigneditem-save");
           yadda.className = yadda.className + " has-success"; 
-          document.getElementById("consigneditem-save-error").innerHTML = "Successfully added Consigned Item id %s";
-        """.format(consignedItem.id.is)
+          document.getElementById("consigneditem-save-error").innerHTML = "Successfully added Consigned Item id %s. Was it uploaded to shopify? %s";
+        """.format(consignedItem.id.is, uploadToShopify)
         JsCmds.Run(runString)
 
     }
@@ -74,6 +82,7 @@ class AddConsignedItemPage(service: Service) extends DynamicFormCreator with Dis
    * button below it
    */
   def render = renderFunction andThen {
+    "@consigneditem-upload-to-shopify" #> SHtml.ajaxCheckbox(false, uploadToShopify = _) &
     "@consigneditem-save-and-confirm" #>  { (ns: NodeSeq) =>
       ("@consigneditem-save" #> SHtml.ajaxButton("save", saveConsignedItemCombinator("consigneditem-confirm-save", ns)) &
       "@consigneditem-confirm-save *" #> ClearNodes)(ns)
