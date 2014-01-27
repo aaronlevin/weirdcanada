@@ -2,10 +2,16 @@ package org.weirdcanada.distro
 
 import argonaut._
 import Argonaut._
-import net.liftweb.http._
-import net.liftweb.http.rest._
-import org.weirdcanada.distro.data.{Artist, Album, Publisher}
+import net.liftweb.actor.LAFuture
+import net.liftweb.common.{Full}
+import net.liftweb.http.{PlainTextResponse}
+import net.liftweb.http.rest.{RestHelper}
+import org.weirdcanada.distro.data.{Account, Album, Artist, ConsignedItem, Publisher}
 import org.weirdcanada.distro.service.Service
+import scala.concurrent._
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Success, Failure}
 
 trait TwitterDatum {
   val value: String
@@ -74,11 +80,37 @@ object AlbumDatum {
 
 }
 
+case class ConsignedItemDatum(
+  value: String,
+  tokens: List[String],
+  id: String
+)
+object ConsignedItemDatum {
+  implicit def ConsignedItemCodec = 
+    casecodec3(ConsignedItemDatum.apply, ConsignedItemDatum.unapply)("value","tokens", "id")
+
+  def consignedItemToDatum(item: ConsignedItem): ConsignedItemDatum = {
+    val album = Album.findByKey(item.album.is).openOrThrowException("DB Should manage consignedItem<->album reference")
+    val artistsString = album.artists.toList.map { _.name.is }.mkString(" // ")
+    val titleString = album.title.is
+    val consignorString =
+      Account.findByKey(item.consignor.is).openOrThrowException("DB handle consignedItem<->Account relation").displayName
+    
+    ConsignedItemDatum(
+      value = "%s - %s (%s)".format(artistsString, titleString,consignorString),
+      tokens = titleString.split(' ').toList.filterNot {_.isEmpty} ++ 
+                consignorString.split(' ').toList.filterNot {_.isEmpty} ++ 
+                artistsString.replace("//","").split(' ').toList.filterNot {_.isEmpty},
+      id = item.id.is.toString
+    )
+  }
+}
 
 class RestAPI(service: Service) extends RestHelper {
 
   import AlbumDatum._
   import ArtistDatum._
+  import ConsignedItemDatum._
   import PublisherDatum._
 
   serve {
@@ -95,6 +127,15 @@ class RestAPI(service: Service) extends RestHelper {
       val datums = Album.findByPartialTitle(albumTitle.toLowerCase).map { albumToDatum }.asJson
       PlainTextResponse(datums.nospaces)
     }
+    case "api" :: "consigned-item" :: itemString :: _ JsonGet _ => {
+      val matchedByArtist = Artist.findByPartialName(itemString.toLowerCase).flatMap { _.albums.toList }.flatMap { _.consignedItems.toList }
+      val matchedByAlbum = Album.findByPartialTitle(itemString.toLowerCase).flatMap { _.consignedItems.toList }
+      val matchedByPublisher =Publisher.findByPartialName(itemString.toLowerCase).flatMap { _.albums.toList }.flatMap { _.consignedItems.toList }
+
+      PlainTextResponse( (matchedByArtist ++ matchedByAlbum ++ matchedByPublisher).map { consignedItemToDatum }.asJson.nospaces )
+
+    }
+
   }
 
 }

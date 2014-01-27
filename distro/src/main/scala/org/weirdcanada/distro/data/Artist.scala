@@ -22,7 +22,7 @@ class Artist extends LongKeyedMapper[Artist] with IdPK with Geography with ManyT
   object artistType extends MappedEnum(this, Artist.Type)
   object social extends MappedText(this)
   
-  object albums extends MappedManyToMany(ArtistsAlbums, ArtistsAlbums.album, ArtistsAlbums.artist, Artist)
+  object albums extends MappedManyToMany(ArtistsAlbums, ArtistsAlbums.artist, ArtistsAlbums.album, Album)
   object publishers extends MappedManyToMany(ArtistsPublishers, ArtistsPublishers.publisher, ArtistsPublishers.artist, Artist)
 }
 

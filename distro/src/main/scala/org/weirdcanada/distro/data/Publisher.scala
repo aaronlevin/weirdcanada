@@ -19,7 +19,7 @@ class Publisher extends LongKeyedMapper[Publisher] with IdPK with Address with M
   object imageUrl extends MappedString(this, 256)
   object social extends MappedText(this)
   
-  object albums extends MappedManyToMany(PublishersAlbums, PublishersAlbums.album, PublishersAlbums.publisher, Publisher)
+  object albums extends MappedManyToMany(PublishersAlbums, PublishersAlbums.publisher, PublishersAlbums.album, Album)
   object artists extends MappedManyToMany(ArtistsPublishers, ArtistsPublishers.artist, ArtistsPublishers.publisher, Publisher)
 }
 
