@@ -101,6 +101,11 @@ class Boot extends Bootable with Loggable {
     LiftRules.htmlProperties.default.set((r: Req) =>
       new Html5Properties(r.userAgent))    
 
+     LiftRules.uriNotFound.prepend(NamedPF("404handler"){
+       case (req,failure) => 
+         NotFoundAsTemplate(ParsePath(List("404"),"html",false,false))
+     })
+
     // Make a transaction span the whole HTTP request
     S.addAround(DB.buildLoanWrapper)
   }
