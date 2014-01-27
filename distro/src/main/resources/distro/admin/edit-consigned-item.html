@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+<title>Accounts</title>
+</head>
+<body class="lift:content_id=main">
+<div id="main" class="lift:surround?with=default;at=content">
+  <script src="/bower_components/typeahead.js/dist/typeahead.min.js" data-lift="head"></script>
+  <link href="/css/typeahead.css" rel="stylesheet" data-lift="head" />
+
+  <script src="/bower_components/bootstrap-sass/js/modal.js" data-lift="head"></script>
+
+
+  <h1>Add an ConsignedItem</h1>
+
+  <div data-lift="EditConsignedItemPage.render?eager_eval=true">
+
+    <form class="form-horizontal" role="form">
+
+      <div data-lift="embed?what=_add_consigneditem"></div>
+
+      <!-- Update -->
+      <div class="form-group" id="consigneditem-update">
+        <label class="col-sm-2 control-label">Update</label>
+        <div class="col-sm-10">
+          <button type="button" class="form-control btn btn-default" name="consigneditem-update-button">Update</button>
+          <div class="help-block" id="consigneditem-update-error"><span id="consigneditem-update-error-msg"></span></div>
+        </div>
+      </div>
+      <!-- /Update -->
+
+    </form>
+
+  </div>
+
+
+</div>
+</body>
+</html>

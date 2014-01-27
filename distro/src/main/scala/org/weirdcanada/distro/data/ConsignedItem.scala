@@ -35,7 +35,10 @@ class ConsignedItem extends LongKeyedMapper[ConsignedItem] with IdPK with OneToM
 }
 
 // The companion object to the above Class
-object ConsignedItem extends ConsignedItem with LongKeyedMetaMapper[ConsignedItem] {
+object ConsignedItem 
+  extends ConsignedItem 
+  with LongKeyedMetaMapper[ConsignedItem] 
+  with MapperObjectUtils[ConsignedItem] {
 
   object Condition extends Enumeration with EnumerationUtils {
     type Type = Value
@@ -165,7 +168,9 @@ object ConsignedItem extends ConsignedItem with LongKeyedMetaMapper[ConsignedIte
         apiEndpoint = "/api/album/%QUERY",
         template = "templates-hidden" :: "_add_album" :: Nil,
         sideEffectB = Album.insertAlbumSideEffect,
-        bStateValue = (s: String) => Album.findByStringId(s).map { _.title.is}.toOption,
+        bStateValue = (s: String) => Album.findByStringId(s).map { album =>
+          "%s - %s".format(album.artists.map { _.name.is }.mkString(" // "), album.title.is)
+        }.toOption,
         lens = consignorIdLens
       )
     )
@@ -199,6 +204,9 @@ object ConsignedItem extends ConsignedItem with LongKeyedMetaMapper[ConsignedIte
       )
     }).getOrElse{ List.empty[ConsignedItem] }
 
+  /**
+   * NOTE: We cannot set the guid as it's a unique id.
+   */
   private def setConsignedItemFromData(data: ConsignedItemData, item: ConsignedItem): \/[String, ConsignedItem] = try {
     item
       .additionalNotes(data.additionalNotes)
@@ -212,7 +220,7 @@ object ConsignedItem extends ConsignedItem with LongKeyedMetaMapper[ConsignedIte
     Condition.withNameOption(data.coverCondition.name.replace(" ","")).map { c => item.coverCondition(c) }
     Condition.withNameOption(data.mediaCondition.name.replace(" ","")).map { m => item.mediaCondition(m) }
     data.quantity.map { q => item.quantity(q) }
-    data.guid.map { g => item.guid(g) }
+    //data.guid.map { g => item.guid(g) }
 
     \/-(item)
   } catch {
@@ -243,5 +251,10 @@ object ConsignedItem extends ConsignedItem with LongKeyedMetaMapper[ConsignedIte
     consignorId = Some(data.consignor.is),
     albumId = Some(data.album.is)
   )
+
+  def updateFromData(data: ConsignedItemData, item: ConsignedItem): \/[String, ConsignedItem] = 
+    DB.use(DefaultConnectionIdentifier) { connection =>
+      setConsignedItemFromData(data, item).map { _.saveMe }
+    }
  
 }
