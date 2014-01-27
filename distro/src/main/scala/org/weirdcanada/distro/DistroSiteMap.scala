@@ -78,6 +78,10 @@ class DistroSiteMapBuilder(service: Service) {
         >> mustBeAdmin
         >> LocGroup("actions"),
 
+      Menu.i("Edit Items") / "admin" / "edit"
+        >> mustBeAdmin
+        >> LocGroup("actions"),
+
      Menu.i("My Account") / "my-account" 
         >> mustBeLoggedIn
         >> LocGroup("actions"),
