@@ -84,7 +84,7 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] with MapperObjectU
   /**
    * Setup custom form-fields (text areas, selects)
    */
-  import DynamicFormFieldRenderHelpers.{textAreaRender, selectRender}
+  import DynamicFormFieldRenderHelpers.{textAreaRender, s3SignedUploadRender, selectRender}
 
   private val provinceSelectOptions: Seq[(String, String)] = Province.provinceNameTuples
   private val countrySelectOptions: Seq[(String, String)] = Country.countryTuples
@@ -100,12 +100,15 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] with MapperObjectU
 
   private val descriptionTextArea = textAreaRender(artistDescriptionLens.get)("name=artist-description-input")("Description") _
 
+  private val imageUrlField =
+    s3SignedUploadRender(artistImageUrlLens.get)("@artist-image-url")("/sign_s3", "name", "type") _
+
   implicit object ArtistDataFields extends HasFields[ArtistData] {
     val fields: List[DynamicField[ArtistData]] = List(
       BasicField[ArtistData]("artist-name", artistNameLens),
       BasicField[ArtistData]("artist-url", artistUrlLens),
       BasicField[ArtistData]("artist-description", artistDescriptionLens, Some(descriptionTextArea)),
-      BasicField[ArtistData]("artist-image-url", artistImageUrlLens),
+      BasicField[ArtistData]("artist-image-url", artistImageUrlLens, Some(imageUrlField)),
       BasicField[ArtistData]("artist-type", artistTypeLens, Some(artistTypeSelect)),
       BasicField[ArtistData]("artist-social", artistSocialLens),
       BasicField[ArtistData]("artist-city", artistCityLens),
