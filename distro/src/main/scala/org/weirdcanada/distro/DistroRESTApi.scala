@@ -134,13 +134,13 @@ class RestAPI(service: Service) extends RestHelper {
       PlainTextResponse( (matchedByArtist ++ matchedByAlbum ++ matchedByPublisher).map { consignedItemToDatum }.asJson.nospaces )
 
     }
-    case "sign_s3" :: _ JsonGet  _ => {
+    case "sign_s3" :: bucket :: _ JsonGet  _ => {
 
       val mimeType = S.param("type").toOption
       val name = S.param("name").openOr("")
 
       val response = S3.signedUrl(
-        bucket = "wc-img",
+        bucket = bucket ,
         objectName = name,
         method = "PUT",
         secretKey = service.config.s3Secret,

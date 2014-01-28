@@ -101,7 +101,7 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] with MapperObjectU
   private val descriptionTextArea = textAreaRender(artistDescriptionLens.get)("name=artist-description-input")("Description") _
 
   private val imageUrlField =
-    s3SignedUploadRender(artistImageUrlLens.get)("@artist-image-url")("/sign_s3", "name", "type") _
+    s3SignedUploadRender(artistImageUrlLens.get)("@artist-image-url")("/sign_s3/wc-img", "name", "type") _
 
   implicit object ArtistDataFields extends HasFields[ArtistData] {
     val fields: List[DynamicField[ArtistData]] = List(
