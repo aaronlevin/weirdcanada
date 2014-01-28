@@ -25,6 +25,8 @@ libraryDependencies ++= {
     "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016"  artifacts Artifact("javax.servlet", "jar", "jar"),
     "org.scalaz"        %% "scalaz-core" % "7.0.5",
     "org.specs2" %% "specs2" % "2.3.1" % "test",
-    "com.h2database"    % "h2"                  % "1.3.167"
+    "com.h2database"    % "h2"                  % "1.3.167",
+    "io.argonaut"       %% "argonaut"           % "6.0.1",
+    "commons-codec" % "commons-codec" % "1.9"
   )
 }

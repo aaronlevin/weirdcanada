@@ -4,8 +4,9 @@ import argonaut._
 import Argonaut._
 import net.liftweb.actor.LAFuture
 import net.liftweb.common.{Full}
-import net.liftweb.http.{PlainTextResponse}
+import net.liftweb.http.{PlainTextResponse, S}
 import net.liftweb.http.rest.{RestHelper}
+import org.weirdcanada.common.http.S3
 import org.weirdcanada.distro.data.{Account, Album, Artist, ConsignedItem, Publisher}
 import org.weirdcanada.distro.service.Service
 import scala.concurrent._
@@ -97,10 +98,8 @@ object ConsignedItemDatum {
       Account.findByKey(item.consignor.is).openOrThrowException("DB handle consignedItem<->Account relation").displayName
     
     ConsignedItemDatum(
-      value = "%s - %s (%s)".format(artistsString, titleString,consignorString),
-      tokens = titleString.split(' ').toList.filterNot {_.isEmpty} ++ 
-                consignorString.split(' ').toList.filterNot {_.isEmpty} ++ 
-                artistsString.replace("//","").split(' ').toList.filterNot {_.isEmpty},
+      value = "$s - $s (%s)".format(artistsString, titleString,consignorString),
+      tokens = titleString.split(' ').toList ++ consignorString.split(' ').toList ++ artistsString.replace("//","").split(' ').toList,
       id = item.id.is.toString
     )
   }
@@ -134,6 +133,22 @@ class RestAPI(service: Service) extends RestHelper {
 
       PlainTextResponse( (matchedByArtist ++ matchedByAlbum ++ matchedByPublisher).map { consignedItemToDatum }.asJson.nospaces )
 
+    }
+    case "sign_s3" :: _ JsonGet  _ => {
+
+      val mimeType = S.param("type").toOption
+      val name = S.param("name").openOr("")
+
+      val response = S3.signedUrl(
+        bucket = "wc-img",
+        objectName = name,
+        method = "PUT",
+        secretKey = service.config.s3Secret,
+        accessKey = service.config.s3AccessKey,
+        amzHeaders = Map("x-amz-acl" -> Set("public-read")),
+        contentType = mimeType
+      )
+      PlainTextResponse(response)
     }
 
   }

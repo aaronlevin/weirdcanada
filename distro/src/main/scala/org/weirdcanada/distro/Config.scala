@@ -29,6 +29,10 @@ trait Config {
   def smtpOverrideTo: String
   
   def paymentRequestEmail: String
+
+  // S3 Credentials
+  def s3AccessKey: String
+  def s3Secret: String
   
   // TODO: airbrake credentials
 }
@@ -62,6 +66,9 @@ class LiftPropsConfig extends Config {
 
   // Where payment requests are sent
   override val paymentRequestEmail = get("paymentRequestEmail")
+
+  override val s3AccessKey = get("s3AccessKey")
+  override val s3Secret = get("s3Secret")
 }
 
 object Config {
