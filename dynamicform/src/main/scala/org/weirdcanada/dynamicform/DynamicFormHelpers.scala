@@ -7,7 +7,7 @@ import net.liftweb.common.{Empty,Full,Box}
 import js.{JsCmd, JsCmds}
 
 // scala
-import scala.xml.NodeSeq
+import scala.xml.{NodeSeq, Unparsed}
 
 /**
  * This trait provides functions to help create dynamic forms using Lift's
@@ -111,7 +111,29 @@ object DynamicFormFieldRenderHelpers {
     selector #> SHtml.ajaxCheckbox(currentValue, booleanUpdateFunc)
   }
 
+  def s3SignedUploadRender[A](accessor: A => String)(selector: String)(
+    signUrl: String,
+    nameParam: String,
+    mimeParam: String
+  )(uid: String)(current: A)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = {
+    val progressBarId = "%s-progress-bar".format(uid)
+    val progressStatusId = "%s-progress-status".format(uid)
+    val progressPercentId = "%s-progress-percent".format(uid)
+    val handleFileSelectJs: String =
+      """wc.s3Upload('%s','%s','%s','%s','%s', '%s', '%s', wc.setProgress)""".format(signUrl, nameParam, mimeParam,progressBarId, progressStatusId, progressPercentId, uid)
+    val s3FilesInputId = "%s-s3-files".format(uid)
+
+    selector #> {
+      "#s3-files [id]" #> s3FilesInputId &
+      "@s3-upload-progress [id]" #> progressBarId &
+      "@s3-upload-progress-percent [id]" #> progressPercentId &
+      "@s3-upload-status [id]" #> progressStatusId &
+      "@s3-url-input" #> SHtml.ajaxText(accessor(current), updateFunc, "id" -> uid) andThen { (ns:NodeSeq) => 
+        ns ++ <script type="text/javascript">{Unparsed("""$( document ).ready(function() { document.getElementById('%s').addEventListener('change', %s, false); wc.setProgress(0, 'Waiting for upload.', '%s', '%s', '%s'); });""".format(s3FilesInputId, handleFileSelectJs, progressBarId, progressStatusId, progressPercentId))}</script>
+      }
+    }
+  }
 
 
-    
+
 }
