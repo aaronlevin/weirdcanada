@@ -19,8 +19,6 @@ wc = {
       progress.textContent = percent + '%';
       //document.getElementById(progressBarId).className = 'loading';
       document.getElementById(progressBarId).style.width = progress.style.width;
-      console.log(progressStatusId);
-      console.log(document.getElementById(progressStatusId));
       document.getElementById(progressStatusId).innerText = statusLabel;
     });
   },

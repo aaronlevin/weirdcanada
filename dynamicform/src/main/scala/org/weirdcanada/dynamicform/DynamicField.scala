@@ -299,7 +299,7 @@ case class TypeaheadField[A, B : HasFields : HasEmpty](
     "@typeahead-modal [id]" #> "%s-modal".format(uid) &
     "@typeahead-modal-save" #> SHtml.ajaxButton("Save", () => sideEffectB(uid)(bState.is)) &
     "@typeahead-hidden-input" #>  SHtml.ajaxText("", false, fieldUpdateFunc, "id" -> (uid + "-hidden"), "value" -> cState) &
-    "@typeahead-modal-form" #> Templates(template).map { bRenderFunction } &
+    "@typeahead-modal-form" #> Templates(template).map { S.eagerEval }.map { bRenderFunction } &
     "@typeahead-script-handler *" #> Unparsed("""wc.typeaheadWrapper('#%s', function(datum) { $('#%s-hidden').val(datum.id); $('#%s-hidden').blur(); }, '%s');""".format(uid, uid, uid, apiEndpoint))
 
   }

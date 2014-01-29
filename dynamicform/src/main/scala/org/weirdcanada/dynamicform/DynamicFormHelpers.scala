@@ -5,6 +5,9 @@ import net.liftweb.util.Helpers._
 import net.liftweb.http._
 import net.liftweb.common.{Empty,Full,Box}
 import js.{JsCmd, JsCmds}
+import net.liftweb.http.js.jquery.{JqJsCmds}
+import js.JE
+import JE._
 
 // scala
 import scala.xml.{NodeSeq, Unparsed}
@@ -70,7 +73,6 @@ trait DynamicFormHelpers {
         // Get current data & transformed data
         val currentData = data.is
         val newData = f(currentData)(inputString)
-        //println("This is the updated state: %s".format(newData))
 
         // validation of new data
         val validationRollUp = foldValidators(newData)(validators)
@@ -124,13 +126,13 @@ object DynamicFormFieldRenderHelpers {
     val s3FilesInputId = "%s-s3-files".format(uid)
 
     selector #> {
-      "#s3-files [id]" #> s3FilesInputId &
+      "@s3-files [id]" #> s3FilesInputId &
       "@s3-upload-progress [id]" #> progressBarId &
       "@s3-upload-progress-percent [id]" #> progressPercentId &
       "@s3-upload-status [id]" #> progressStatusId &
-      "@s3-url-input" #> SHtml.ajaxText(accessor(current), updateFunc, "id" -> uid) andThen { (ns:NodeSeq) => 
-        ns ++ <script type="text/javascript">{Unparsed("""$( document ).ready(function() { document.getElementById('%s').addEventListener('change', %s, false); wc.setProgress(0, 'Waiting for upload.', '%s', '%s', '%s'); });""".format(s3FilesInputId, handleFileSelectJs, progressBarId, progressStatusId, progressPercentId))}</script>
-      }
+      "@s3-url-input" #> SHtml.ajaxText(accessor(current), updateFunc, "id" -> uid) &
+      "@s3-javascript" #>  JsCmds.Script( JsCmds.Run("""$( document ).ready(function() { document.getElementById('%s').addEventListener('change', %s, false); wc.setProgress(0, 'Waiting for upload.', '%s', '%s', '%s'); });""".format(s3FilesInputId, handleFileSelectJs, progressBarId, progressStatusId, progressPercentId)))
+      
     }
   }
 
