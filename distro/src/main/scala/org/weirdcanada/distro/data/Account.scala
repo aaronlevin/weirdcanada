@@ -3,6 +3,7 @@ package org.weirdcanada.distro.data
 import net.liftweb.mapper._
 import net.liftweb.util._
 import java.math.MathContext
+import scala.collection.mutable.ListBuffer
   
 object UserRole extends Enumeration {
   type Roles = Value
@@ -66,4 +67,13 @@ object Account extends Account with LongKeyedMetaMapper[Account] {
   // This is used for cookie logins
   def findByWcdId(wcdid: String) =
     Account.find(By(Account.wcdid, wcdid))
+
+  def findByPartialName(name: String) = Account.findAllByPreparedStatement({ conn => 
+    val stmt = conn.connection.prepareStatement("""select firstname, lastname, organization from account where lower(firstname) like lower(?) OR lower(lastname) like lower(?) OR lower(organization) like lower(?) """)
+
+    stmt.setString(1,"%" + name + "%")
+    stmt.setString(2,"%" + name + "%")
+    stmt.setString(3,"%" + name + "%")
+    stmt
+  })
 }

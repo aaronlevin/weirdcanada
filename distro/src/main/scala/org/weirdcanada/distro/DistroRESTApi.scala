@@ -105,6 +105,34 @@ object ConsignedItemDatum {
   }
 }
 
+case class AccountDatum(
+  value: String,
+  tokens: List[String],
+  id: String
+)
+object AccountDatum {
+  implicit def AccountDatumCodec = 
+    casecodec3(AccountDatum.apply, AccountDatum.unapply)("value", "tokens","id")
+
+  def accountToDatum(account: Account): AccountDatum = {
+
+    val organization = account.organization.is match {
+      case "" => ""
+      case x => " (%s)".format(x)
+    }
+
+    val value = "%s - %s%s".format(account.firstName.is, account.lastName.is, organization)
+    val tokens = List(account.firstName.is, account.lastName.is,account.organization.is).mkString(" ").toLowerCase.split(' ').filter { !_.isEmpty }.toList
+
+    AccountDatum(
+      value = value,
+      tokens = tokens,
+      id = account.id.is.toString
+    )
+  }
+
+}
+
 class RestAPI(service: Service) extends RestHelper {
 
   import AlbumDatum._
@@ -151,6 +179,22 @@ class RestAPI(service: Service) extends RestHelper {
       PlainTextResponse(response)
     }
 
+  }
+
+}
+
+class StatefulRestAPI(service: Service) extends RestHelper {
+  import AccountDatum._
+
+  serve {
+
+    case "api" :: "account" :: accountName :: _ JsonGet _ if 
+      service.SessionManager.current.isLoggedIn => {
+        val datums = Account.findByPartialName(accountName.toLowerCase).map { accountToDatum }.asJson
+
+        PlainTextResponse(datums.nospaces)
+
+    }
   }
 
 }
