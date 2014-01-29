@@ -61,12 +61,45 @@
       <input class="form-control" type="text" name="album-catalognumber-input">
     </div>
   </div>
-  <div class="form-group" id="album-additionalimageurls">
+
+
+  <!-- Album additionalimageurlss -->
+  <div name="add-album-additionalimageurls" class="panel panel-default">
+
+    <div class="panel-heading">
+      <h4>Additional Image #<span name="album-additionalimageurls-number">0</span></h4>
+    </div>
+
+    <div class="panel-body">
+
+      <div name="album-additionalimageurls">
+        <div data-lift="embed?what=_s3_file_upload"></div>
+      </div>
+
+      <div class="col-sm-4 col-sm-offset-2">
+        <p><button type="button" name="album-additionalimageurls-add">+</button> | <button type="button" name="album-additionalimageurls-remove">-</button></p>
+      </div>
+
+    </div>
+
+
+  </div>
+  <div id="album-additionalimageurls-elements"></div>
+  <!-- /Album additionalimageurlss -->
+
+
+
+  <!-- <div class="form-group" id="album-additionalimageurls">
     <label class="col-sm-2 control-label">Additional Image Urls</label>
     <div class="col-sm-10">
       <input class="form-control" type="text" name="album-additionalimageurls-input">
     </div>
-  </div>
+  </div> -->
+
+
+
+
+
 
   <!-- Album Artists -->
   <div name="add-many-album-artist" class="panel panel-default">

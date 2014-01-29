@@ -105,7 +105,7 @@ object Publisher extends Publisher with LongKeyedMetaMapper[Publisher] with Mapp
     val empty: PublisherData = PublisherData(-1L, "","","","","","","","")
   }
 
-  import DynamicFormFieldRenderHelpers.{textAreaRender, selectRender}
+  import DynamicFormFieldRenderHelpers.{textAreaRender, selectRender, s3SignedUploadRender}
 
   private val provinceSelectOptions: Seq[(String, String)] = Province.provinceNameTuples
   private val countrySelectOptions: Seq[(String, String)] = Country.countryTuples
@@ -117,12 +117,16 @@ object Publisher extends Publisher with LongKeyedMetaMapper[Publisher] with Mapp
 
   private val descriptionTextArea = textAreaRender(publisherDescriptionLens.get)("name=publisher-description-input")("Description") _
 
+  private val imageUrlField =
+    s3SignedUploadRender(publisherImageUrlLens.get)("@publisher-image-url")("/sign_s3/wc-img", "name", "type") _
+
+
   implicit object PublisherDataFields extends HasFields[PublisherData] {
     val fields: List[DynamicField[PublisherData]] = List(
       BasicField[PublisherData]("publisher-name", publisherNameLens),
       BasicField[PublisherData]("publisher-url", publisherUrlLens),
       BasicField[PublisherData]("publisher-description", publisherDescriptionLens, Some(descriptionTextArea)),
-      BasicField[PublisherData]("publisher-image-url", publisherImageUrlLens),
+      BasicField[PublisherData]("publisher-image-url", publisherImageUrlLens, Some(imageUrlField)),
       BasicField[PublisherData]("publisher-social", publisherSocialLens),
       BasicField[PublisherData]("publisher-city", publisherCityLens),
       BasicField[PublisherData]("publisher-province", publisherProvinceLens, Some(provinceSelect)),
