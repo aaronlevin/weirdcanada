@@ -1,9 +1,11 @@
 package org.weirdcanada.distro.data
 
+import argonaut._
+import Argonaut._
 import net.liftweb.common.{Box, Failure, Full}
 import net.liftweb.http.js.{JsCmd, JsCmds}
 import net.liftweb.mapper._
-import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasEmpty,HasFields}
+import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasEmpty,HasFields, RecordField}
 import org.weirdcanada.common.util.{Country, Province, StringParsingUtil}
 import StringParsingUtil.safeParse
 import scala.xml.NodeSeq
@@ -36,7 +38,7 @@ case class ArtistData(
   description: String,
   imageUrl: String,
   artistType: String,
-  social: String,
+  social: Option[SocialData],
   city: String,
   province: String,
   country: String
@@ -60,7 +62,7 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] with MapperObjectU
   }
 
   implicit object ArtistEmpty extends HasEmpty[ArtistData] {
-    val empty: ArtistData = ArtistData(-1L, "","","","","Band","","","alberta","canada")
+    val empty: ArtistData = ArtistData(-1L, "","","","","Band",None,"","alberta","canada")
   }
 
   /**
@@ -74,8 +76,8 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] with MapperObjectU
       a.copy(artistType = t), (a) => a.artistType)
   val artistImageUrlLens: Lens[ArtistData, String] = Lens.lensu( (a,i) =>
       a.copy(imageUrl = i), (a) => a.imageUrl)
-  val artistSocialLens: Lens[ArtistData, String] = Lens.lensu( (a, s) =>
-      a.copy(social = s), (a) => a.social)
+  val artistSocialLens: Lens[ArtistData, SocialData] = Lens.lensu( 
+    (a, s) => a.copy(social = Some(s)), (a) => a.social.getOrElse { implicitly[HasEmpty[SocialData]].empty })
   val artistCityLens: Lens[ArtistData, String] = Lens.lensu( (a, c) => a.copy(city = c), (a) => a.city )
   val artistProvinceLens: Lens[ArtistData, String] = Lens.lensu( (a, p) => a.copy(province = p), (a) => a.province )
   val artistCountryLens: Lens[ArtistData, String] = Lens.lensu( (a,c) =>
@@ -110,7 +112,7 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] with MapperObjectU
       BasicField[ArtistData]("artist-description", artistDescriptionLens, Some(descriptionTextArea)),
       BasicField[ArtistData]("artist-image-url", artistImageUrlLens, Some(imageUrlField)),
       BasicField[ArtistData]("artist-type", artistTypeLens, Some(artistTypeSelect)),
-      BasicField[ArtistData]("artist-social", artistSocialLens),
+      RecordField[ArtistData, SocialData]("artist-social", artistSocialLens),
       BasicField[ArtistData]("artist-city", artistCityLens),
       BasicField[ArtistData]("artist-province", artistProvinceLens, Some(provinceSelect)),
       BasicField[ArtistData]("artist-country", artistCountryLens, Some(countrySelect))
@@ -120,18 +122,20 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] with MapperObjectU
   private def setArtistParamsFromData(data: ArtistData, artist: Artist): \/[String, Artist] = {
     try {
       val t = Type.withName(data.artistType)
-      \/-(
-        artist
-          .name(data.name)
-          .url(data.url)
-          .description(data.description)
-          .imageUrl(data.imageUrl)
-          .artistType(t)
-          .social(data.social)
-          .city(data.city)
-          .province(data.province)
-          .country(data.country)
-      )
+
+       artist
+        .name(data.name)
+        .url(data.url)
+        .description(data.description)
+        .imageUrl(data.imageUrl)
+        .artistType(t)
+        .city(data.city)
+        .province(data.province)
+        .country(data.country)
+
+      data.social.map { s => artist.social(s.asJson.nospaces) }
+
+      \/-(artist)
     } catch {
       case e: java.util.NoSuchElementException =>
         -\/("Cannot find Artist Type for %s".format(data.artistType))
@@ -161,7 +165,7 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] with MapperObjectU
     description = artist.description.is,
     imageUrl = artist.imageUrl.is,
     artistType = artist.artistType.is.toString,
-    social = artist.social.is,
+    social = artist.social.is.decodeOption[SocialData],
     city = artist.city.is,
     province = artist.province.is,
     country = artist.country.is

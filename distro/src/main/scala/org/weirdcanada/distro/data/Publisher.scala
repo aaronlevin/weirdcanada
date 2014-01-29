@@ -1,10 +1,12 @@
 package org.weirdcanada.distro.data
 
+import argonaut._
+import Argonaut._
 import net.liftweb.common.{Box, Failure, Full}
 import net.liftweb.http.js.{JsCmd, JsCmds}
 import net.liftweb.mapper._
 import org.weirdcanada.common.util.{Country, Province}
-import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasEmpty,HasFields}
+import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasEmpty,HasFields, RecordField}
 import scala.xml.NodeSeq
 import scalaz.Lens
 import scalaz.\/
@@ -29,7 +31,7 @@ case class PublisherData(
   url: String,
   description: String,
   imageUrl: String,
-  social: String,
+  social: Option[SocialData],
   city: String,
   province: String,
   country: String
@@ -47,17 +49,18 @@ object Publisher extends Publisher with LongKeyedMetaMapper[Publisher] with Mapp
     Publisher.findAll(Cmp(Publisher.name, OprEnum.Like, Full("%" + name + "%"), None, Full("LOWER")))
   
   private def setPublisherParamsFromData(data: PublisherData, publisher: Publisher): \/[String, Publisher] = try {
-    \/-(
-      publisher
-        .name(data.name)
-        .url(data.url)
-        .description(data.description)
-        .imageUrl(data.imageUrl)
-        .social(data.social)
-        .city(data.city)
-        .province(data.province)
-        .country(data.country)
-      )
+    publisher
+      .name(data.name)
+      .url(data.url)
+      .description(data.description)
+      .imageUrl(data.imageUrl)
+      .city(data.city)
+      .province(data.province)
+      .country(data.country)
+
+    data.social.map { s => publisher.social(s.asJson.nospaces) }
+
+    \/-(publisher)
   } catch {
     case e: Throwable => -\/("Something terrible happened.\n%s".format(e))
   }
@@ -79,7 +82,7 @@ object Publisher extends Publisher with LongKeyedMetaMapper[Publisher] with Mapp
     url = publisher.url.is, 
     description = publisher.description.is,
     imageUrl = publisher.imageUrl.is,
-    social = publisher.social.is,
+    social = publisher.social.is.decodeOption[SocialData],
     city = publisher.city.is,
     province = publisher.province.is,
     country = publisher.country.is
@@ -94,15 +97,17 @@ object Publisher extends Publisher with LongKeyedMetaMapper[Publisher] with Mapp
       p.copy(description = d), (p) => p.description)
   val publisherImageUrlLens: Lens[PublisherData, String] = Lens.lensu( (p,i) =>
       p.copy(imageUrl = i), (p) => p.imageUrl)
-  val publisherSocialLens: Lens[PublisherData, String] = Lens.lensu( (p, s) =>
-      p.copy(social = s), (p) => p.social)
+  val publisherSocialLens: Lens[PublisherData, SocialData] = Lens.lensu( 
+    (p, s) => p.copy(social = Some(s)),
+    (p) => p.social.getOrElse { implicitly[HasEmpty[SocialData]].empty }
+  )
   val publisherCityLens: Lens[PublisherData, String] = Lens.lensu( (p, c) => p.copy(city = c), (p) => p.city )
   val publisherProvinceLens: Lens[PublisherData, String] = Lens.lensu( (p, pr) => p.copy(province = pr), (p) => p.province )
   val publisherCountryLens: Lens[PublisherData, String] = Lens.lensu( (p,c) =>
       p.copy(country = c), (p) => p.country)
 
   implicit object PublisherDataEmpty extends HasEmpty[PublisherData] {
-    val empty: PublisherData = PublisherData(-1L, "","","","","","","","")
+    val empty: PublisherData = PublisherData(-1L, "","","","",None,"","","")
   }
 
   import DynamicFormFieldRenderHelpers.{textAreaRender, selectRender, s3SignedUploadRender}
@@ -127,7 +132,7 @@ object Publisher extends Publisher with LongKeyedMetaMapper[Publisher] with Mapp
       BasicField[PublisherData]("publisher-url", publisherUrlLens),
       BasicField[PublisherData]("publisher-description", publisherDescriptionLens, Some(descriptionTextArea)),
       BasicField[PublisherData]("publisher-image-url", publisherImageUrlLens, Some(imageUrlField)),
-      BasicField[PublisherData]("publisher-social", publisherSocialLens),
+      RecordField[PublisherData, SocialData]("publisher-social", publisherSocialLens),
       BasicField[PublisherData]("publisher-city", publisherCityLens),
       BasicField[PublisherData]("publisher-province", publisherProvinceLens, Some(provinceSelect)),
       BasicField[PublisherData]("publisher-country", publisherCountryLens, Some(countrySelect))
