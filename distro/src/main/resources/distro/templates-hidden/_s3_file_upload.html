@@ -2,29 +2,39 @@
 
 
   <div class="form-group">
-    <label class="col-sm-2 control-label">Uploald</label>
+    <label class="col-sm-2 control-label">Upload</label>
     <div class="col-sm-4">
       <input type="file" id="s3-files" name="s3-files" multiple/>
     </div>
   </div>
   <div class="row">
 
-    <div class="col-sm-4 col-sm-offset-2">
-      <div class="progress">
-        <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;" name="s3-upload-progress">
-          <span name="s3-upload-progress-percent" class="sr-only">60%</span>
-        </div>
-      </div>
-    </div>
+    <div class="col-sm-6 col-sm-offset-2">
 
-    <div class="col-sm-4">
-      <span id="status" name="s3-upload-status"></span>
+      <div class="media">
+        <div class="pull-left" name="s3-uploaded-image">
+          <img src="#" name="s3-uploaded-image-src"  style="height:64px;" class="media-object" />
+        </div>
+
+        <div class="media-body">
+          <h4 class="media-heading">
+            <span id="status" name="s3-upload-status"></span>
+          </h4>
+          <div class="progress">
+            <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;" name="s3-upload-progress">
+              <span name="s3-upload-progress-percent" class="sr-only">60%</span>
+            </div>
+          </div>
+        </div>
+
     </div>
 
   </div>
+
   <div class="hidden">
     <input type="text" name="s3-url-input" />
   </div>
+
   <script type="text/javascript" name="s3-javascript"></script>
 
 </div>

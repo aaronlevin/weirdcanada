@@ -31,7 +31,7 @@ class EditArtistPage(artistDataTuple: (Artist, ArtistData)) extends DispatchSnip
   private def updateArtistFunc(data: ArtistData, artist: Artist): JsCmd = {
     Artist.updateFromData(data, artist) match {
       case \/-(_) => 
-        JsCmds.Run(addSuccessJs) & 
+        JsCmds.Run(removeErrorJs + addSuccessJs) & 
         JsCmds.SetHtml("artist-update-error", Text("Successfully updated artist with id %s".format(data.id)))
       case -\/(errorMsg) => 
         JsCmds.Run(addErrorJs) &
@@ -47,7 +47,7 @@ class EditArtistPage(artistDataTuple: (Artist, ArtistData)) extends DispatchSnip
   val renderFunction = renderField(artistState)
 
   def render = renderFunction andThen {
-    "@artist-update-button" #> SHtml.ajaxButton("Update", () => updateArtistFunc(artistState.is,artist), "onclick" -> removeErrorJs)
+    "@artist-update-button" #> SHtml.ajaxButton("Update", () => updateArtistFunc(artistState.is,artist))
   }
 
   def dispatch = {

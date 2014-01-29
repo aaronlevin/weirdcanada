@@ -1,6 +1,7 @@
 package org.weirdcanada.dynamicform
 
 // Lift
+import net.liftweb.util.ClearNodes
 import net.liftweb.util.Helpers._
 import net.liftweb.http._
 import net.liftweb.common.{Empty,Full,Box}
@@ -125,13 +126,21 @@ object DynamicFormFieldRenderHelpers {
       """wc.s3Upload('%s','%s','%s','%s','%s', '%s', '%s', wc.setProgress)""".format(signUrl, nameParam, mimeParam,progressBarId, progressStatusId, progressPercentId, uid)
     val s3FilesInputId = "%s-s3-files".format(uid)
 
+    val currentUrl = accessor(current)
+
     selector #> {
       "@s3-files [id]" #> s3FilesInputId &
       "@s3-upload-progress [id]" #> progressBarId &
       "@s3-upload-progress-percent [id]" #> progressPercentId &
       "@s3-upload-status [id]" #> progressStatusId &
-      "@s3-url-input" #> SHtml.ajaxText(accessor(current), updateFunc, "id" -> uid) &
-      "@s3-javascript" #>  JsCmds.Script( JsCmds.Run("""$( document ).ready(function() { document.getElementById('%s').addEventListener('change', %s, false); wc.setProgress(0, 'Waiting for upload.', '%s', '%s', '%s'); });""".format(s3FilesInputId, handleFileSelectJs, progressBarId, progressStatusId, progressPercentId)))
+      "@s3-url-input" #> SHtml.ajaxText(currentUrl, updateFunc, "id" -> uid) &
+      "@s3-javascript" #> JsCmds.Script( JsCmds.Run("""$( document ).ready(function() { document.getElementById('%s').addEventListener('change', %s, false); wc.setProgress(0, 'Waiting for upload.', '%s', '%s', '%s'); });""".format(s3FilesInputId, handleFileSelectJs, progressBarId, progressStatusId, progressPercentId))) &
+      "@s3-uploaded-image" #> {
+        if( accessor(current).isEmpty )
+          ClearNodes
+        else
+          "@s3-uploaded-image-src [src]" #> currentUrl
+      }
     }
   }
 
