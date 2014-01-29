@@ -292,16 +292,19 @@ case class TypeaheadField[A, B : HasFields : HasEmpty](
     def bUpdateState = getUpdateAndSaveFuncForField[B](bState)
     val bRenderFunction = renderField(bState)
 
-    "@typeahead-label *" #> typeaheadLabel &
-    "@typeahead-input [id]" #> uid &
-    "@typeahead-input [value]" #> bStateValue(cState) &
-    "@typeahead-modal-button [data-target]" #> "#%s-modal".format(uid) &
-    "@typeahead-modal [id]" #> "%s-modal".format(uid) &
-    "@typeahead-modal-save" #> SHtml.ajaxButton("Save", () => sideEffectB(uid)(bState.is)) &
-    "@typeahead-hidden-input" #>  SHtml.ajaxText("", false, fieldUpdateFunc, "id" -> (uid + "-hidden"), "value" -> cState) &
-    "@typeahead-modal-form" #> Templates(template).map { S.eagerEval }.map { bRenderFunction } &
-    "@typeahead-script-handler *" #> Unparsed("""wc.typeaheadWrapper('#%s', function(datum) { $('#%s-hidden').val(datum.id); $('#%s-hidden').blur(); }, '%s');""".format(uid, uid, uid, apiEndpoint))
+    "@%s".format(name) #> {
 
+      "@typeahead-label *" #> typeaheadLabel &
+      "@typeahead-input [id]" #> uid &
+      "@typeahead-input [value]" #> bStateValue(cState) &
+      "@typeahead-modal-button [data-target]" #> "#%s-modal".format(uid) &
+      "@typeahead-modal [id]" #> "%s-modal".format(uid) &
+      "@typeahead-modal-save" #> SHtml.ajaxButton("Save", () => sideEffectB(uid)(bState.is)) &
+      "@typeahead-hidden-input" #>  SHtml.ajaxText("", fieldUpdateFunc, "id" -> (uid + "-hidden"), "value" -> cState) &
+      "@typeahead-modal-form" #> Templates(template).map { S.eagerEval }.map { bRenderFunction } &
+      "@typeahead-script-handler *" #> Unparsed("""wc.typeaheadWrapper('#%s', function(datum) { $('#%s-hidden').val(datum.id); $('#%s-hidden').blur(); }, '%s');""".format(uid, uid, uid, apiEndpoint))
+
+    }
   }
 }
 
@@ -335,12 +338,17 @@ case class ManyTypeaheadField[A, B : HasFields : HasEmpty](
 
     import DynamicFieldPrimitives.{StringPrimitive, StringPrimitiveEmpty}
 
+    def indexedOuterName(index: Int): Option[String] = outerName match {
+      case None => Some(index.toString)
+      case Some(n) => Some(n + "-" + index.toString)
+    }
+
     def lensAtIndex(index: Int): Lens[C,String] = 
       outerLens >=> manyLens >=> mapVLens(index) >=> optionLens[String]
 
     def indexedRenderer(index: Int):NodeSeq => NodeSeq = 
       "@many-%s-number *".format(name) #> (index+1) &
-      makeName(outerName, name) #> TypeaheadField[C,B](label(outerName, name) + "-" + index.toString, typeaheadLabel, apiEndpoint, template, sideEffectB, bStateValue, lensAtIndex(index)).render(formStateUpdater, state)(lensId[C], outerName)     
+      makeName(outerName, name) #> TypeaheadField[C,B](label(outerName, name), typeaheadLabel, apiEndpoint, template, sideEffectB, bStateValue, lensAtIndex(index)).render(formStateUpdater, state)(lensId[C], indexedOuterName(index))
 
     ManyRecordField[A, String]("many-%s".format(name), manyLens, Some(indexedRenderer _)).render(formStateUpdater, state)(outerLens, outerName)
   }

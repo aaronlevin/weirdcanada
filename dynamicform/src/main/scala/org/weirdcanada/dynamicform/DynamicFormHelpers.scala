@@ -132,10 +132,22 @@ object DynamicFormFieldRenderHelpers {
       "@s3-upload-status [id]" #> progressStatusId &
       "@s3-url-input" #> SHtml.ajaxText(accessor(current), updateFunc, "id" -> uid) &
       "@s3-javascript" #>  JsCmds.Script( JsCmds.Run("""$( document ).ready(function() { document.getElementById('%s').addEventListener('change', %s, false); wc.setProgress(0, 'Waiting for upload.', '%s', '%s', '%s'); });""".format(s3FilesInputId, handleFileSelectJs, progressBarId, progressStatusId, progressPercentId)))
-      
     }
   }
 
-
-
+  def singleTypeahead[A](accessor: A => String)(selector: String)(
+    apiEndpoint: String,
+    typeaheadLabel: String,
+    currentTransformedValue: String => String
+  )(uid: String)(current: A)(updateFunc: String => JsCmd): NodeSeq => NodeSeq =
+    selector #> {
+      "@typeahead-label *" #> typeaheadLabel &
+      "@typeahead-input [id]" #> uid &
+      "@typeahead-input [value]" #> currentTransformedValue(accessor(current)) &
+      "@typeahead-modal" #> List.empty &
+      "@typeahead-hidden-input" #> SHtml.ajaxText("", updateFunc, "id" -> (uid + "-hidden"), "value" -> accessor(current)) &
+      "@typeahead-script-handler *" #> Unparsed(
+        """wc.typeaheadWrapper('#%s',function(datum) { $('#%s-hidden').val(datum.id); $('#%s').blur(); }, '%s');""".format(uid, uid, uid, apiEndpoint)
+      )
+    }
 }
