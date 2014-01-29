@@ -135,7 +135,7 @@ object ConsignedItem
     (c) => c.albumId.map { _.toString }.getOrElse { "" }
   )
 
-  import DynamicFormFieldRenderHelpers.{checkboxRender, selectRender, textAreaRender}
+  import DynamicFormFieldRenderHelpers.{checkboxRender, selectRender, singleTypeahead, textAreaRender}
   /**
    * Select fields
    */
@@ -145,6 +145,12 @@ object ConsignedItem
     selectRender(mediaConditionLens.get)("name=consigneditem-mediaCondition-input")(PhysicalCondition.conditionNameTuples) _
   private val notesArea = 
     textAreaRender(additionalNotesLens.get)("name=consigneditem-additionalNotes-input")("") _
+
+  /**
+   * consignor typeahead field
+   */
+  private val consignorTypeahead = 
+    singleTypeahead(consignorIdLens.get)("@consigneditem-consignorId")("/api/account/%QUERY","Add Consignor", (id:String) => Account.findByStringId(id).map { _.displayName }.getOrElse { "" }) _
 
     import Album._
 
@@ -161,7 +167,7 @@ object ConsignedItem
       BasicField[ConsignedItemData]("consigneditem-customerCost", customerCostLens),
       BasicField[ConsignedItemData]("consigneditem-wholesaleCost", wholesaleCostLens),
       BasicField[ConsignedItemData]("consigneditem-markUp", markUpLens),
-      BasicField[ConsignedItemData]("consigneditem-consignorId", consignorIdLens),
+      BasicField[ConsignedItemData]("consigneditem-consignorId", consignorIdLens, Some(consignorTypeahead)),
       TypeaheadField[ConsignedItemData, AlbumData](
         name = "consigneditem-albumId",
         typeaheadLabel = "Add Album",

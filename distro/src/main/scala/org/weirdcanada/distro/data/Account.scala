@@ -58,7 +58,11 @@ class Account extends LongKeyedMapper[Account] with IdPK with OneToMany[Long, Ac
 /**
  * The singleton that has methods for accessing the database
  */
-object Account extends Account with LongKeyedMetaMapper[Account] {
+object Account 
+  extends Account 
+  with LongKeyedMetaMapper[Account] 
+  with MapperObjectUtils[Account] {
+
   override def dbIndexes = UniqueIndex(email) :: super.dbIndexes
   
   def findByEmailAddress(emailAddress: String) =
@@ -69,7 +73,7 @@ object Account extends Account with LongKeyedMetaMapper[Account] {
     Account.find(By(Account.wcdid, wcdid))
 
   def findByPartialName(name: String) = Account.findAllByPreparedStatement({ conn => 
-    val stmt = conn.connection.prepareStatement("""select firstname, lastname, organization from account where lower(firstname) like lower(?) OR lower(lastname) like lower(?) OR lower(organization) like lower(?) """)
+    val stmt = conn.connection.prepareStatement("""select id, firstname, lastname, organization from account where lower(firstname) like lower(?) OR lower(lastname) like lower(?) OR lower(organization) like lower(?) """)
 
     stmt.setString(1,"%" + name + "%")
     stmt.setString(2,"%" + name + "%")
