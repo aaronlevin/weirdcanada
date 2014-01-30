@@ -135,7 +135,7 @@ object ConsignedItem
     (c) => c.albumId.map { _.toString }.getOrElse { "" }
   )
 
-  import DynamicFormFieldRenderHelpers.{checkboxRender, selectRender, singleTypeahead, textAreaRender}
+  import DynamicFormFieldRenderHelpers.{checkboxRender, datePickerRender, selectRender, singleTypeahead, textAreaRender}
   /**
    * Select fields
    */
@@ -146,6 +146,8 @@ object ConsignedItem
   private val notesArea = 
     textAreaRender(additionalNotesLens.get)("name=consigneditem-additionalNotes-input")("") _
 
+  private val dateSelect = 
+    datePickerRender(dateLens.get)("@consigneditem-date-input")("yyyy-mm-dd") _
   /**
    * consignor typeahead field
    */
@@ -162,7 +164,7 @@ object ConsignedItem
       BasicField[ConsignedItemData]("consigneditem-coverCondition", coverConditionLens, Some(conditionSelect)),
       BasicField[ConsignedItemData]("consigneditem-mediaCondition", mediaConditionLens, Some(mediaSelect)),
       BasicField[ConsignedItemData]("consigneditem-additionalNotes", additionalNotesLens, Some(notesArea)),
-      BasicField[ConsignedItemData]("consigneditem-date", dateLens),
+      BasicField[ConsignedItemData]("consigneditem-date", dateLens, Some(dateSelect)),
       BasicField[ConsignedItemData]("consigneditem-quantity", quantityLens),
       BasicField[ConsignedItemData]("consigneditem-customerCost", customerCostLens),
       BasicField[ConsignedItemData]("consigneditem-wholesaleCost", wholesaleCostLens),
