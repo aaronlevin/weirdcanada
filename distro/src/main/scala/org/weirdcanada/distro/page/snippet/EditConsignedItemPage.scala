@@ -15,11 +15,10 @@ import scala.xml.{NodeSeq, Text}
 import scalaz.\/
 import scalaz.{\/-,-\/} // Zoidberg
 
-class EditConsignedItemPage(consigneditemDataTuple: (ConsignedItem, ConsignedItemData), shopify: Shopify) extends DispatchSnippet with DynamicFormCreator  {
+class EditConsignedItemPage(consigneditemDataTuple: (ConsignedItem, ConsignedItemData)) extends DispatchSnippet with DynamicFormCreator  {
 
   var uploadToShopify = false
   import ConsignedItem._
-  println("xxx edit page: %s".format(consigneditemDataTuple._1))
 
   /**
    * Get consigneditem from id in `ConsignedItemData`
@@ -55,8 +54,6 @@ class EditConsignedItemPage(consigneditemDataTuple: (ConsignedItem, ConsignedIte
     "@consigneditem-update-button" #> SHtml.ajaxButton(
       "Update", 
       () => {
-        if(uploadToShopify)
-          (new UploadConsignedItemToShopify(consignedItem, shopify)).upload
         updateConsignedItemFunc(consigneditemState.is,consigneditem)
       }
     )
