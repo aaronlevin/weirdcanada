@@ -4,6 +4,7 @@ import net.liftweb.common.Full
 import net.liftweb.db.DefaultConnectionIdentifier
 import net.liftweb.http.js.{JsCmd, JsCmds}
 import net.liftweb.mapper._
+import org.joda.time.DateTime
 import org.weirdcanada.common.util.StringParsingUtil
 import StringParsingUtil.safeParse
 import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasFields, HasEmpty, ManyRecordField, ManyTypeaheadField, S3Image, S3Resource}
@@ -174,7 +175,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
   )
   private val albumTracksLens: Lens[AlbumData, Map[Int, TrackData]] = Lens.lensu((a,t) => a.copy(tracks = t), (a) => a.tracks)
 
-  import DynamicFormFieldRenderHelpers.{checkboxRender, selectRender, s3SignedUploadRender}
+  import DynamicFormFieldRenderHelpers.{checkboxRender, datePickerRender, selectRender, s3SignedUploadRender}
 
   private val albumFirstPressingCheckbox = 
     checkboxRender(albumPressingLens.get)("@album-pressing-input") _
@@ -187,6 +188,9 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
 
   private val imageUrlField =
     s3SignedUploadRender(albumImageUrlLens.get)("@album-imageurl")("/sign_s3/wc-img", "name", "type") _
+
+  private val yearDateSelect = 
+    datePickerRender(albumReleaseYearLens.get)("@album-releaseyear-input")("yyyy") _
 
 
   import Track._
@@ -207,7 +211,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
       shopifyId = 0,
       format = "Cassette",
       isFirstPressing = true,
-      releaseYear = 0,
+      releaseYear = (new DateTime).toString("YYYY").toInt,
       catalogNumber = "",
       imageUrl = "",
       additionalImageUrls = Map.empty[Int, S3Image],
@@ -229,7 +233,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
       BasicField[AlbumData]("album-shopifyid", albumShopifyIdLens),
       BasicField[AlbumData]("album-format", albumFormatLens, Some(albumFormatSelect)),
       BasicField[AlbumData]("album-pressing", albumPressingLens, Some(albumFirstPressingCheckbox)),
-      BasicField[AlbumData]("album-releaseyear", albumReleaseYearLens),
+      BasicField[AlbumData]("album-releaseyear", albumReleaseYearLens,Some(yearDateSelect)),
       BasicField[AlbumData]("album-catalognumber", albumCatalogNumberLens),
       BasicField[AlbumData]("album-imageurl", albumImageUrlLens, Some(imageUrlField)),
       ManyRecordField[AlbumData, S3Image]("album-additionalimageurls",albumAdditionalImageUrlsLens),
