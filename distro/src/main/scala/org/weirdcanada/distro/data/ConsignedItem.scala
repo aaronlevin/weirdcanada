@@ -44,9 +44,6 @@ object ConsignedItem
     type Type = Value
     val StillSealed, NearMint, Excellent, VeryGoodPlus, VeryGood, VeryGoodMinus, Good, Poor = Value
 
-    def fromPhysicalCondition(p: PhysicalCondition): Option[Value] = 
-      withNameOption(p.name.replace(" ",""))
-
     def toPhysicalCondition(cond: Value): PhysicalCondition = cond match {
       case StillSealed => PhysicalCondition.StillSealed
       case NearMint => PhysicalCondition.NearMint
@@ -57,6 +54,17 @@ object ConsignedItem
       case Good => PhysicalCondition.Good
       case Poor => PhysicalCondition.Poor
       case _ => PhysicalCondition.NearMint
+    }
+
+    def fromPhysicalCondition(cond: PhysicalCondition): Value = cond match {
+      case PhysicalCondition.StillSealed => StillSealed
+      case PhysicalCondition.NearMint => NearMint
+      case PhysicalCondition.Excellent => Excellent
+      case PhysicalCondition.VeryGoodPlus => VeryGoodPlus
+      case PhysicalCondition.VeryGood => VeryGood
+      case PhysicalCondition.VeryGoodMinus => VeryGoodMinus
+      case PhysicalCondition.Good => Good
+      case PhysicalCondition.Poor => Poor
     }
   }
   
@@ -222,11 +230,14 @@ object ConsignedItem
       .customerCost(data.customerCost)
       .wholesaleCost(data.wholesaleCost)
       .markUp(data.markUp)
+      .coverCondition(Condition.fromPhysicalCondition(data.coverCondition))
+      .mediaCondition(Condition.fromPhysicalCondition(data.mediaCondition))
 
     data.consignorId.map { i => item.consignor(i) }
     data.albumId.map { i => item.album(i) }
-    Condition.withNameOption(data.coverCondition.name.replace(" ","")).map { c => item.coverCondition(c) }
-    Condition.withNameOption(data.mediaCondition.name.replace(" ","")).map { m => item.mediaCondition(m) }
+    
+    println("xxx sec condsigned: %s".format(data.coverCondition.name.replace(" ","")))
+
     data.quantity.map { q => item.quantity(q) }
     //data.guid.map { g => item.guid(g) }
 

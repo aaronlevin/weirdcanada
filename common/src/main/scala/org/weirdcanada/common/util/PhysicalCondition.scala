@@ -46,7 +46,7 @@ object PhysicalCondition {
 
   case object VeryGoodPlus extends PhysicalCondition { 
     val name = "VG+"
-    val longName = "Very Good +"
+    val longName = "Very Good Plus"
     val slug = "vg-plus"
     val description = ""
     val order = 3
@@ -55,14 +55,14 @@ object PhysicalCondition {
   case object VeryGood extends PhysicalCondition { 
     val name = "VG"
     val longName = "Very Good"
-    val slug = ""
+    val slug = "vg"
     val description = ""
     val order = 4
   }
 
   case object VeryGoodMinus extends PhysicalCondition { 
     val name = "VG-"
-    val longName = "Very Good -"
+    val longName = "Very Good Minus"
     val slug = "vg-minus"
     val description = ""
     val order = 5
@@ -106,5 +106,11 @@ object PhysicalCondition {
    */
   def fromSlug(slug: String): Option[PhysicalCondition] = 
     physicalConditions.find { _.slug == slug }
+
+  def fromName(name: String): Option[PhysicalCondition] = {
+    val slug = name.replace(" ", "-").replace("+","plus").toLowerCase
+    fromSlug(slug)
+
+  }
 
 }
