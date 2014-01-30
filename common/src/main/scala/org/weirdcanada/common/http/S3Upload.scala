@@ -58,7 +58,6 @@ object S3 {
       case Left(date) => rfc822DateParser.format(date)
       case Right(expires) => expires.toString
     }
-    println("xxx PATH FOR CANONICAL: %s".format(path))
     (method :: contentMd5.getOrElse("") :: contentType.getOrElse("") :: dateExpiresString :: Nil) ++ amzString ++ List(path) mkString("\n")
   }
 
@@ -80,7 +79,6 @@ object S3 {
     val mac = crypto.Mac.getInstance(SHA1)
     val key = new crypto.spec.SecretKeySpec(stringToBytes(secretKey), SHA1)
     mac.init(key)
-    println("xxx message to sign: %s".format(message.replace("\n","\nxxx ")))
     new String(Base64.encodeBase64(mac.doFinal(stringToBytes(message))))
   }
 
