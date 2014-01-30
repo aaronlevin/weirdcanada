@@ -177,7 +177,7 @@ object ConsignedItem
         bStateValue = (s: String) => Album.findByStringId(s).map { album =>
           "%s - %s".format(album.artists.map { _.name.is }.mkString(" // "), album.title.is)
         }.toOption,
-        lens = consignorIdLens
+        lens = albumIdLens
       )
     )
   }

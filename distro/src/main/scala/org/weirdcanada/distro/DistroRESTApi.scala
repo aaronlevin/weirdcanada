@@ -121,7 +121,7 @@ object AccountDatum {
       case x => " (%s)".format(x)
     }
 
-    val value = "%s - %s%s".format(account.firstName.is, account.lastName.is, organization)
+    val value = "%s (%s)".format(account.displayName, account.city.is)
     val tokens = List(account.firstName.is, account.lastName.is,account.organization.is).mkString(" ").toLowerCase.split(' ').filter { !_.isEmpty }.toList
 
     AccountDatum(

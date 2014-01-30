@@ -156,7 +156,7 @@ object DynamicFormFieldRenderHelpers {
       "@typeahead-modal" #> List.empty &
       "@typeahead-hidden-input" #> SHtml.ajaxText("", updateFunc, "id" -> (uid + "-hidden"), "value" -> accessor(current)) &
       "@typeahead-script-handler *" #> Unparsed(
-        """wc.typeaheadWrapper('#%s',function(datum) { $('#%s-hidden').val(datum.id); $('#%s').blur(); }, '%s');""".format(uid, uid, uid, apiEndpoint)
+        """wc.typeaheadWrapper('#%s',function(datum) { $('#%s-hidden').val(datum.id); $('#%s-hidden').blur(); }, '%s');""".format(uid, uid, uid, apiEndpoint)
       )
     }
 }
