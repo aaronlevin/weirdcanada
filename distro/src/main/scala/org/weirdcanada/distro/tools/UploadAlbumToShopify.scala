@@ -119,7 +119,7 @@ class UploadAlbumToShopify(album: Album, shopify: Shopify) {
         shopify.updateProduct(existingShopifyId, product) |>
           (pp => println("Updated Shopify product #%s from album #%s (%s)".format(pp.id, album.id.is, album.title.is)))
     }) |>
-    setPublisherMetafield(album.publishers.toList) |>
-    setArtistMetaField(album.artists.toList)
+      setPublisherMetafield(album.publishers.toList) |>
+      setArtistMetaField(album.artists.toList)
   }
 }

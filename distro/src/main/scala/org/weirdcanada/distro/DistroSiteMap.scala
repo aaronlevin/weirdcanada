@@ -4,6 +4,7 @@ import net.liftweb.sitemap.{Loc, Menu, SiteMap}
 import Loc.{LocGroup, LocSnippets, Snippet}
 import net.liftweb.common._
 import net.liftweb.http._
+import org.weirdcanada.distro.api.shopify.Shopify
 import org.weirdcanada.distro.data.{Artist, ArtistData, Album, AlbumData, ConsignedItem, Publisher, PublisherData}
 import ConsignedItem.ConsignedItemData
 import org.weirdcanada.distro.page.{AccountPage}
@@ -11,7 +12,7 @@ import org.weirdcanada.distro.page.snippet.EditArtistPage
 import org.weirdcanada.distro.service.Service
 import scala.xml.NodeSeq
 
-class DistroSiteMapBuilder(service: Service) {
+class DistroSiteMapBuilder(service: Service, shopify: Shopify) {
   implicit def svc = service
   import DistroSiteMapBuilder._
 
@@ -36,10 +37,10 @@ class DistroSiteMapBuilder(service: Service) {
     (tuple) => tuple._2.id.toString
   ) / "admin" / "edit-album" >> mustBeAdmin >> LocGroup("actions")
 
-  val editConsignedItemPage = Menu.param[(ConsignedItem, ConsignedItemData)](
+  val editConsignedItemPage = Menu.param[(ConsignedItem, ConsignedItemData,Shopify)](
     "EditConsignedItem",
     "Edit Consigned Item",
-    id => ConsignedItem.findByStringId(id).map { c => (c, ConsignedItem.toData(c)) },
+    id => ConsignedItem.findByStringId(id).map { c => (c, ConsignedItem.toData(c), shopify) },
     (tuple) => tuple._2.id.toString
   ) / "admin" / "edit-consigned-item" >> mustBeAdmin >> LocGroup("actions")
 
@@ -147,7 +148,7 @@ class DistroSiteMapBuilder(service: Service) {
 }
 
 object DistroSiteMapBuilder {
-  def apply(service: Service) = new DistroSiteMapBuilder(service)
+  def apply(service: Service, shopify: Shopify) = new DistroSiteMapBuilder(service, shopify)
 
   def mustBeVisitor(implicit service: Service) = Loc.TestAccess(() => if (!service.SessionManager.current.isLoggedIn) Empty else Full(RedirectResponse("/")))
   def mustBeLoggedIn(implicit service: Service)  = Loc.TestAccess(() => if (service.SessionManager.current.isLoggedIn) Empty else Full(RedirectResponse("/")))

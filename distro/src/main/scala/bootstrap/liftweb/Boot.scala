@@ -10,6 +10,7 @@ import net.liftweb.sitemap.Loc._
 import net.liftweb.mapper._
 import net.liftmodules.JQueryModule
 import org.weirdcanada.distro.{RestAPI, StatefulRestAPI}
+import org.weirdcanada.distro.api.shopify.Shopify
 import org.weirdcanada.distro.page._
 import org.weirdcanada.distro.data._
 import org.weirdcanada.distro.snippet._
@@ -43,6 +44,7 @@ class Boot extends Bootable with Loggable {
   private def internalBoot = {
     val config = Config.fromLiftProps
     val emailFactory = EmailFactory.getSslEmailFactory(config)
+    val shopify = new Shopify(config)
     val shopifyClient = ShopifyClient(config)
     val service = new Service(config, emailFactory)
 
@@ -57,7 +59,7 @@ class Boot extends Bootable with Loggable {
     LiftRules.snippetDispatch.append(SnippetDispatch(service, shopifyClient))
 
     // Build SiteMap
-    def sitemap = DistroSiteMapBuilder(service).toSiteMap
+    def sitemap = DistroSiteMapBuilder(service, shopify).toSiteMap
     LiftRules.setSiteMapFunc(() => sitemap)
     
     // Add REST APIs
