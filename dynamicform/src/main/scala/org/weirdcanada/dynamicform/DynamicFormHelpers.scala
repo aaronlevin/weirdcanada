@@ -114,6 +114,12 @@ object DynamicFormFieldRenderHelpers {
     selector #> SHtml.ajaxCheckbox(currentValue, booleanUpdateFunc)
   }
 
+  def datePickerRender[A](accessor: A => String)(selector: String)(format: String)(uid: String)(current: A)(updateFunc: String => JsCmd): NodeSeq => NodeSeq = {
+    selector #> SHtml.ajaxText(accessor(current), updateFunc, "id" -> (uid+"-input")) &
+    "%s-script *".format(selector) #> JsCmds.OnLoad( JsCmds.Run("""$('#%s-input').datepicker({ format: "%s", autoclose: true });""".format(uid,format)))
+  }
+
+
   def s3SignedUploadRender[A](accessor: A => String)(selector: String)(
     signUrl: String,
     nameParam: String,
