@@ -30,10 +30,10 @@ class DistroSiteMapBuilder(service: Service, shopify: Shopify) {
     (tuple) => tuple._2.id.toString
   ) / "admin" / "edit-publisher" >> mustBeAdmin >> LocGroup("actions")
 
-  val editAlbumPage = Menu.param[(Album,AlbumData)](
+  val editAlbumPage = Menu.param[(Album,AlbumData, Shopify)](
     "EditAlbum",
     "Edit Album",
-    id =>  Album.findByStringId(id).map { a => (a, Album.toData(a)) },
+    id =>  Album.findByStringId(id).map { a => (a, Album.toData(a), shopify) },
     (tuple) => tuple._2.id.toString
   ) / "admin" / "edit-album" >> mustBeAdmin >> LocGroup("actions")
 
