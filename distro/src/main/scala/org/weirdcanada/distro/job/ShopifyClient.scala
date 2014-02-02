@@ -16,15 +16,12 @@ class ShopifyClient(config: Config) extends IntervalService(config.shopifyPollin
     val options = Sale.getLatestOrderId.map("since_id" -> _).toArray
     
     val orders = shopify.getOrders(options : _*)
-    val uniqueVariantIds = orders.flatMap(_.lineItems.map(_.variantId)).toSet
-    val metafields = uniqueVariantIds.map(id => id -> shopify.getVariantMetafields(id, "namespace" -> "weirdcanada")).toMap // TODO: could cache locally in our DB...
+    //val uniqueVariantIds = orders.flatMap(_.lineItems.map(_.variantId)).toSet
     
     orders.foreach( order => {
       order.lineItems.foreach( lineItem => {
         for {
-          metafields <- metafields.get(lineItem.variantId) orElse sys.error("Order #%s: Can't find metafields for variant: %s".format(order.id, lineItem.variantId))
-          consignedItemGuid <- metafields.find(_.key == "guid").map(_.value) orElse sys.error("Order: #%s: guid missing for variant: %s".format(order.id, lineItem.variantId))
-          consignedItem <- ConsignedItem.findByGuid(consignedItemGuid) orElse sys.error("Order #%s: Can't find item by guid: %s".format(order.id, consignedItemGuid))
+          consignedItem <- ConsignedItem.findBySku(lineItem.sku) orElse sys.error("Order #%s: Can't find item by sku: %s".format(order.id, lineItem.sku))
           consignor <- consignedItem.consignor.obj orElse sys.error("Order #%s: Can't find consignor for item: %s".format(order.id, consignedItem.id.is))
         }
         yield {

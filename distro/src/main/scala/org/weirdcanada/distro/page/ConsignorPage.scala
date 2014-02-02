@@ -283,7 +283,7 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
             "@sold" #> 1 &
             "@remaining" #> 2 &
             "@price" #> "%s // %s".format(consignedItem.customerCost.is, consignedItem.wholesaleCost.is) &
-            "@sku" #> consignedItem.guid &
+            "@sku" #> consignedItem.sku &
             "@image [src]" #> album.imageUrl &
             "@artist" #> album.artists.map { _.name.is }.mkString { " // " } &
             "@title" #> album.title.is &

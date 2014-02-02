@@ -119,17 +119,7 @@ class DownloadOrdersFromShopify(args: Args, shopify: Shopify) {
 
     vprintln("downloading orders...")
     val orders = shopify.getOrders(options : _*)
-
-    // Keep a cache of metafields by VariantID for the lifetime of this tool (perhaps not super useful...)
-    // TODO: consider using a cache (e.g. Redis) that exceeds the lifetime of this app
-    val metafieldsByVariantId = scala.collection.mutable.HashMap.empty[Long, List[Metafield]]
-    def getMetafields(variantId: Long) = {
-      // Look up the metafield in our cache. If not there, go get the metafield from Shopify
-      metafieldsByVariantId.getOrElseUpdate(variantId, {
-        vprintln("downloading metafields for product %d...".format(variantId))
-        shopify.getVariantMetafields(variantId, "namespace" -> "weirdcanada")
-      })
-    }
+    
     
     // Helper method to make the for-comprehension below a little cleaner
     def require(bool: => Boolean) = if (bool) Some(true) else None
@@ -142,24 +132,10 @@ class DownloadOrdersFromShopify(args: Args, shopify: Shopify) {
       // Process each SKU line item on the order, one at a time
       order.lineItems.foreach( lineItem => {
         try {
-          // Look up the metafields on the product variant (because we use it to tie to the ConsignedItem in our database)
-          val metafields = getMetafields(lineItem.variantId)
-
-          vprintln("found metafields: " + metafields.toString)
+          vprintln("found sku: " + lineItem.sku)
           
-          // Pull the guid out of the metafield
-          val trueConsignedItemGuid =
-            metafields.find(_.key == "guid").map(_.value)
-              .orElse(exit("guid metafield missing for variant: %s".format(lineItem.variantId)))
-              .getOrElse("")
-
-          // It may be necessary to override the guid (e.g. when working with test data or corrupt/incomplete production data)
-          // Use the force-guid if supplied... otherwise use the true guid from the metafield
-          val consignedItemGuid =
-            args.forceGuid.getOrElse(trueConsignedItemGuid)
-
           for {
-            consignedItem <- ConsignedItem.findByGuid(consignedItemGuid) orElse exit("can't find item by guid: %s".format(consignedItemGuid))
+            consignedItem <- ConsignedItem.findBySku(lineItem.sku) orElse exit("can't find item by sku: %s".format(lineItem.sku))
             consignor <- consignedItem.consignor.obj orElse exit("can't find consignor for item: %s".format(consignedItem.id.is))
             weirdCanadaRevenue = lineItem.quantity * consignedItem.markUp.is
             consignorRevenue = lineItem.price - weirdCanadaRevenue
