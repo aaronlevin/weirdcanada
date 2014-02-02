@@ -22,6 +22,7 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
   object description extends MappedText(this)
   object sku extends MappedString(this, 32)
   object shopifyId extends MappedLong(this)
+  object barcode extends MappedString(this, 32) // UPC, ISBN, etc
 
   object format extends MappedEnum(this, Album.Type)
   object isFirstPressing extends MappedBoolean(this)
@@ -62,6 +63,25 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
       "lathe"
     else 
       "cool"
+  }
+
+  /**
+   * Convert the `Type` enum to a char (for use in the SKU)
+   *
+   * @returns a char representation of the enum
+   */
+  def formatTypeChar: Char = {
+    import Album.Type._
+    format.is match {
+      case CompactDisc     => 'C'
+      case Vinyl           => 'V'
+      case TwelveInchVinyl => 'F' // Foot
+      case SevenInchVinyl  => '7'
+      case Cassette        => 'T' // Tape
+      case Digital         => 'D'
+      case Lathe           => 'L'
+      case _               => 'X'
+    }
   }
 
   /**
