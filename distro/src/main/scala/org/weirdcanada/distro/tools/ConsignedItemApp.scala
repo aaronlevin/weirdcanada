@@ -47,7 +47,7 @@ object ConsignedItemApp extends App with Loggable {
     notes: Option[String] = None,
     coverCondition: Option[String] = None,
     mediaCondition: Option[String] = None,
-    guid: Option[String] = None
+    sku: Option[String] = None
   )
   
   object Args {
@@ -73,8 +73,8 @@ object ConsignedItemApp extends App with Loggable {
           parseArgs(tail, args.copy(mode = List))
         
 
-        case "-guid" :: guid :: tail => // Note: Guid is automatically assigned. only use this to override the value
-          parseArgs(tail, args.copy(guid = Some(guid)))
+        case "-sku" :: sku :: tail => // Note: Sku is automatically assigned. only use this to override the value
+          parseArgs(tail, args.copy(sku = Some(sku)))
           
         case "-mediacond" :: cond :: tail =>
           parseArgs(tail, args.copy(mediaCondition = Some(cond)))
@@ -123,7 +123,7 @@ class ConsignedItemApp(args: Args) {
     val json =
       "consignedItem" -> (
         ("id" -> consignedItem.id.is) ~ 
-        ("guid" -> consignedItem.guid.is) ~
+        ("sku" -> consignedItem.sku.is) ~
         ("customerCost" -> consignedItem.customerCost.is) ~
         ("wholesaleCost" -> consignedItem.wholesaleCost.is) ~
         ("markUp" -> consignedItem.markUp.is) ~
@@ -137,6 +137,12 @@ class ConsignedItemApp(args: Args) {
     println(pretty(render(json)))    
   }
   
+  def mkDefaultSku(consignedItem: ConsignedItem) = {
+    var idSegment = consignedItem.id.is + 54040 // Tack on arbitrary amount so we're not starting at 0 (well, not totally arbitrary... 54-40)
+    require(idSegment >= 0 && idSegment <= 999999) // We're expecting up to 6 digits (positive)
+    "WC-%c-%06d".format(consignedItem.album.obj.map(_.formatTypeChar).getOrElse('X'), consignedItem.id.is)
+  }
+    
   def apply = {
     val consignedItem: ConsignedItem =
       (args.mode, args.id) match {
@@ -170,8 +176,14 @@ class ConsignedItemApp(args: Args) {
       args.notes map consignedItem.additionalNotes.set
       args.coverCondition map ConsignedItem.Condition.withName map consignedItem.coverCondition.set
       args.mediaCondition map ConsignedItem.Condition.withName map consignedItem.mediaCondition.set
-      args.guid map consignedItem.guid.set
+      args.sku map consignedItem.sku.set
       consignedItem.save
+      
+      // Assign a default SKU if necessary
+      if (args.mode == Add && args.sku.isEmpty) {
+        consignedItem.sku(mkDefaultSku(consignedItem))
+        consignedItem.save
+      }
     }
 
     print(consignedItem)

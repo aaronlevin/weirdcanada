@@ -31,7 +31,7 @@ class ConsignedItem extends LongKeyedMapper[ConsignedItem] with IdPK with OneToM
   object wholesaleCost extends MappedDecimal(this, MathContext.DECIMAL32, 2)
   object markUp extends MappedDecimal(this, MathContext.DECIMAL32, 2)
   
-  object guid extends MappedUniqueId(this, 32) with DBIndexed // Use this ID to track an item in the store
+  object sku extends MappedString(this, 32) with DBIndexed
 }
 
 // The companion object to the above Class
@@ -73,8 +73,8 @@ object ConsignedItem
     val New, Vintage = Value // TODO: anything between new and vintage? perhaps just used/preowned
   }
 
-  def findByGuid(guid: String): Box[ConsignedItem] = {
-    find(By(ConsignedItem.guid, guid), PreCache(ConsignedItem.consignor))
+  def findBySku(sku: String): Box[ConsignedItem] = {
+    find(By(ConsignedItem.sku, sku), PreCache(ConsignedItem.consignor))
   }
 
   case class ConsignedItemData(
@@ -87,7 +87,7 @@ object ConsignedItem
     customerCost: BigDecimal,
     wholesaleCost: BigDecimal,
     markUp: BigDecimal,
-    guid: Option[String],
+    sku: Option[String],
     consignorId: Option[Long],
     albumId: Option[Long]
   )
@@ -130,9 +130,9 @@ object ConsignedItem
     (c,m) => safeParse[BigDecimal](m).map { cost => c.copy(markUp = cost) }.getOrElse { c },
     (c) => c.markUp.toString
   )
-  private val guidLens: Lens[ConsignedItemData, String] = Lens.lensu(
-    (c,g) => c.copy(guid = Some(g)),
-    (c) => c.guid.getOrElse { "" }
+  private val skuLens: Lens[ConsignedItemData, String] = Lens.lensu(
+    (c,s) => c.copy(sku = Some(s)),
+    (c) => c.sku.getOrElse { "" }
   )
   private val consignorIdLens: Lens[ConsignedItemData, String] = Lens.lensu(
     (c,i) => c.copy(consignorId = safeParse[Long](i)),
@@ -203,7 +203,7 @@ object ConsignedItem
       customerCost = 0.0,
       wholesaleCost = 0.0,
       markUp = 1.0,
-      guid = None,
+      sku = None,
       consignorId = None,
       albumId = None
     )
@@ -239,7 +239,7 @@ object ConsignedItem
     println("xxx sec condsigned: %s".format(data.coverCondition.name.replace(" ","")))
 
     data.quantity.map { q => item.quantity(q) }
-    //data.guid.map { g => item.guid(g) }
+    data.sku.map { g => item.sku(g) }
 
     \/-(item)
   } catch {
@@ -266,7 +266,7 @@ object ConsignedItem
     customerCost = data.customerCost.is,
     wholesaleCost = data.wholesaleCost.is,
     markUp = data.markUp.is,
-    guid = Some(data.guid.is),
+    sku = Some(data.sku.is),
     consignorId = Some(data.consignor.is),
     albumId = Some(data.album.is)
   )
@@ -274,6 +274,5 @@ object ConsignedItem
   def updateFromData(data: ConsignedItemData, item: ConsignedItem): \/[String, ConsignedItem] = 
     DB.use(DefaultConnectionIdentifier) { connection =>
       setConsignedItemFromData(data, item).map { _.saveMe }
-    }
- 
+    } 
 }

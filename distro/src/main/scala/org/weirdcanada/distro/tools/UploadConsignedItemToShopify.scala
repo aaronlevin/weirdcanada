@@ -54,21 +54,17 @@ object UploadConsignedItemToShopify extends App with Loggable {
 }
 
 class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopify) {
-  def shopifyVariantFromConsignedItem = {
-    Metafield(
-      "guid",
-      consignedItem.guid.is,
-      "weirdcanada"
-    )
-  }
-  
   def upload = {
     val option1 = 1 // Store the media format in the first option.
     
     for {
       album <- consignedItem.album.obj ?~ "Consigned item %s has no album".format(consignedItem.id.is)
-      metafield = shopifyVariantFromConsignedItem
       variantOptions = Map(option1 -> album.format.is.toString)
+      barcode = album.barcode.is
+      position = 1 // TODO: Might not want to put a new item in first slot... maybe append to the end?
+      price = consignedItem.customerCost.is
+      sku = consignedItem.sku.is
+      title = album.title.is // TODO: show something here to distinguish from other variants?
     }
     yield {
       val productId =
@@ -80,14 +76,16 @@ class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopif
             
           case productId => productId
         }
-      
-      shopify.addProductVariant(productId, Seq(metafield), variantOptions) |>
+
+      val variant = new Variant(barcode, variantOptions, position, price, sku, title)
+      shopify.addProductVariant(productId, variant) |>
         (pv => {
-          println("Created Shopify variant #%s from consigned item #%s (%s)".format(pv.id, consignedItem.id.is, consignedItem.guid.is))
+          println("Created Shopify variant #%s from consigned item #%s (%s)".format(pv.id, consignedItem.id.is, consignedItem.sku.is))
           
-          // Now add metafield to connect the Shopify item back to the Consigned Item (I was asked to not use SKU field for this purpose)
-          val metafield = Metafield("guid", consignedItem.guid.is, "weirdcanada")
-          shopify.addVariantMetafields(pv.id, metafield :: Nil)
+          // Now add any metafields you want. (note: it should actually be possible to create the metafields in the initial call...
+          // and not have to have this code here).
+          //val metafields = Seq.empty[Metafield] // TODO: put here whatever metafields you want
+          //shopify.addVariantMetafields(pv.id, metafields)
         })
     }
   }
