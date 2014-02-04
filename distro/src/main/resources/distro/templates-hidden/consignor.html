@@ -126,7 +126,7 @@
 
         </div>
 
-        <section class="salesInventory row" data-lift="ConsignorPage.renderConsignedItems">
+        <section class="salesInventory row table-responsive" data-lift="ConsignorPage.renderConsignedItems">
           <table class="table table-hover table-condensed table-striped" name="consigned-items-table">
             <thead>
               <tr>
@@ -138,9 +138,11 @@
                 <th>Sold</th>
                 <th>Remaining</th>
                 <th>Price</th>
-                <th>SKU</th>
-                <th>&nbsp;</th>
-                <th>&nbsp;</th>
+                <th>Wholesale</th>
+                <th name="sku-header">SKU</th>
+                <th name="edit-header">SKU</th>
+                <!-- <th>&nbsp;</th> -->
+                <!-- <th>&nbsp;</th> -->
               </tr>
             </thead>
             <tbody class="consigned-items">
@@ -153,9 +155,10 @@
                 <td><span name="sold">16</span></td>
                 <td><span name="remaining">8</span></td>
                 <td><span name="price">$4.99</span></td>
+                <td><span name="wholesale">$4.99</span></td>
                 <td><span name="sku">SKU</span></td>
-                <td><a href="#" class="btn btn-xs btn-default">Sales Breakdown</a></td>
-                <td><a href="#" class="btn btn-xs btn-default">Edit</a></td>
+                <!-- <td><a href="#" class="btn btn-xs btn-default">Sales Breakdown</a></td> -->
+                <td name="edit-item"><a href="#" class="btn btn-xs btn-default" name="edit-item-link">Edit</a></td>
               </tr>
             </tbody>
           </table>

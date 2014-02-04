@@ -4,11 +4,11 @@ import net.liftweb.common.Full
 import net.liftweb.http.{DispatchSnippet, S, SHtml}
 import net.liftweb.http.js.{JsCmd, JsCmds}
 import JsCmds.{Noop, Replace, Run}
-import net.liftweb.util.{ClearClearable, ClearNodes, Helpers, PassThru}
+import net.liftweb.util.{ClearClearable, ClearNodes, CssSel, Helpers, PassThru}
 import Helpers._
-import org.weirdcanada.common.util.DateTimeUtil
+import org.weirdcanada.common.util.{DateTimeUtil, LiftUtils}
 import org.weirdcanada.distro.service.{BalanceTooLow, EmailNotValidated, PaymentAllowed, Service}
-import org.weirdcanada.distro.data.{Account, Album, Sale}
+import org.weirdcanada.distro.data.{Account, Album, Sale, UserRole}
 import Album.Type._
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
@@ -29,6 +29,8 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
    * The account of the user viewing the consignor page.
    */
   private val account = service.SessionManager.current.account
+
+  private val isAdmin = (account.role.is == UserRole.Admin || account.role.is == UserRole.Intern)
 
   /**
    * What we call the user when they land on the page.
@@ -278,6 +280,8 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
       case Nil =>
        ".consigned-items" #> Nil
       case _ =>
+        "@sku-header *" #> {if( isAdmin ) Some("SKU") else None} &
+        "@edit-header *" #> {if( isAdmin ) Some("") else None} &
         ".consigned-item" #> consignedItems.flatMap{ consignedItem =>
           consignedItem.album.obj.map{ album =>
             val quantity = consignedItem.quantity.is
@@ -285,12 +289,14 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
             "@consigned" #> quantity &
             "@sold" #> sold &
             "@remaining" #> (quantity - sold) &
-            "@price" #> "%s // %s".format(consignedItem.customerCost.is, consignedItem.wholesaleCost.is) &
-            "@sku" #> consignedItem.sku &
+            "@price" #> "$%s".format(consignedItem.customerCost.is) &
+            "@wholesale" #> "$%s".format(consignedItem.wholesaleCost.is) &
+            "@sku" #> { if( isAdmin ) Some(consignedItem.sku.is) else None } &
             "@image [src]" #> album.imageUrl &
             "@artist" #> album.artists.map { _.name.is }.mkString { " // " } &
             "@title" #> album.title.is &
-            "@format" #> album.formatTypeString
+            "@format" #> album.formatTypeString &
+            "@edit-item" #> { if( !isAdmin ) None else { Some( "@edit-item-link [href]" #> "/admin/edit-consigned-item/%s".format(consignedItem.id.is) ) } }
           }
       } &
       ClearClearable
