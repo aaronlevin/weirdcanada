@@ -53,6 +53,7 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
    * registered or has zero consigned items.
    */
   lazy val sales: List[Sale] = Sale.getSalesByAccount(account.id.is)
+  lazy val salesMap: Map[Long, List[Sale]] = sales.groupBy { _.consignedItem.is }
 
   /**
    * when a user visits this page, they may or may not have been validated or
@@ -279,9 +280,11 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
       case _ =>
         ".consigned-item" #> consignedItems.flatMap{ consignedItem =>
           consignedItem.album.obj.map{ album =>
-            "@consigned" #> consignedItem.quantity.is &
-            "@sold" #> 1 &
-            "@remaining" #> 2 &
+            val quantity = consignedItem.quantity.is
+            val sold = salesMap.get(consignedItem.id.is).map { _.size }.getOrElse { 0 }
+            "@consigned" #> quantity &
+            "@sold" #> sold &
+            "@remaining" #> (quantity - sold) &
             "@price" #> "%s // %s".format(consignedItem.customerCost.is, consignedItem.wholesaleCost.is) &
             "@sku" #> consignedItem.sku &
             "@image [src]" #> album.imageUrl &
