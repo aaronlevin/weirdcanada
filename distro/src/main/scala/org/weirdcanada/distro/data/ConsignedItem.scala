@@ -67,7 +67,21 @@ object ConsignedItem
       case PhysicalCondition.Poor => Poor
     }
   }
-  
+
+  /**
+   * We offset the sku IDs by this fixed amount
+   */
+  val skuOffset: Long = 54040L
+
+  /**
+   * Generate a default SKU
+   */
+  def mkDefaultSku(consignedItem: ConsignedItem): String = {
+    var idSegment = consignedItem.id.is + skuOffset // Tack on arbitrary amount so we're not starting at 0 (well, not totally arbitrary... 54-40)
+    require(idSegment >= 0 && idSegment <= 999999) // We're expecting up to 6 digits (positive)
+    "WC-%s-%06d".format(consignedItem.album.obj.map(_.formatCodeString).getOrElse("UN"), idSegment)
+  } 
+
   object Age extends Enumeration with EnumerationUtils {
     type Type = Value
     val New, Vintage = Value // TODO: anything between new and vintage? perhaps just used/preowned
@@ -177,6 +191,7 @@ object ConsignedItem
       BasicField[ConsignedItemData]("consigneditem-customerCost", customerCostLens),
       BasicField[ConsignedItemData]("consigneditem-wholesaleCost", wholesaleCostLens),
       BasicField[ConsignedItemData]("consigneditem-markUp", markUpLens),
+      BasicField[ConsignedItemData]("consigneditem-sku", skuLens),
       BasicField[ConsignedItemData]("consigneditem-consignorId", consignorIdLens, Some(consignorTypeahead)),
       TypeaheadField[ConsignedItemData, AlbumData](
         name = "consigneditem-albumId",
@@ -236,10 +251,8 @@ object ConsignedItem
     data.consignorId.map { i => item.consignor(i) }
     data.albumId.map { i => item.album(i) }
     
-    println("xxx sec condsigned: %s".format(data.coverCondition.name.replace(" ","")))
-
     data.quantity.map { q => item.quantity(q) }
-    data.sku.map { g => item.sku(g) }
+    data.sku.map { s => item.sku(s) }
 
     \/-(item)
   } catch {
@@ -251,6 +264,9 @@ object ConsignedItem
     val newConsignedItem = ConsignedItem.create
     setConsignedItemFromData(data, newConsignedItem) match {
       case \/-(newItem) => 
+        newItem.saveMe
+        if(data.sku.isEmpty)
+          newItem.sku(mkDefaultSku(newItem))
         Some(newItem.saveMe)
       case -\/(_) => None
     }
@@ -266,7 +282,7 @@ object ConsignedItem
     customerCost = data.customerCost.is,
     wholesaleCost = data.wholesaleCost.is,
     markUp = data.markUp.is,
-    sku = Some(data.sku.is),
+    sku = if(data.sku.is.isEmpty) None else Some(data.sku.is),
     consignorId = Some(data.consignor.is),
     albumId = Some(data.album.is)
   )

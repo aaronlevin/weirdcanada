@@ -113,6 +113,8 @@ object ConsignedItemApp extends App with Loggable {
 import ConsignedItemApp._
 
 class ConsignedItemApp(args: Args) {
+
+  import ConsignedItem.mkDefaultSku
   // Helper method to display an error message and exit (or continue if the user chose to ignore errors)
   private def exit(code: Int, msg: => String): Nothing = {
     println(msg)
@@ -135,12 +137,6 @@ class ConsignedItemApp(args: Args) {
       )
       
     println(pretty(render(json)))    
-  }
-  
-  def mkDefaultSku(consignedItem: ConsignedItem) = {
-    var idSegment = consignedItem.id.is + 54040 // Tack on arbitrary amount so we're not starting at 0 (well, not totally arbitrary... 54-40)
-    require(idSegment >= 0 && idSegment <= 999999) // We're expecting up to 6 digits (positive)
-    "WC-%c-%06d".format(consignedItem.album.obj.map(_.formatTypeChar).getOrElse('X'), consignedItem.id.is)
   }
     
   def apply = {

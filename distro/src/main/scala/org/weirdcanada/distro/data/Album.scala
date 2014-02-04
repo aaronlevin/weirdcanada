@@ -70,17 +70,17 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
    *
    * @returns a char representation of the enum
    */
-  def formatTypeChar: Char = {
+  def formatCodeString: String = {
     import Album.Type._
     format.is match {
-      case CompactDisc     => 'C'
-      case Vinyl           => 'V'
-      case TwelveInchVinyl => 'F' // Foot
-      case SevenInchVinyl  => '7'
-      case Cassette        => 'T' // Tape
-      case Digital         => 'D'
-      case Lathe           => 'L'
-      case _               => 'X'
+      case CompactDisc     => "CD"
+      case Vinyl           => "VINL"
+      case TwelveInchVinyl => "12IN"
+      case SevenInchVinyl  => "7IN"
+      case Cassette        => "CASS"
+      case Digital         => "DIGI"
+      case Lathe           => "LATH"
+      case _               => "UNKN"
     }
   }
 
