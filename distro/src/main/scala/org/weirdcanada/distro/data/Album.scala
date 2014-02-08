@@ -281,8 +281,6 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
 
   private def setAlbumParamsFromData(data: AlbumData, album: Album): \/[String, Album] = try {
     val format = Album.Type.withName(data.format)
-    val artistIds = data.artistIdsList
-    val publisherIds = data.publisherIdsList
 
     \/-(
       album
@@ -325,6 +323,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
           /** side effects! **/
           artists.foreach { album.artists += _ }
           publishers.foreach { album.publishers += _ }
+          album.saveMe
           data.tracks.values.map { Track.fromData(_)(album) } // (track adds itself to an album)
 
           Some(album.saveMe)
@@ -342,6 +341,8 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
       setAlbumParamsFromData(data, album).map { album =>
         val currentArtistIds: Set[String] = album.artists.map { _.id.is.toString }.toSet
         val currentPublisherIds: Set[String] = album.publishers.map { _.id.is.toString }.toSet
+        val currentTrackNames: Set[String] = album.tracks.map { _.name.is }.toSet
+        val dataTrackNames: Set[String] = data.tracks.values.map { _.name }.toSet
 
         val newArtistIds = 
           (data.artistIds.values.toSet &~ currentArtistIds).flatMap { safeParse[Long] }
@@ -353,6 +354,9 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
         val removeablePublisherIds = 
           (currentPublisherIds &~ data.publisherIds.values.toSet).flatMap { safeParse[Long] }
 
+        val removeableTrackNames = (currentTrackNames &~ dataTrackNames)
+        val newTrackDatas = data.tracks.values.filter { t => !currentTrackNames.contains(t.name) }
+        val removeableTracks = album.tracks.filter { t => removeableTrackNames.contains(t.name.is) }
 
         val newArtists = newArtistIds.flatMap { Artist.findByKey(_).toOption }
         val removeableArtists = removeableArtistIds.flatMap { Artist.findByKey(_).toOption}
@@ -362,8 +366,13 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
 
         newArtists.foreach { album.artists += _ }
         removeableArtists.foreach { album.artists -= _ }
+
         newPublishers.foreach { album.publishers += _ }
         removeablePublishers.foreach { album.publishers -= _ }
+
+        newTrackDatas.foreach { Track.fromData(_)(album) }
+        removeableTracks.foreach { album.tracks -= _ }
+        removeableTracks.foreach { _.delete_! }
 
         album.saveMe
       }
