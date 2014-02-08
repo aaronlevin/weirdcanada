@@ -42,10 +42,9 @@ object Variant {
   object ByMetafields {
     def apply(variantId: Long, metafields: Seq[Metafield]) = compactRender(
       JObject(
-        JField("id", JInt(variantId)) ::
         JField("variant",
           JObject(
-            Metafield.List(metafields) :: Nil
+            JField("id", JInt(variantId)) :: Metafield.List(metafields) :: Nil
           )
         ) :: Nil
       )

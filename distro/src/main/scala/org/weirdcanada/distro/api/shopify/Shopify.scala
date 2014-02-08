@@ -202,6 +202,12 @@ class Shopify(config: Config) extends Loggable {
       case _ => sys.error("Failed to add metafield to product: %s".format(productId))
     }
   }
+
+  def addProductMetafields(productId: Long, metafields: Seq[Metafield]) = 
+    put("/admin/products/%s.json".format(productId), Product.ByMetafields(productId, metafields)) match {
+      case Product(result) => result
+      case _ => sys.error("Failed to update metafields on product: %s".format(productId))
+    }
  
   def addVariantMetafields(variantId: Long, metafields: Seq[Metafield]) = {
     put("/admin/variants/%s.json".format(variantId), Variant.ByMetafields(variantId, metafields)) match {

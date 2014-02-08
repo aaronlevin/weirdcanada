@@ -65,6 +65,10 @@ class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopif
       price = consignedItem.customerCost.is
       sku = consignedItem.sku.is
       title = album.title.is // TODO: show something here to distinguish from other variants?
+      markUp = consignedItem.markUp.is
+      customerCost = consignedItem.customerCost.is
+      wholesaleCost = consignedItem.wholesaleCost.is
+
     }
     yield {
       val productId =
@@ -86,7 +90,15 @@ class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopif
           // and not have to have this code here).
           //val metafields = Seq.empty[Metafield] // TODO: put here whatever metafields you want
           //shopify.addVariantMetafields(pv.id, metafields)
+        }) |>
+        (pv => {
+          shopify.addVariantMetafields(pv.id, Seq(
+            Metafield("markup", markUp.toString, "weirdcanada"), 
+            Metafield("wholesalePrice", wholesaleCost.toString, "weirdcanada"),
+            Metafield("customerPrice", customerCost.toString, "weirdcanada")
+          ))
         })
+
     }
   }
 }

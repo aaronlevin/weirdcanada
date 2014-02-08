@@ -5,7 +5,7 @@ import net.liftweb.common.Loggable
 import org.weirdcanada.distro.Config
 import org.weirdcanada.distro.api.shopify.{Shopify, Product}
 import org.weirdcanada.distro.service.DatabaseManager
-import org.weirdcanada.distro.data.{Album, Artist}
+import org.weirdcanada.distro.data.{Album, Artist, Track}
 import net.liftweb.common.Full
 import scala.io.Source
 import org.weirdcanada.distro.util.AnyExtensions._
@@ -105,7 +105,33 @@ class UploadAlbumToShopify(album: Album, shopify: Shopify) {
           "weirdcanada"
         )
       )
-  
+
+  def publisherMetafield(publishers: List[Publisher]) = 
+    Metafield(
+      "publishers",
+      publishers.map(_.name.is).mkString(";"),
+      "weirdcanada"
+    )
+
+  def artistMetafield(artists: List[Artist]) = 
+    Metafield(
+      "artists",
+      artists.map { _.name.is }.mkString(";"),
+      "weirdcanada"
+    )
+
+  def tracksMetafield(tracks: List[Track]) =
+    Metafield(
+      "tracks",
+      tracks.map { _.s3Url.is }.mkString(";"),
+      "weirdcanada"
+    )
+
+  def addProductMetafields(metafields: Seq[Metafield]) = 
+    (product: PersistentProduct) => {
+      shopify.addProductMetafields(product.id, metafields)
+    }
+
   def upload = {
     val product = shopifyProductFromAlbum(album)
     
@@ -119,7 +145,12 @@ class UploadAlbumToShopify(album: Album, shopify: Shopify) {
         shopify.updateProduct(existingShopifyId, product) |>
           (pp => println("Updated Shopify product #%s from album #%s (%s)".format(pp.id, album.id.is, album.title.is)))
     }) |>
-      setPublisherMetafield(album.publishers.toList) |>
-      setArtistMetaField(album.artists.toList)
+      addProductMetafields(Seq(
+        publisherMetafield(album.publishers.toList),
+        artistMetafield(album.artists.toList),
+        tracksMetafield(album.tracks.toList),
+        Metafield("format", album.formatTypeString, "weirdcanada"),
+        Metafield("title", album.title.is, "weirdcanada")
+      ))
   }
 }

@@ -25,6 +25,18 @@ object Product {
       vendor = (jv \ "vendor").extract[String]
     )
   }
+
+  object ByMetafields {
+    def apply(productId: Long, metafields: Seq[Metafield]) = compactRender(
+      JObject(
+        JField("product",
+          JObject(
+            JField("id", JInt(productId)) :: Metafield.List(metafields) :: Nil
+          )
+        ) :: Nil
+      )
+    ).toString
+  }
     
   object List {
     def unapply(jsonString: String): Option[List[Product]] = {
