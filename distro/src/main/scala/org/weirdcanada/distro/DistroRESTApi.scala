@@ -98,7 +98,7 @@ object ConsignedItemDatum {
       Account.findByKey(item.consignor.is).openOrThrowException("DB handle consignedItem<->Account relation").displayName
     
     ConsignedItemDatum(
-      value = "$s - $s (%s)".format(artistsString, titleString,consignorString),
+      value = "%s - %s (%s)".format(artistsString, titleString,consignorString),
       tokens = titleString.split(' ').toList ++ consignorString.split(' ').toList ++ artistsString.replace("//","").split(' ').toList,
       id = item.id.is.toString
     )
@@ -151,7 +151,12 @@ class RestAPI(service: Service) extends RestHelper {
       PlainTextResponse(datums.nospaces)
     }
     case "api" :: "album" :: albumTitle :: _ JsonGet _ => {
-      val datums = Album.findByPartialTitle(albumTitle.toLowerCase).map { albumToDatum }.asJson
+      val artistAlbums = 
+        Artist.findByPartialName(albumTitle.toLowerCase)
+          .flatMap { _.albums }
+          .map { albumToDatum }
+
+      val datums = (artistAlbums ::: Album.findByPartialTitle(albumTitle.toLowerCase).map { albumToDatum }).asJson
       PlainTextResponse(datums.nospaces)
     }
     case "api" :: "consigned-item" :: itemString :: _ JsonGet _ => {
