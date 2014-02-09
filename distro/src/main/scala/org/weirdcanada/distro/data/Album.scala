@@ -26,6 +26,7 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
 
   object format extends MappedEnum(this, Album.Type)
   object isFirstPressing extends MappedBoolean(this)
+  object isCompilation extends MappedBoolean(this)
   object releaseYear extends MappedInt(this)
   object catalogNumber extends MappedString(this, 32)
   object imageUrl extends MappedString(this, 256)
@@ -133,6 +134,7 @@ case class AlbumData(
   shopifyId: Long,
   format: String,
   isFirstPressing: Boolean,
+  isCompilation: Boolean,
   releaseYear: Int,
   catalogNumber: String,
   imageUrl: String,
@@ -174,8 +176,13 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
   private val albumShopifyIdLens: Lens[AlbumData, String] = 
     Lens.lensu( (a, s) => a.copy(shopifyId = safeParse[Long](s).getOrElse { 0L }), (a) => a.shopifyId.toString )
   private val albumFormatLens: Lens[AlbumData, String] = Lens.lensu( (a,f) => a.copy(format = f), (a) => a.format )
+
   private val albumPressingLens: Lens[AlbumData, String] = 
     Lens.lensu( (a,p) => a.copy(isFirstPressing = safeParse[Boolean](p).getOrElse { true }), (a) => a.isFirstPressing.toString)
+
+  private val albumCompilationLens: Lens[AlbumData, String] = 
+    Lens.lensu( (a,p) => a.copy(isCompilation = safeParse[Boolean](p).getOrElse { true }), (a) => a.isCompilation.toString)
+
   private val albumReleaseYearLens: Lens[AlbumData, String] = 
     Lens.lensu( (a,r) => a.copy(releaseYear = safeParse[Int](r).getOrElse { 0 }), (a) => a.releaseYear.toString )
   private val albumCatalogNumberLens: Lens[AlbumData, String] = Lens.lensu( (a,c) => a.copy(catalogNumber = c), (a) => a.catalogNumber)
@@ -199,6 +206,9 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
 
   private val albumFirstPressingCheckbox = 
     checkboxRender(albumPressingLens.get)("@album-pressing-input") _
+
+  private val albumCompilationCheckbox = 
+    checkboxRender(albumCompilationLens.get)("@album-compilation-input") _
 
   private val formatSequence: Seq[(String, String)] = 
     Album.Type.values.toSeq.map { _.toString }.map { s => (s, s) }
@@ -231,6 +241,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
       shopifyId = 0,
       format = "Cassette",
       isFirstPressing = true,
+      isCompilation = false,
       releaseYear = (new DateTime).toString("YYYY").toInt,
       catalogNumber = "",
       imageUrl = "",
@@ -253,6 +264,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
       BasicField[AlbumData]("album-shopifyid", albumShopifyIdLens),
       BasicField[AlbumData]("album-format", albumFormatLens, Some(albumFormatSelect)),
       BasicField[AlbumData]("album-pressing", albumPressingLens, Some(albumFirstPressingCheckbox)),
+      BasicField[AlbumData]("album-compilation", albumCompilationLens, Some(albumCompilationCheckbox)),
       BasicField[AlbumData]("album-releaseyear", albumReleaseYearLens,Some(yearDateSelect)),
       BasicField[AlbumData]("album-catalognumber", albumCatalogNumberLens),
       BasicField[AlbumData]("album-imageurl", albumImageUrlLens, Some(imageUrlField)),
@@ -291,6 +303,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
         .shopifyId(data.shopifyId)
         .format(format)
         .isFirstPressing(data.isFirstPressing)
+        .isCompilation(data.isCompilation)
         .releaseYear(data.releaseYear)
         .catalogNumber(data.catalogNumber)
         .imageUrl(data.imageUrl)
@@ -403,6 +416,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
       shopifyId = album.shopifyId.is,
       format = album.format.is.toString,
       isFirstPressing = album.isFirstPressing.is,
+      isCompilation = album.isCompilation.is,
       releaseYear = album.releaseYear.is,
       catalogNumber = album.catalogNumber.is,
       imageUrl = album.imageUrl.is,
