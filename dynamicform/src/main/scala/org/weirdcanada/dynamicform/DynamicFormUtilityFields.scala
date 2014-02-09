@@ -7,7 +7,7 @@ import scalaz.Lens
 
 sealed trait S3Bucket { val slug: String }
 case object WCS3Image extends S3Bucket { val slug = "wc-img" }
-case object WCS3Audio extends S3Bucket { val slug = "wc-track" }
+case object WCS3Audio extends S3Bucket { val slug = "wc-tracks" }
 case object WCS3Binary extends S3Bucket { val slug = "wc-dump" }
 
 sealed trait S3Resource { val url: URL ; val bucket: S3Bucket}

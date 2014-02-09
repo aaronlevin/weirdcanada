@@ -4,8 +4,9 @@ import java.math.MathContext
 import net.liftweb.mapper._
 import org.weirdcanada.common.util.StringParsingUtil
 import StringParsingUtil.safeParse
-import org.weirdcanada.dynamicform.{BasicField, DynamicField, HasFields, HasEmpty}
+import org.weirdcanada.dynamicform.{BasicField, DynamicField, HasFields, HasEmpty, RecordField, S3Audio}
 import scalaz.Lens
+import java.net.{MalformedURLException, URL}
 
 
 class Track extends LongKeyedMapper[Track] with IdPK {
@@ -23,7 +24,7 @@ class Track extends LongKeyedMapper[Track] with IdPK {
 /**
  * ADT for track data
  */
-case class TrackData(id: Option[Long], name: String, number: Int, url: String, price: BigDecimal, s3Url: String)
+case class TrackData(id: Option[Long], name: String, number: Int, url: String, price: BigDecimal, s3Url: Option[S3Audio])
 
 // The companion object to the above Class
 object Track extends Track with LongKeyedMetaMapper[Track] {
@@ -40,7 +41,10 @@ object Track extends Track with LongKeyedMetaMapper[Track] {
     (t,d) => t.copy(price = safeParse[BigDecimal](d).getOrElse { 0.0 }),
     (t) => t.price.toString
   )
-  val trackS3UrlLens: Lens[TrackData, String] = Lens.lensu( (t,u) => t.copy(s3Url = u), (t) => t.s3Url )
+  val trackS3UrlLens: Lens[TrackData, S3Audio] = Lens.lensu( 
+    (t, s3) => t.copy(s3Url = Some(s3)),
+    (t) => t.s3Url.getOrElse { S3Audio(new URL("https://s3.amazon.com")) }
+  )
 
   /**
    * Witness to the `HasFields` Type Class
@@ -51,7 +55,8 @@ object Track extends Track with LongKeyedMetaMapper[Track] {
       BasicField[TrackData]("track-number", trackNumberLens),
       BasicField[TrackData]("track-url", trackUrlLens),
       BasicField[TrackData]("track-price", trackPriceLens),
-      BasicField[TrackData]("track-s3url", trackS3UrlLens)
+      RecordField[TrackData, S3Audio]("track-s3url", trackS3UrlLens)
+      //BasicField[TrackData]("track-s3url", trackS3UrlLens)
     )
   }
 
@@ -59,19 +64,23 @@ object Track extends Track with LongKeyedMetaMapper[Track] {
    * Witness to the `HasEmpty` type class
    */
   implicit object TrackDataEmpty extends HasEmpty[TrackData] {
-    val empty = TrackData(None, "", 0, "", 0.0, "")
+    val empty = TrackData(None, "", 0, "", 0.0, None)
   }
 
-  def fromData(data: TrackData)(album: Album): Track =
-    Track
-      .create
-      .name(data.name)
-      .number(data.number)
-      .url(data.url)
-      .price(data.price)
-      .s3Url(data.s3Url)
-      .album(album)
-      .saveMe
+  def fromData(data: TrackData)(album: Album): Track = {
+    val track = 
+      Track
+        .create
+        .name(data.name)
+        .number(data.number)
+        .url(data.url)
+        .price(data.price)
+        .album(album)
+
+      data.s3Url.map { url => track.s3Url(url.url.toString) }
+
+      track.saveMe
+  }
 
   def toData(track: Track): TrackData = TrackData(
     id = Some(track.id.is),
@@ -79,7 +88,7 @@ object Track extends Track with LongKeyedMetaMapper[Track] {
     number = track.number.is,
     url = track.url.is,
     price = track.price.is,
-    s3Url = track.s3Url.is
+    s3Url = try{ Some(S3Audio( new URL(track.s3Url.is) )) } catch { case _:MalformedURLException => None }
   )
 
 }
