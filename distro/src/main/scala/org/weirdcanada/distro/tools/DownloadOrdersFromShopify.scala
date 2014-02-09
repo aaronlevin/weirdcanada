@@ -139,8 +139,9 @@ class DownloadOrdersFromShopify(args: Args, shopify: Shopify) {
           for {
             consignedItem <- ConsignedItem.findBySku(lineItem.sku) orElse exit("can't find item by sku: %s".format(lineItem.sku))
             consignor <- consignedItem.consignor.obj orElse exit("can't find consignor for item: %s".format(consignedItem.id.is))
+            saleAmount = lineItem.quantity * lineItem.price
             weirdCanadaRevenue = lineItem.quantity * consignedItem.markUp.is
-            consignorRevenue = lineItem.price - weirdCanadaRevenue
+            consignorRevenue = saleAmount - weirdCanadaRevenue
             _ <- require(lineItem.quantity > 0)   orElse exit("invalid quantity: %d".format(lineItem.quantity))
             _ <- require(weirdCanadaRevenue >= 0) orElse exit("negative WC revenue: $%s".format(weirdCanadaRevenue))
             _ <- require(consignorRevenue >= 0)   orElse exit("negative consignor revenue: $%s".format(consignorRevenue))
@@ -165,7 +166,8 @@ class DownloadOrdersFromShopify(args: Args, shopify: Shopify) {
                 .dateTime(order.createdAt.toDate)
                 .lineItemId(lineItem.id)
                 .sku(lineItem.sku)
-                .amount(lineItem.price)
+                .amount(saleAmount)
+                .quantity(lineItem.quantity)
                 .customerId(order.customer.id)
                 .consignedItem(consignedItem)
                 .consignor(consignor)
@@ -180,7 +182,8 @@ class DownloadOrdersFromShopify(args: Args, shopify: Shopify) {
               }
             }
 
-            println("order %s, lineitem %s: sku %s @ $%,0.2f x %d for $%,0.2f".format(order.id, lineItem.id, lineItem.sku, consignedItem.customerCost.is, lineItem.quantity, lineItem.price))
+            //println("order %s, lineitem %s: sku %s @ $%,0.2f x %d for $%,0.2f".format(order.id, lineItem.id, lineItem.sku, consignedItem.customerCost.is, lineItem.quantity, lineItem.price))
+            println("order %s, lineitem %s: sku %s @ $%s x %s for $%s".format(order.id, lineItem.id, lineItem.sku, consignedItem.customerCost.is, lineItem.quantity, lineItem.price))
           } // yield
         }
         catch {

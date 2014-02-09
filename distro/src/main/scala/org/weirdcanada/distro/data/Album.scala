@@ -109,6 +109,8 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
     }
   }
 
+  def titleWithArtist = "%s - %s".format(artists.toList.map { _.name.is }.mkString(" // "), title.is)
+
   override def toString =
     "Album(id=%s, title=%s, sku=%s, format=%s, releaseYear=%s, catalogNumber=%s, shopifyId=%s)"
       .format(

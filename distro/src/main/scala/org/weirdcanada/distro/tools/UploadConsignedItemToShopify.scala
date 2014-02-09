@@ -62,9 +62,9 @@ class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopif
       variantOptions = Map(option1 -> album.format.is.toString)
       barcode = album.barcode.is
       position = 1 // TODO: Might not want to put a new item in first slot... maybe append to the end?
-      price = consignedItem.customerCost.is
+      price = consignedItem.customerCost.is + consignedItem.markUp.is
       sku = consignedItem.sku.is
-      title = album.title.is // TODO: show something here to distinguish from other variants?
+      title = album.titleWithArtist // TODO: show something here to distinguish from other variants?
       markUp = consignedItem.markUp.is
       customerCost = consignedItem.customerCost.is
       wholesaleCost = consignedItem.wholesaleCost.is
