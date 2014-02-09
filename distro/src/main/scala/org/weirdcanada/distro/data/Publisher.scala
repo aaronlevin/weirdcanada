@@ -82,7 +82,7 @@ object Publisher extends Publisher with LongKeyedMetaMapper[Publisher] with Mapp
     url = publisher.url.is, 
     description = publisher.description.is,
     imageUrl = publisher.imageUrl.is,
-    social = publisher.social.is.decodeOption[SocialData],
+    social = Option(publisher.social.is).flatMap { _.decodeOption[SocialData] },
     city = publisher.city.is,
     province = publisher.province.is,
     country = publisher.country.is

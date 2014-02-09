@@ -165,7 +165,7 @@ object Artist extends Artist with LongKeyedMetaMapper[Artist] with MapperObjectU
     description = artist.description.is,
     imageUrl = artist.imageUrl.is,
     artistType = artist.artistType.is.toString,
-    social = artist.social.is.decodeOption[SocialData],
+    social = Option(artist.social.is).flatMap { _.decodeOption[SocialData] },
     city = artist.city.is,
     province = artist.province.is,
     country = artist.country.is
