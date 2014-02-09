@@ -106,17 +106,17 @@ case class SocialData(
 object SocialData {
 
   val twitterLens: Lens[SocialData, TwitterEntity] = Lens.lensu(
-    (s,t) => s.copy(twitter = Some(t)),
+    (s,t) => if( t.equals( implicitly[HasEmpty[TwitterEntity]].empty)) s else s.copy(twitter = Some(t)),
     (s) => s.twitter.getOrElse { implicitly[HasEmpty[TwitterEntity]].empty }
   )
 
   val facebookLens: Lens[SocialData, FacebookEntity] = Lens.lensu(
-    (s,f) => s.copy(facebook = Some(f)),
+    (s,f) => if( f.equals(implicitly[HasEmpty[FacebookEntity]].empty)) s else s.copy(facebook = Some(f)),
     (s) => s.facebook.getOrElse { implicitly[HasEmpty[FacebookEntity]].empty }
   )
 
   val bandcampLens: Lens[SocialData, BandcampEntity] = Lens.lensu(
-    (s,b) => s.copy(bandcamp = Some(b)),
+    (s,b) => if( b.equals(implicitly[HasEmpty[BandcampEntity]].empty)) s else s.copy(bandcamp = Some(b)),
     (s) => s.bandcamp.getOrElse { implicitly[HasEmpty[BandcampEntity]].empty }
   )
 
