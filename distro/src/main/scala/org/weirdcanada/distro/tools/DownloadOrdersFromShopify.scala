@@ -1,3 +1,5 @@
+package org.weirdcanada.distro.tools
+
 import net.liftweb.json._
 import net.liftweb.common.Loggable
 import org.weirdcanada.distro.Config

@@ -20,7 +20,7 @@ scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 
 val Portal = config("portal") extend(Compile)
 
-val AlbumApp = config("albumapp") extend(Compile)
+val DownloadSales = config("albumapp") extend(Compile)
 
 lazy val assemblyMergeSettings = Seq(
   mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
@@ -44,12 +44,12 @@ lazy val customAssemblySettings: Seq[Project.Setting[_]] =
     jrebelSettings ++
     Seq(buildTask)
   ) ++
-  inConfig(AlbumApp)(
+  inConfig(DownloadSales)(
     baseAssemblySettings ++ 
-    inTask(assembly)(mainClass := Some("org.weirdcanada.distro.tools.AlbumApp")) ++
+    inTask(assembly)(mainClass := Some("org.weirdcanada.distro.tools.DownloadOrdersFromShopify")) ++
     assemblyMergeSettings ++
     assemblyNoTestSetting ++
-    Seq(jarName in assembly := "weirdcanada-albumapp.jar") ++
+    Seq(jarName in assembly := "weirdcanada-downloadsales.jar") ++
     Seq(buildTask)
   )
 
