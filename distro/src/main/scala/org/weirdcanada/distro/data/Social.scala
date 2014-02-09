@@ -68,12 +68,40 @@ object FacebookEntity {
 
 }
 
+case class BandcampEntity(
+  val url: URL
+) extends SocialMediaEntity
+object BandcampEntity {
+
+  import JsonUtils._
+
+  val urlLens: Lens[BandcampEntity, String] = Lens.lensu(
+    (b,u) => try { b.copy(url = new URL(u)) } catch {case _:MalformedURLException => b },
+    (b) => b.url.toString
+  )
+
+  implicit def BandcampEntityCodec = 
+    casecodec1(BandcampEntity.apply, BandcampEntity.unapply)("url")
+
+  implicit object bandcampFields extends HasFields[BandcampEntity] {
+    val fields: List[DynamicField[BandcampEntity]] = List(
+      BasicField[BandcampEntity]("bandcamp-url", urlLens)
+    )
+  }
+
+  implicit object bandcampEmpty extends HasEmpty[BandcampEntity] {
+    val empty = BandcampEntity(new URL("http://bandcamp.com"))
+  }
+
+}
+
 /**
  * ADT for Social data
  */
 case class SocialData(
   val twitter: Option[TwitterEntity],
-  val facebook: Option[FacebookEntity]
+  val facebook: Option[FacebookEntity],
+  val bandcamp: Option[BandcampEntity]
 )
 object SocialData {
 
@@ -87,18 +115,23 @@ object SocialData {
     (s) => s.facebook.getOrElse { implicitly[HasEmpty[FacebookEntity]].empty }
   )
 
+  val bandcampLens: Lens[SocialData, BandcampEntity] = Lens.lensu(
+    (s,b) => s.copy(bandcamp = Some(b)),
+    (s) => s.bandcamp.getOrElse { implicitly[HasEmpty[BandcampEntity]].empty }
+  )
 
   implicit def SocialDataCodec = 
-    casecodec2(SocialData.apply, SocialData.unapply)("twitter", "facebook")
+    casecodec3(SocialData.apply, SocialData.unapply)("twitter", "facebook", "bandcamp")
 
   implicit object socialFields extends HasFields[SocialData] {
     val fields: List[DynamicField[SocialData]] = List(
       RecordField[SocialData, TwitterEntity]("social-twitter", twitterLens),
-      RecordField[SocialData, FacebookEntity]("social-facebook", facebookLens)
+      RecordField[SocialData, FacebookEntity]("social-facebook", facebookLens),
+      RecordField[SocialData, BandcampEntity]("social-bandcamp", bandcampLens)
     )
   }
   implicit object socialEmpty extends HasEmpty[SocialData] {
-    val empty = SocialData(None, None)
+    val empty = SocialData(None, None, None)
   }
 
 }
