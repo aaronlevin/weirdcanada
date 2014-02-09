@@ -20,7 +20,7 @@ scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 
 val Portal = config("portal") extend(Compile)
 
-val DownloadSales = config("albumapp") extend(Compile)
+val DownloadSales = config("downloadsales") extend(Compile)
 
 lazy val assemblyMergeSettings = Seq(
   mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>

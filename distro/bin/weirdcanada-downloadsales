@@ -11,4 +11,4 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 cd "$DIR"
 cd ..
 
-java -server -Xmx512m -XX:MaxPermSize=200m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSIncrementalPacing -XX:ParallelGCThreads=2 -jar jars/weirdcanada-albumapp.jar "$@"
+java -server -Xmx512m -XX:MaxPermSize=200m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSIncrementalPacing -XX:ParallelGCThreads=2 -jar jars/weirdcanada-downloadsales.jar "$@"
