@@ -95,7 +95,9 @@ class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopif
           shopify.addVariantMetafields(pv.id, Seq(
             Metafield("markup", markUp.toString, "weirdcanada"), 
             Metafield("wholesalePrice", wholesaleCost.toString, "weirdcanada"),
-            Metafield("customerPrice", customerCost.toString, "weirdcanada")
+            Metafield("customerPrice", customerCost.toString, "weirdcanada"),
+            Metafield("customerPriceWithMarkUp", price.toString, "weirdcanada"),
+            Metafield("wholsalePriceWithMarkUp", (wholesaleCost + markUp).toString, "weirdcanada")
           ))
         })
 
