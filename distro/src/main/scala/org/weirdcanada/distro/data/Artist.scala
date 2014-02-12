@@ -26,6 +26,8 @@ class Artist extends LongKeyedMapper[Artist] with IdPK with Geography with ManyT
   
   object albums extends MappedManyToMany(ArtistsAlbums, ArtistsAlbums.artist, ArtistsAlbums.album, Album)
   object publishers extends MappedManyToMany(ArtistsPublishers, ArtistsPublishers.publisher, ArtistsPublishers.artist, Artist)
+
+  def geoString: String = "%s, %s".format(city.is, province.is)
 }
 
 /**

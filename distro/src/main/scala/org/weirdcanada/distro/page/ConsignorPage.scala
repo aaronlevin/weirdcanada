@@ -239,6 +239,8 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
       case _ => "Other Releases"
     }
 
+    format = formatType
+
     Run(jsCmd) &
     Replace("sales-charts", chartMemoize.applyAgain())
   }

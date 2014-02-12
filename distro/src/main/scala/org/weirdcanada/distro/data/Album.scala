@@ -57,13 +57,13 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
     else if (formatType == SevenInchVinyl)
       "7\""
     else if (formatType == Cassette)
-      "tape"
+      "cassette"
     else if (formatType == Digital)
       "digital"
     else if (formatType == Lathe)
       "lathe"
     else 
-      "cool"
+      "other"
   }
 
   /**
@@ -103,7 +103,7 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
         (formatType == Lathe)
       }
       case "cd" => (formatType == CompactDisc)
-      case "tape" => (formatType == Cassette)
+      case "cassette" => (formatType == Cassette)
       case "digital" => (formatType == Digital)
       case _ => false
     }
