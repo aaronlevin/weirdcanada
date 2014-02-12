@@ -59,18 +59,19 @@ class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopif
     
     for {
       album <- consignedItem.album.obj ?~ "Consigned item %s has no album".format(consignedItem.id.is)
-      variantOptions = Map(option1 -> album.format.is.toString)
-      barcode = album.barcode.is
-      position = 1 // TODO: Might not want to put a new item in first slot... maybe append to the end?
-      price = consignedItem.customerCost.is + consignedItem.markUp.is
-      sku = consignedItem.sku.is
-      title = album.titleWithArtist // TODO: show something here to distinguish from other variants?
-      markUp = consignedItem.markUp.is
-      customerCost = consignedItem.customerCost.is
-      wholesaleCost = consignedItem.wholesaleCost.is
 
-    }
-    yield {
+    } yield {
+
+      val variantOptions = Map(option1 -> album.format.is.toString)
+      val barcode = album.barcode.is
+      val position = 1 // TODO: Might not want to put a new item in first slot... maybe append to the end?
+      val price = consignedItem.customerCost.is + consignedItem.markUp.is
+      val sku = consignedItem.sku.is
+      val title = album.titleWithArtist // TODO: show something here to distinguish from other variants?
+      val markUp = consignedItem.markUp.is
+      val customerCost = consignedItem.customerCost.is
+      val wholesaleCost = consignedItem.wholesaleCost.is
+
       val productId =
         album.shopifyId.is match {
           case 0 =>

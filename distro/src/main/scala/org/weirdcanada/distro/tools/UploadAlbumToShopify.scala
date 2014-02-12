@@ -71,11 +71,17 @@ class UploadAlbumToShopify(album: Album, shopify: Shopify) {
         album.description.is,
         album.publishers.toList.map(_.name.is).mkString(", ")
       )
-      
+
+    def tags = (
+      album.formatTypeString :: 
+      album.artists.toList.map { _.province.is }.distinct ::: 
+      album.artists.toList.map { _.city.is }.distinct
+    ).toSet
+     
     new Product(
       mkBody,
       album.format.is.toString,
-      Set.empty, // Tags
+      tags, // Tags
       album.title.is,
       album.publishers.headOption.map(_.name.is).getOrElse(DEFAULT_VENDOR) // Vendor -- arbitrarily choose the first publisher
     )
@@ -134,7 +140,7 @@ class UploadAlbumToShopify(album: Album, shopify: Shopify) {
 
   def upload = {
     val product = shopifyProductFromAlbum(album)
-    
+
     (album.shopifyId.is match {
       case 0 =>
         shopify.addProduct(product) |>
