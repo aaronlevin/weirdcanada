@@ -123,6 +123,9 @@ class Shopify(config: Config) extends Loggable {
   private def put(path: String, body: String, options: Seq[(String, Any)] = Seq.empty) =
     makeHttpRequestWithBody("PUT", path, body, options)
 
+  private def delete(path: String, body: String, options: Seq[(String, Any)] = Seq.empty) =
+    makeHttpRequestWithBody("DELETE", path, body, options)
+
   
   /*
   def getTransactions(orderId: Long, sinceIdOpt: Option[Long] = None): List[Transaction] = {
