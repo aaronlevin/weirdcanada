@@ -72,6 +72,11 @@ class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopif
       val customerCost = consignedItem.customerCost.is
       val wholesaleCost = consignedItem.wholesaleCost.is
 
+      val coverCondition = ConsignedItem.Condition.toPhysicalCondition(consignedItem.coverCondition.is).name
+      val mediaCondition = ConsignedItem.Condition.toPhysicalCondition(consignedItem.mediaCondition.is).name
+
+      val quantity = consignedItem.quantity.is
+
       val productId =
         album.shopifyId.is match {
           case 0 =>
@@ -82,7 +87,7 @@ class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopif
           case productId => productId
         }
 
-      val variant = new Variant(barcode, variantOptions, position, price, sku, title)
+      val variant = new Variant(barcode, variantOptions, position, price, sku, title, quantity)
       shopify.addProductVariant(productId, variant) |>
         (pv => {
           println("Created Shopify variant #%s from consigned item #%s (%s)".format(pv.id, consignedItem.id.is, consignedItem.sku.is))
@@ -98,9 +103,12 @@ class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopif
             Metafield("wholesalePrice", wholesaleCost.toString, "weirdcanada"),
             Metafield("customerPrice", customerCost.toString, "weirdcanada"),
             Metafield("customerPriceWithMarkUp", price.toString, "weirdcanada"),
-            Metafield("wholsalePriceWithMarkUp", (wholesaleCost + markUp).toString, "weirdcanada")
+            Metafield("wholesalePriceWithMarkUp", (wholesaleCost + markUp).toString, "weirdcanada"),
+            Metafield("coverCondition", coverCondition, "weirdcanada"),
+            Metafield("mediaCondition", mediaCondition, "weirdcanada")
           ))
-        })
+        }) |>
+        ( pv => shopify.deleteDefaultVariant(pv.id) )
 
     }
   }

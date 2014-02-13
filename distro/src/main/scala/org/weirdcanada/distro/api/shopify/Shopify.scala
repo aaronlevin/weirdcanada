@@ -218,4 +218,15 @@ class Shopify(config: Config) extends Loggable {
       case _ => sys.error("Failed to update metafields on variant: %s".format(variantId))
     }
   }
+
+  def deleteDefaultVariant(variantId: Long) = {
+    get("/admin/variants/%s.json".format(variantId), Seq.empty[(String,Any)]) match {
+      case Variant.List(variants) =>
+        variants
+          .filter { _.title =="Default" }
+          .map { v => delete("/admin/products/%s/variants/%s.json".format(v.productId, variantId), "", Seq.empty[(String, Any)]) }
+      case _ => Unit
+    }
+  }
+
 }

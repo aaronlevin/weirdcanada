@@ -34,7 +34,8 @@ object Variant {
       price = BigDecimal((jv \ "price").extract[String]),
       productId = (jv \ "product_id").extract[Long],
       sku = (jv \ "sku").extract[String],
-      title = (jv \ "title").extract[String]
+      title = (jv \ "title").extract[String],
+      inventoryQuantity = (jv \ "inventory_quantity").extract[Int]
     )
   }
   
@@ -89,8 +90,8 @@ class Variant(
     //"requires_shipping": true,
   val sku: String,
     //"taxable": true,
-  val title: String
-  //val inventoryQuantity: Int
+  val title: String,
+  val inventoryQuantity: Int
 ) {
   def toJson = compactRender(toJValue).toString
   
@@ -102,12 +103,14 @@ class Variant(
         "option2" -> options.getOrElse(2, ""),
         "option3" -> options.getOrElse(3, ""),
         "sku" -> sku,
-        "title" -> title
+        "title" -> title,
+        "inventory_management" -> "shopify"
       ).collect{
         case (field, value) if value.length > 0 =>
           JField(field, JString(value))
       } :::
       List(
+        JField("inventory_quantity", JInt(inventoryQuantity)),
         JField("position", JInt(position)),
         JField("price", JString(price.toString))
       )
@@ -130,7 +133,7 @@ class PersistentVariant(
     //"requires_shipping": true,
   sku: String,
     //"taxable": true,
-  title: String
+  title: String,
     //"updated_at": "2013-09-05T10:07:19-04:00",
-  //inventoryQuantity: Int
-) extends Variant(barcode, options, position, price, sku, title)
+  inventoryQuantity: Int
+) extends Variant(barcode, options, position, price, sku, title, inventoryQuantity)
