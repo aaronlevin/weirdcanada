@@ -6,8 +6,9 @@ import net.liftweb.common.{Box, Failure, Full}
 import net.liftweb.http.js.{JsCmd, JsCmds}
 import net.liftweb.mapper._
 import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasEmpty,HasFields, RecordField}
-import org.weirdcanada.common.util.{Country, Province, StringParsingUtil}
+import org.weirdcanada.common.util.{Country, Province, StringParsingUtil, StringUtils}
 import StringParsingUtil.safeParse
+import StringUtils.capitalizeFirstLetter
 import scala.xml.NodeSeq
 import scalaz.Lens
 import scalaz.{\/-,-\/} // Zoidberg
@@ -27,7 +28,10 @@ class Artist extends LongKeyedMapper[Artist] with IdPK with Geography with ManyT
   object albums extends MappedManyToMany(ArtistsAlbums, ArtistsAlbums.artist, ArtistsAlbums.album, Album)
   object publishers extends MappedManyToMany(ArtistsPublishers, ArtistsPublishers.publisher, ArtistsPublishers.artist, Artist)
 
-  def geoString: String = "%s, %s".format(city.is, province.is)
+  def geoString: String = Province.getProvinceForSlug(province.is) match {
+    case Some(province) => "%s, %s".format(city.is, province.name)
+    case None => "%s, %s".format(city.is, capitalizeFirstLetter(province.is))
+  }
 }
 
 /**
