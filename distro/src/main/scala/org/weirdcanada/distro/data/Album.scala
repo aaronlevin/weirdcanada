@@ -5,7 +5,7 @@ import net.liftweb.db.DefaultConnectionIdentifier
 import net.liftweb.http.js.{JsCmd, JsCmds}
 import net.liftweb.mapper._
 import org.joda.time.DateTime
-import org.weirdcanada.common.util.StringParsingUtil
+import org.weirdcanada.common.util.{StringParsingUtil, StringUtils}
 import StringParsingUtil.safeParse
 import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasFields, HasEmpty, ManyRecordField, ManyTypeaheadField, S3Image, S3Resource}
 import scalaz.Lens
@@ -65,6 +65,11 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
     else 
       "other"
   }
+
+  /**
+   * Return a sluggable version of the format string
+   */
+  def sluggedFormatTypeString: String = StringUtils.formatSlug(formatTypeString)
 
   /**
    * Convert the `Type` enum to a char (for use in the SKU)

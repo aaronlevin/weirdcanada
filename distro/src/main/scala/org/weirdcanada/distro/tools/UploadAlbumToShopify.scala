@@ -74,7 +74,7 @@ class UploadAlbumToShopify(album: Album, shopify: Shopify) {
 
 
     def tags = (
-      album.formatTypeString :: 
+      album.sluggedFormatTypeString :: 
       album.artists.toList.map { _.province.is }.distinct ::: 
       album.artists.toList.map { _.city.is }.distinct
     ).toSet
@@ -83,7 +83,7 @@ class UploadAlbumToShopify(album: Album, shopify: Shopify) {
       mkBody,
       album.format.is.toString,
       tags,
-      album.title.is,
+      album.titleWithArtist,
       album.publishers.headOption.map(_.name.is).getOrElse(DEFAULT_VENDOR) // Vendor -- arbitrarily choose the first publisher
     )
   }

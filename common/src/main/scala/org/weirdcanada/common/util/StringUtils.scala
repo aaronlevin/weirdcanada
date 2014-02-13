@@ -10,4 +10,7 @@ object StringUtils {
     else
       Character.toUpperCase(s(0)) + s.substring(1, s.length).toLowerCase
 
+  def formatSlug(s: String) =
+    s.toLowerCase.replace("\"", "-inch").replace(" ", "-")
+
 }
