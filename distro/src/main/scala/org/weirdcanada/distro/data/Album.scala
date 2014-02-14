@@ -31,6 +31,8 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
   object catalogNumber extends MappedString(this, 32)
   object imageUrl extends MappedString(this, 256)
   object additionalImageUrls extends MappedText(this) // Stored as a comma separated list or JSON // TODO: maybe extract the logic into a class?
+  object weirdCanadaUrl extends MappedString(this, 256)
+  object weirdCanadaSays extends MappedText(this)
   
   // it could be a "split label" release (i.e. more than one label collaborating), or it could be a re-release by a new label
   object publishers extends MappedManyToMany(PublishersAlbums, PublishersAlbums.album, PublishersAlbums.publisher, Publisher)
@@ -163,6 +165,8 @@ case class AlbumData(
   catalogNumber: String,
   imageUrl: String,
   additionalImageUrls: Map[Int, S3Image],
+  weirdCanadaUrl: Option[String],
+  weirdCanadaSays: Option[String],
   artistIds: Map[Int, String],
   publisherIds: Map[Int, String],
   tracks: Map[Int, TrackData]
@@ -212,6 +216,15 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
   private val albumCatalogNumberLens: Lens[AlbumData, String] = Lens.lensu( (a,c) => a.copy(catalogNumber = c), (a) => a.catalogNumber)
   private val albumImageUrlLens: Lens[AlbumData, String] = Lens.lensu( (a,i) => a.copy(imageUrl = i), (a) => a.imageUrl )
 
+  private val weirdCanadaUrlLens: Lens[AlbumData, String] = Lens.lensu( 
+    (a,i) => if( i.isEmpty ) a else a.copy(weirdCanadaUrl = Some(i)),
+    (a) => a.weirdCanadaUrl.getOrElse { "" }
+  )
+  private val weirdCanadaSaysLens: Lens[AlbumData, String] = Lens.lensu( 
+    (a,i) => if( i.isEmpty ) a else a.copy(weirdCanadaSays = Some(i)),
+    (a) => a.weirdCanadaSays.getOrElse { "" }
+  )
+
   private val albumAdditionalImageUrlsLens: Lens[AlbumData, Map[Int, S3Image]] = Lens.lensu(
     (a,map) => a.copy(additionalImageUrls = map),
     (a) => a.additionalImageUrls
@@ -226,7 +239,10 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
   )
   private val albumTracksLens: Lens[AlbumData, Map[Int, TrackData]] = Lens.lensu((a,t) => a.copy(tracks = t), (a) => a.tracks)
 
-  import DynamicFormFieldRenderHelpers.{checkboxRender, datePickerRender, selectRender, s3SignedUploadRender}
+  import DynamicFormFieldRenderHelpers.{checkboxRender, datePickerRender, selectRender, s3SignedUploadRender, textAreaRender}
+
+  private val descriptionTextArea = textAreaRender(albumDescriptionLens.get)("name=album-description-input")("Description") _
+  private val weirdCanadaSaysTextArea = textAreaRender(weirdCanadaSaysLens.get)("name=album-weirdcanadasays-input")("Description") _
 
   private val albumFirstPressingCheckbox = 
     checkboxRender(albumPressingLens.get)("@album-pressing-input") _
@@ -269,6 +285,8 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
       releaseYear = (new DateTime).toString("YYYY").toInt,
       catalogNumber = "",
       imageUrl = "",
+      weirdCanadaUrl = None,
+      weirdCanadaSays = None,
       additionalImageUrls = Map.empty[Int, S3Image],
       artistIds = Map.empty[Int, String],
       publisherIds = Map.empty[Int, String],
@@ -283,7 +301,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
     val fields: List[DynamicField[AlbumData]] = List(
       BasicField[AlbumData]("album-title", albumTitleLens),
       BasicField[AlbumData]("album-url", albumUrlLens),
-      BasicField[AlbumData]("album-description", albumDescriptionLens),
+      BasicField[AlbumData]("album-description", albumDescriptionLens, Some(descriptionTextArea)),
       BasicField[AlbumData]("album-sku", albumSkuLens),
       BasicField[AlbumData]("album-shopifyid", albumShopifyIdLens),
       BasicField[AlbumData]("album-format", albumFormatLens, Some(albumFormatSelect)),
@@ -293,6 +311,8 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
       BasicField[AlbumData]("album-catalognumber", albumCatalogNumberLens),
       BasicField[AlbumData]("album-imageurl", albumImageUrlLens, Some(imageUrlField)),
       ManyRecordField[AlbumData, S3Image]("album-additionalimageurls",albumAdditionalImageUrlsLens),
+      BasicField[AlbumData]("album-weirdcanadaurl", weirdCanadaUrlLens),
+      BasicField[AlbumData]("album-weirdcanadasays", weirdCanadaSaysLens, Some(weirdCanadaSaysTextArea)),
       ManyTypeaheadField[AlbumData, ArtistData](
         name = "album-artist", 
         typeaheadLabel = "Add Artist", 
@@ -317,6 +337,9 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
 
   private def setAlbumParamsFromData(data: AlbumData, album: Album): \/[String, Album] = try {
     val format = Album.Type.withName(data.format)
+
+    data.weirdCanadaUrl.map { u => album.weirdCanadaUrl(u) }
+    data.weirdCanadaSays.map { s => album.weirdCanadaSays(s) }
 
     \/-(
       album
@@ -445,6 +468,8 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
       catalogNumber = album.catalogNumber.is,
       imageUrl = album.imageUrl.is,
       additionalImageUrls = additionalImageUrls,
+      weirdCanadaUrl = Option(album.weirdCanadaUrl.is).flatMap { s => if(s.isEmpty) None else Some(s) },
+      weirdCanadaSays = Option(album.weirdCanadaSays.is).flatMap { s => if(s.isEmpty) None else Some(s) },
       artistIds = album.artists.map { _.id.is.toString }.zipWithIndex.map { _.swap }.toMap,
       publisherIds = album.publishers.map { _.id.is.toString }.zipWithIndex.map { _.swap }.toMap,
       tracks = album.tracks.map { Track.toData }.zipWithIndex.map { _.swap }.toMap
