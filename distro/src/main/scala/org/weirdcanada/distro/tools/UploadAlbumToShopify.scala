@@ -160,7 +160,9 @@ class UploadAlbumToShopify(album: Album, shopify: Shopify) {
         Metafield("title", album.title.is, "weirdcanada"),
         Metafield("geo", album.artists.toList.map { _.geoString }.mkString(" // "), "weirdcanada"),
         Metafield("albumUrl", album.url.is, "weirdcanada"),
-        Metafield("catalogNumber", album.catalogNumber.is, "weirdcanada")
+        Metafield("catalogNumber", album.catalogNumber.is, "weirdcanada"),
+        Metafield("weirdcanadasays", album.weirdCanadaSays.is, "weirdcanada"),
+        Metafield("weirdcanadaurl", album.weirdCanadaUrl.is, "weirdcanada")
       ))
   }
 }
