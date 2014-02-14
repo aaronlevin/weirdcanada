@@ -77,6 +77,8 @@ class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopif
 
       val quantity = consignedItem.quantity.is
 
+      val weight = album.weight
+
       val productId =
         album.shopifyId.is match {
           case 0 =>
@@ -87,7 +89,7 @@ class UploadConsignedItemToShopify(consignedItem: ConsignedItem, shopify: Shopif
           case productId => productId
         }
 
-      val variant = new Variant(barcode, variantOptions, position, price, sku, title, quantity)
+      val variant = new Variant(barcode, weight, variantOptions, position, price, sku, title, quantity)
       shopify.addProductVariant(productId, variant) |>
         (pv => {
           println("Created Shopify variant #%s from consigned item #%s (%s)".format(pv.id, consignedItem.id.is, consignedItem.sku.is))

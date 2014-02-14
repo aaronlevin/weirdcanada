@@ -91,6 +91,23 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
   }
 
   /**
+   * calculate an items weight in grams
+   */
+  def weight: Int = {
+    import Album.Type._
+    format.is match {
+      case CompactDisc => 50
+      case Vinyl => 350
+      case TwelveInchVinyl => 350
+      case SevenInchVinyl => 65
+      case Cassette => 65
+      case Digital => 0
+      case Lathe => 150
+      case _ => 350
+    }
+  }
+
+  /**
    * Test if this album has the format of the right type
    *
    * @returns a boolean indicating whether the test was true or not.

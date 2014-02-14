@@ -27,6 +27,7 @@ object Variant {
     
     new PersistentVariant(
       barcode = (jv \ "barcode").extract[String],
+      grams = (jv \ "grams").extract[Int],
       createdAt = new DateTime((jv \ "created_at").extract[String]),
       id = (jv \ "id").extract[Long],
       options = extractOptions(jv),
@@ -81,7 +82,7 @@ class Variant(
   val barcode: String,
     //"compare_at_price": null,
     //"fulfillment_service": "manual",
-    //"grams": 0,
+  val grams: Int,
     //"inventory_management": null,
     //"inventory_policy": "deny",
   val options: Map[Int, String],
@@ -110,6 +111,7 @@ class Variant(
           JField(field, JString(value))
       } :::
       List(
+        JField("grams", JInt(grams)),
         JField("inventory_quantity", JInt(inventoryQuantity)),
         JField("position", JInt(position)),
         JField("price", JString(price.toString))
@@ -123,7 +125,7 @@ class PersistentVariant(
     //"compare_at_price": null,
   val createdAt: DateTime,
     //"fulfillment_service": "manual",
-    //"grams": 0,
+  grams: Int,
     //"inventory_management": null,
     //"inventory_policy": "deny",
   options: Map[Int, String],
@@ -136,4 +138,4 @@ class PersistentVariant(
   title: String,
     //"updated_at": "2013-09-05T10:07:19-04:00",
   inventoryQuantity: Int
-) extends Variant(barcode, options, position, price, sku, title, inventoryQuantity)
+) extends Variant(barcode, grams, options, position, price, sku, title, inventoryQuantity)
