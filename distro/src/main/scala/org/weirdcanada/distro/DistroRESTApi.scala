@@ -73,7 +73,7 @@ object AlbumDatum {
     casecodec4(AlbumDatum.apply, AlbumDatum.unapply)("value","tokens","title", "id")
 
   def albumToDatum(album: Album): AlbumDatum = AlbumDatum(
-    value = "%s - %s".format(album.artists.toList.map { _.name.is }.mkString(" // "), album.title.is),
+    value = "%s - %s (%s)".format(album.artists.toList.map { _.name.is }.mkString(" // "), album.title.is, album.formatTypeString),
     tokens = album.title.is :: album.artists.toList.map { _.name.is } ,
     title = album.title.is,
     id = album.id.is.toString
