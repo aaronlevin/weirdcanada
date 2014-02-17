@@ -126,7 +126,7 @@ object ConsignedItem
   )
   private val dateLens: Lens[ConsignedItemData, String] = Lens.lensu(
     (c,ds) => c.copy(consignedDate = new DateTime(ds)),
-    (c) => c.consignedDate.toString("YYYY-MM-DD")
+    (c) => c.consignedDate.toString("YYYY-MM-dd")
   )
   private val quantityLens: Lens[ConsignedItemData, String] = Lens.lensu(
     (c,q) => c.copy(quantity = safeParse[Int](q)),
