@@ -50,30 +50,8 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
   def formatTypeString: String = {
     import Album.Type._
     val formatType = format.is
-    if( formatType == CompactDisc)
-      "compact disc"
-    else if (formatType == Vinyl)
-      "vinyl"
-    else if (formatType == TwelveInchVinyl)
-      "12\""
-    else if (formatType == SevenInchVinyl)
-      "7\""
-    else if (formatType == Cassette)
-      "cassette"
-    else if (formatType == Digital)
-      "digital"
-    else if (formatType == Lathe)
-      "lathe"
-    else if (formatType == Book)
-      "book"
-    else if (formatType == TShirt)
-      "t-shirt"
-    else if (formatType == DVD)
-      "dvd"
-    else if (formatType == Other)
-      "other"
-    else 
-      "other"
+    import Album.formatPretty
+    formatPretty(formatType)
   }
 
   /**
@@ -93,6 +71,7 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
       case Vinyl           => "VINL"
       case TwelveInchVinyl => "12IN"
       case SevenInchVinyl  => "7IN"
+      case TenInchVinyl    => "10IN"
       case Cassette        => "CASS"
       case Digital         => "DIGI"
       case Lathe           => "LATH"
@@ -114,6 +93,7 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
       case Vinyl => 350
       case TwelveInchVinyl => 350
       case SevenInchVinyl => 65
+      case TenInchVinyl => 125
       case Cassette => 65
       case Digital => 0
       case Lathe => 150
@@ -140,6 +120,7 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
         (formatType == Vinyl) ||
         (formatType == TwelveInchVinyl) ||
         (formatType == SevenInchVinyl) ||
+        (formatType == TenInchVinyl) ||
         (formatType == Lathe)
       }
       case "cd" => (formatType == CompactDisc)
@@ -206,7 +187,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
 
   object Type extends Enumeration {
     type Type = Value
-    val CompactDisc, Vinyl, TwelveInchVinyl, SevenInchVinyl, Cassette, Digital, Lathe, Book, TShirt, DVD, Other = Value
+    val CompactDisc, TwelveInchVinyl, SevenInchVinyl, TenInchVinyl, Cassette, Digital, Lathe, Vinyl, Book, TShirt, DVD, Other = Value
   }
 
   def findByTitle(title: String): List[Album] = Album.findAll(By(Album.title, title))
@@ -215,6 +196,37 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
     Album.findAll(
       Cmp(Album.title, OprEnum.Like, Full("%" + title + "%"), None, Full("LOWER") )
     )
+
+  def formatPretty(formatType: Album.Type.Type): String = {
+    import Type._
+    if( formatType == CompactDisc)
+      "compact disc"
+    else if (formatType == Vinyl)
+      "vinyl"
+    else if (formatType == TwelveInchVinyl)
+      "12\""
+    else if (formatType == SevenInchVinyl)
+      "7\""
+    else if (formatType == TenInchVinyl)
+      "10\""
+    else if (formatType == Cassette)
+      "cassette"
+    else if (formatType == Digital)
+      "digital"
+    else if (formatType == Lathe)
+      "lathe"
+    else if (formatType == Book)
+      "book"
+    else if (formatType == TShirt)
+      "t-shirt"
+    else if (formatType == DVD)
+      "dvd"
+    else if (formatType == Other)
+      "other"
+    else 
+      "other"
+  }
+
 
   /**
    * Lenses for dynamic fields
@@ -273,7 +285,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
     checkboxRender(albumCompilationLens.get)("@album-compilation-input") _
 
   private val formatSequence: Seq[(String, String)] = 
-    Album.Type.values.toSeq.map { _.toString }.map { s => (s, s) }
+    Album.Type.values.toSeq.map { s =>(s.toString, formatPretty(s)) }
 
   private val albumFormatSelect =
     selectRender(albumFormatLens.get)("name=album-format-input")(formatSequence) _
