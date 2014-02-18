@@ -64,6 +64,14 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
       "digital"
     else if (formatType == Lathe)
       "lathe"
+    else if (formatType == Book)
+      "book"
+    else if (formatType == TShirt)
+      "t-shirt"
+    else if (formatType == DVD)
+      "dvd"
+    else if (formatType == Other)
+      "other"
     else 
       "other"
   }
@@ -88,6 +96,10 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
       case Cassette        => "CASS"
       case Digital         => "DIGI"
       case Lathe           => "LATH"
+      case Book            => "BOOK"
+      case TShirt          => "SHRT"
+      case DVD             => "DVD"
+      case Other           => "OTHR"
       case _               => "UNKN"
     }
   }
@@ -105,6 +117,10 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
       case Cassette => 65
       case Digital => 0
       case Lathe => 150
+      case Book => 100
+      case TShirt => 100
+      case DVD => 65
+      case Other => 150
       case _ => 350
     }
   }
@@ -129,6 +145,12 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
       case "cd" => (formatType == CompactDisc)
       case "cassette" => (formatType == Cassette)
       case "digital" => (formatType == Digital)
+      case "other" => {
+        (formatType == Book) ||
+        (formatType == TShirt) ||
+        (formatType == DVD) ||
+        (formatType == Other)
+      }
       case _ => false
     }
   }
@@ -184,7 +206,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
 
   object Type extends Enumeration {
     type Type = Value
-    val CompactDisc, Vinyl, TwelveInchVinyl, SevenInchVinyl, Cassette, Digital, Lathe = Value
+    val CompactDisc, Vinyl, TwelveInchVinyl, SevenInchVinyl, Cassette, Digital, Lathe, Book, TShirt, DVD, Other = Value
   }
 
   def findByTitle(title: String): List[Album] = Album.findAll(By(Album.title, title))
