@@ -3,6 +3,7 @@ package org.weirdcanada.common.util
 object StringUtils {
 
   val slugRegex = """[^\p{L}-_]""".r
+  val doubleDashRegex = """[-][-]+""".r
 
   def trim(s: String): String = s.dropWhile(_ == ' ').reverse.dropWhile(_ == ' ').reverse.toString
 
@@ -13,7 +14,10 @@ object StringUtils {
       Character.toUpperCase(s(0)) + s.substring(1, s.length).toLowerCase
 
   def simpleSlug(s: String): String =
-    slugRegex.replaceAllIn(s, "-").toLowerCase
+    doubleDashRegex.replaceAllIn(
+      slugRegex.replaceAllIn(s, "-").toLowerCase,
+      "-"
+    )
 
   def formatSlug(s: String) =
     s.toLowerCase.replace("\"", "-inch").replace(" ", "-")
