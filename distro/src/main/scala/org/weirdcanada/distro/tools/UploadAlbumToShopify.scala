@@ -2,6 +2,7 @@ package org.weirdcanada.distro.tools
 
 import net.liftweb.json._
 import net.liftweb.common.Loggable
+import org.weirdcanada.common.util.StringUtils
 import org.weirdcanada.distro.Config
 import org.weirdcanada.distro.api.shopify.{Shopify, Product}
 import org.weirdcanada.distro.service.DatabaseManager
@@ -57,25 +58,12 @@ class UploadAlbumToShopify(album: Album, shopify: Shopify) {
 
   def shopifyProductFromAlbum(album: Album): Product = {
     def mkBody =
-      "<p><b>%s</b> (<b>%d</b>) by </b>%s</b>.</p><p>%s</p><p>Published by %s</p>".format(
-        album.title.is,
-        album.releaseYear.is,
-        album.artists.toList.map(_.name.is) match {
-          case oneArtist :: Nil =>
-            oneArtist
-          case firstArtist :: etAl =>
-            firstArtist + " et al"
-          case _ =>
-            "???"
-        },
-        album.description.is,
-        album.publishers.toList.map(_.name.is).mkString(", ")
-      )
-
+      "<p>%s</p>".format(album.description.is)
 
     def tags = (
       album.sluggedFormatTypeString :: 
-      album.artists.toList.map { _.province.is }.distinct ::: 
+      album.artists.toList.map { _.province.is }.distinct :::
+      album.artists.toList.map { a => StringUtils.simpleSlug(a.name.is) } :::
       album.artists.toList.map { _.city.is }.distinct
     ).toSet
       
@@ -116,14 +104,14 @@ class UploadAlbumToShopify(album: Album, shopify: Shopify) {
   def publisherMetafield(publishers: List[Publisher]) = 
     Metafield(
       "publishers",
-      publishers.map(_.name.is).mkString(";"),
+      publishers.map(_.name.is).mkString(" // "),
       "weirdcanada"
     )
 
   def artistMetafield(artists: List[Artist]) = 
     Metafield(
       "artists",
-      artists.map { _.name.is }.mkString(";"),
+      artists.map { _.name.is }.mkString(" // "),
       "weirdcanada"
     )
 
