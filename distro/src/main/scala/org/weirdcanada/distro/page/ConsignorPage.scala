@@ -154,7 +154,7 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
         .take(5)
 
     "name=total-sales-header *" #> currentSalesHeader &
-    "name=best-seller [src]" #> {
+    "name=best-seller-img [src]" #> {
       for {
         best <- bestSeller
         consignedItem <- best.consignedItem.obj.toOption
