@@ -13,7 +13,10 @@ class Payment extends LongKeyedMapper[Payment] with IdPK {
   object notes extends MappedText(this)
 }
 
-// The companion object to the above Class
 object Payment extends Payment with LongKeyedMetaMapper[Payment] {
-  
+  // The account has a payment pending if there is a record with the account but no paidAt date.
+  // Note: to handle rejected payment claims, should set the paidAt date to current date and the amount to 0
+  // Alternately, could add a payment status (or resolution) field that says what happened to the request.
+  def hasPaymentPending(account: Account) =
+    find(By(consignor, account), NullRef(paidAt)).isDefined
 }
