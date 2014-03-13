@@ -3,7 +3,7 @@ package org.weirdcanada.distro
 import org.weirdcanada.distro.page._
 import org.weirdcanada.distro.snippet._
 import net.liftweb.http.DispatchSnippet
-import org.weirdcanada.distro.page._
+import org.weirdcanada.distro.page.snippet._
 import org.weirdcanada.distro.job.ShopifyClient
 import org.weirdcanada.distro.service.Service
 
@@ -28,5 +28,6 @@ object SnippetDispatch {
     case "AddConsignedItemPage" => new AddConsignedItemPage(service)
     case "ForgotPasswordPage" => new ForgotPasswordPage(service)
     case "UpdatePasswordPage" => new UpdatePasswordPage(service, service.SessionManager.current.account)
+    case "Payments" => new PaymentsSnippet(service, service.SessionManager.current.account)
   }
 }
