@@ -86,7 +86,9 @@
       <nav class="col-md-3 salesActions">
       <h1>Actions</h1>
       <ul id="action-menu">
-        <li><span data-lift="Menu.item?name=Request+Payment&a:class=btn+btn-sm+btn-success">Pay Me</span></li>
+        <li data-lift="Payments.Eligible"><span data-lift="Menu.item?name=Request+Payment&a:class=btn+btn-sm+btn-success">Request Payment!</span></li>
+        <li data-lift="Payments.Ineligible"><span data-lift="Menu.item?name=Request+Payment&a:class=btn+btn-sm+disabled">Request Payment</span></li>
+        <li data-lift="Payments.Pending"><span data-lift="Menu.item?name=Request+Payment&a:class=btn+btn-sm+btn-success+disabled">Payment Requested</span></li>
         <li><a href="mailto:distro@weirdcanada.com" class="btn btn-sm btn-default">Contact Wyrd Distro</a></li>
         <lift:Menu.group group="actions" a:class="btn btn-sm btn-default">
           <li><menu:bind /></li>
