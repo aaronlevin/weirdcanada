@@ -28,6 +28,6 @@ object SnippetDispatch {
     case "AddConsignedItemPage" => new AddConsignedItemPage(service)
     case "ForgotPasswordPage" => new ForgotPasswordPage(service)
     case "UpdatePasswordPage" => new UpdatePasswordPage(service, service.SessionManager.current.account)
-    case "Payments" => new PaymentsSnippet(service, service.SessionManager.current.account)
+    case "Payments" => new PaymentsSnippet(service)
   }
 }
