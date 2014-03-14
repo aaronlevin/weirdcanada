@@ -16,7 +16,7 @@ class PaymentsSnippet(service: Service) extends DispatchSnippet {
 
   val MINIMUM_BALANCE = BigDecimal(4)
   
-  val paymentStatus = service.SessionManager.current.accountOpt.map { account =>
+  def paymentStatusOpt = service.SessionManager.current.accountOpt.map { account =>
     (account.unofficialBalance.is, Payment.hasPaymentPending(account)) match {
     case (_, true) =>
       Pending
@@ -34,9 +34,9 @@ class PaymentsSnippet(service: Service) extends DispatchSnippet {
     case "Pending" => renderIf(Pending) _
   }
   
-  def renderIf(desiredStatus: PaymentStatus)(ns: NodeSeq) = service.SessionManager.current.accountOpt match { 
+  def renderIf(desiredStatus: PaymentStatus)(ns: NodeSeq) = paymentStatusOpt match {
     case None => NodeSeq.Empty
-    case _ => 
+    case Some(paymentStatus) =>
       if (paymentStatus == desiredStatus)
         ns
       else
