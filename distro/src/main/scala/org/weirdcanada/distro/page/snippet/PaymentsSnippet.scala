@@ -14,7 +14,7 @@ class PaymentsSnippet(service: Service, account: Account) extends DispatchSnippe
   final case object Ineligible extends PaymentStatus
   final case object Pending extends PaymentStatus
 
-  val MINIMUM_BALANCE = BigDecimal(50)
+  val MINIMUM_BALANCE = BigDecimal(4)
   
   val paymentStatus =
     (account.unofficialBalance.is, Payment.hasPaymentPending(account)) match {

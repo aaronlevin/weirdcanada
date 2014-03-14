@@ -90,18 +90,14 @@ class AccountManager(config: Config, emailManager: EmailManager) {
     }
   
   def canRequestPayment(account: Account): PaymentNotAllowedReason = {
-    val MinimumPaymentBalance = 50
-    
-    // Not allowed to request payment if their email hasn't been validated yet
-    if (!account.emailValidated.is)
-      return EmailNotValidated
-    
+    val MinimumPaymentBalance = 4
+
     // Not allowed if they don't have enough $$ in their account
     if (account.unofficialBalance.is < MinimumPaymentBalance) 
       return BalanceTooLow
-    
+
     // TODO: check an official balance?  (or perhaps this in an offline process with a human verification step)
-      
+
     PaymentAllowed
   }
   
