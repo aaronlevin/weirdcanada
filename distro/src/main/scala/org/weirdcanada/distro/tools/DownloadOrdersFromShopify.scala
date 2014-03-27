@@ -151,7 +151,7 @@ class DownloadOrdersFromShopify(args: Args, shopify: Shopify) {
             
             if (args.writeToDb) {
               val (sale, isNew) = 
-                Sale.findByOrderId(order.id) // Does this order already exist in the database?
+                Sale.findByLineItemId(lineItem.id) // Does this order already exist in the database?
                   .map(_ -> false)
                   .getOrElse(Sale.create -> true) // Create a new record of the sale
 
