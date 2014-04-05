@@ -109,8 +109,27 @@ object Payment extends Payment with LongKeyedMetaMapper[Payment] {
     )
   }
 
+  def toData(payment: Payment): PaymentData = PaymentData(
+    id = Some(payment.id.is),
+    requestedAt = new DateTime(payment.requestedAt.is),
+    paidAt = Option(payment.paidAt.is).map { d => new DateTime(d) },
+    amount = payment.amount.is,
+    consignorId = Some(payment.consignor.is),
+    notes = payment.notes.is
+  )
 
-    
+  def fromData(data: PaymentData)(account: Account): Payment = {
+    val payment = 
+      Payment
+        .create
+        .requestedAt(data.requestedAt.toDate)
+        .amount(data.amount)
+        .consignor(account)
+        .notes(data.notes)
 
+    data.paidAt.foreach { p => payment.paidAt(p.toDate) }
+
+    payment.saveMe
+  }
 
 }

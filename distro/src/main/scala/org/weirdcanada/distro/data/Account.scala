@@ -7,8 +7,12 @@ import org.weirdcanada.common.util.{StringParsingUtil, StringUtils}
 import StringParsingUtil.safeParse
 import org.weirdcanada.dynamicform.{BasicField, DynamicField, DynamicFormFieldRenderHelpers, HasFields, HasEmpty, ManyRecordField, ManyTypeaheadField, S3Image, S3Resource}
 import java.math.MathContext
+import java.util.Date
 import scala.collection.mutable.ListBuffer
 import scalaz.Lens
+import scalaz.\/
+import scalaz.{\/-,-\/} // Zoidberg
+
 
 object UserRole extends Enumeration {
   type Roles = Value
@@ -159,18 +163,59 @@ object Account
     )
   }
 
+  /**
+   * a bunch of methods that should be abstracted out but i'm too lazy
+   */
+  private def setAccountParamsFromData(data: AccountData, account: Account): \/[String, Account] = {
+    try {
+      account
+        .firstName(data.firstName)
+        .lastName(data.lastName)
+        .email(data.email)
+        .paypalEmail(data.paypalEmail)
+        .organization(data.organization)
+        .phoneNumber(data.phoneNumber)
 
+      \/-(account)
+    } catch {
+      case e: Throwable => -\/("Something terrible happened for data: %s".format(data))
+    }
+  }
 
+  def toData(account: Account): AccountData = AccountData(
+    id = Some(account.id.is),
+    firstName = account.firstName.is,
+    lastName = account.lastName.is,
+    email = account.email.is,
+    paypalEmail = account.paypalEmail.is,
+    organization = account.organization.is,
+    phoneNumber = account.phoneNumber.is,
+    payments = account.payments.map { Payment.toData }.zipWithIndex.map { _.swap }.toMap
+  )
 
+  def updateFromData(data: AccountData, account: Account): \/[String, Account] = 
+    DB.use(DefaultConnectionIdentifier) { connection =>
 
+      setAccountParamsFromData(data, account).map { account =>
 
+        val currentPayments: Set[Date] = account.payments.map { _.requestedAt.is }.toSet
+        val dataPayments: Set[Date] = data.payments.values.map { _.requestedAt.toDate }.toSet
 
+        val removeablePayments = (currentPayments &~ dataPayments)
 
+        val newPayments = data.payments.values.filter { p =>
+          !currentPayments.contains( p.requestedAt.toDate )
+        }
+        val deletePayments = account.payments.filter { p =>
+          removeablePayments.contains( p.requestedAt.is )
+        }
 
+        newPayments.foreach { Payment.fromData(_)(account) }
+        deletePayments.foreach { account.payments -= _ }
+        deletePayments.foreach { _.delete_! }
 
-
-
-
-
+        account.saveMe
+      }
+    }
 
 }
