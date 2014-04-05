@@ -17,7 +17,7 @@ import scala.xml.{NodeSeq, Text}
 import scalaz.\/
 import scalaz.{\/-,-\/} // Zoidberg
 
-class EditAccounPage(accountDataTuple: (Account, AccountData)) extends DispatchSnippet with DynamicFormCreator  {
+class EditAccountPage(accountDataTuple: (Account, AccountData)) extends DispatchSnippet with DynamicFormCreator  {
 
   import Account._
 

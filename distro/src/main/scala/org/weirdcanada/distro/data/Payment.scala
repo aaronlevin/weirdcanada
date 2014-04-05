@@ -29,6 +29,8 @@ object Payment extends Payment with LongKeyedMetaMapper[Payment] {
   def hasPaymentPending(account: Account) =
     find(By(consignor, account), NullRef(paidAt)).isDefined
 
+  def findById(paymentId: Long) = 
+    find(By(id,paymentId)) 
   /**
   def payments(account: Account) = {
     val results = find(By(consignor, account))
@@ -60,7 +62,7 @@ object Payment extends Payment with LongKeyedMetaMapper[Payment] {
     (p) => p.requestedAt.toString("YYYY-MM-dd")
   )
   private val paidAtLens: Lens[PaymentData, String] = Lens.lensu(
-    (p,ps) => p.copy(paidAt = Some(new DateTime(ps))),
+    (p,ps) => {println("xxx string: %s".format(ps)); p.copy(paidAt = Some(new DateTime(ps))) },
     (p) => p.paidAt.map { _.toString("YYYY-MM-dd") }.getOrElse { "" }
   )
   private val amountLens: Lens[PaymentData, String] = Lens.lensu(
@@ -72,7 +74,7 @@ object Payment extends Payment with LongKeyedMetaMapper[Payment] {
     (p) => p.consignorId.map { _.toString }.getOrElse { "" }
   )
   private val notesLens: Lens[PaymentData, String] = Lens.lensu(
-    (p,n) => p.copy(notes = n),
+    (p,n) => {println("xxx notes: %s".format(n)); p.copy(notes = n) },
     (p) => p.notes
   )
 
@@ -109,6 +111,21 @@ object Payment extends Payment with LongKeyedMetaMapper[Payment] {
     )
   }
 
+  private def setPaymentParamsFromData(data: PaymentData, payment: Payment, consignor: Option[Account]): \/[String, Payment] = 
+    try {
+      payment
+        .requestedAt(data.requestedAt.toDate)
+        .amount(data.amount)
+        .notes(data.notes)
+
+      data.paidAt.foreach { p => payment.paidAt(p.toDate) }
+      consignor.foreach { c => payment.consignor(c) }
+
+      \/-(payment)
+    } catch {
+      case e: Throwable => -\/("Something terrible happened for data: %s".format(data))
+    }
+
   def toData(payment: Payment): PaymentData = PaymentData(
     id = Some(payment.id.is),
     requestedAt = new DateTime(payment.requestedAt.is),
@@ -118,18 +135,16 @@ object Payment extends Payment with LongKeyedMetaMapper[Payment] {
     notes = payment.notes.is
   )
 
-  def fromData(data: PaymentData)(account: Account): Payment = {
-    val payment = 
-      Payment
-        .create
-        .requestedAt(data.requestedAt.toDate)
-        .amount(data.amount)
-        .consignor(account)
-        .notes(data.notes)
-
-    data.paidAt.foreach { p => payment.paidAt(p.toDate) }
-
-    payment.saveMe
+  /**
+   * TODO: don't squash error here
+   */
+  def fromData(data: PaymentData)(account: Account): Option[Payment] = 
+    setPaymentParamsFromData(data, Payment.create, Some(account)) match {
+      case \/-(payment) => Some(payment.saveMe)
+      case -\/(error) => None
   }
+
+  def updateFromData(data: PaymentData, payment: Payment)(account: Option[Account]): \/[String, Payment] = 
+    setPaymentParamsFromData(data, payment, account).map { _.saveMe }
 
 }

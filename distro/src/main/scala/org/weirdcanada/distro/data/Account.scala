@@ -146,7 +146,7 @@ object Account
       BasicField[AccountData]("account-paypal-email", paypalEmailLens),
       BasicField[AccountData]("account-organization", organizationLens),
       BasicField[AccountData]("account-phone-number", phoneLens),
-      ManyRecordField[AccountData, PaymentData]("account-payments", paymentsLens) 
+      ManyRecordField[AccountData, PaymentData]("account-payment", paymentsLens) 
     )
   }
 
@@ -198,16 +198,27 @@ object Account
 
       setAccountParamsFromData(data, account).map { account =>
 
-        val currentPayments: Set[Date] = account.payments.map { _.requestedAt.is }.toSet
-        val dataPayments: Set[Date] = data.payments.values.map { _.requestedAt.toDate }.toSet
+        val currentPayments: Set[PaymentData] = account.payments.map { Payment.toData }.toSet
+        val dataPayments: Set[PaymentData] = data.payments.values.toSet
 
         val removeablePayments = (currentPayments &~ dataPayments)
+        val removeablePaymentIds = removeablePayments.flatMap { _.id }
 
         val newPayments = data.payments.values.filter { p =>
-          !currentPayments.contains( p.requestedAt.toDate )
+          !currentPayments.contains( p )
         }
         val deletePayments = account.payments.filter { p =>
-          removeablePayments.contains( p.requestedAt.is )
+          removeablePaymentIds.contains( p.id.is )
+        }
+
+        /**
+         * update all payments that won't be deleted
+         */
+        (currentPayments & dataPayments).foreach { paymentData =>
+          for {
+            id <- paymentData.id
+            payment <- Payment.findById(id)
+          } yield Payment.updateFromData(paymentData, payment)(Some(account))
         }
 
         newPayments.foreach { Payment.fromData(_)(account) }

@@ -46,11 +46,11 @@ class DistroSiteMapBuilder(service: Service, shopify: Shopify) {
   ) / "admin" / "edit-consigned-item" >> mustBeAdmin >> LocGroup("actions")
 
   val editConsignorPage = Menu.param[(Account, AccountData)](
-    "EditAccountPage",
-    "Edit Account Page",
+    "EditAccount",
+    "Edit Account",
     id => Account.findByStringId(id).map { a => (a, Account.toData(a)) },
     (tuple) => tuple._2.toString
-  ) / "admin" / "edit-consignor" >> mustBeAdmin >> LocGroup("actions")
+  ) / "admin" / "edit-account" >> mustBeAdmin >> LocGroup("actions")
 
   def toSiteMap =
     SiteMap(
@@ -108,6 +108,7 @@ class DistroSiteMapBuilder(service: Service, shopify: Shopify) {
       editAlbumPage,
       editConsignedItemPage,
       AccountPage.toMenu(service),
+      editConsignorPage,
 
       Menu.i("Dashboard") / "admin" / "dashboard" >> mustBeAdmin,
       Menu.i("Accounts") / "admin" / "account-list" >> mustBeAdmin,
