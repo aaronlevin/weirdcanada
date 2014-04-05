@@ -1,0 +1,66 @@
+<div>
+
+  <div class="form-group" id="account-first-name">
+    <label class="col-sm-2 control-label">First Name</label>
+    <div class="col-sm-10">
+      <input class="form-control" type="text" id="account-first-name-input" name="account-first-name-input">
+    </div>
+  </div>
+
+  <div class="form-group" id="account-last-name">
+    <label class="col-sm-2 control-label">Last Name</label>
+    <div class="col-sm-10">
+      <input class="form-control" type="text" id="account-last-name-input" name="account-last-name-input">
+    </div>
+  </div>
+
+  <div class="form-group" id="account-email">
+    <label class="col-sm-2 control-label">email</label>
+    <div class="col-sm-10">
+      <input class="form-control" type="text" id="account-email-input" name="account-email-input">
+    </div>
+  </div>
+
+  <div class="form-group" id="account-paypal-email">
+    <label class="col-sm-2 control-label">Paypal email</label>
+    <div class="col-sm-10">
+      <input class="form-control" type="text" id="account-paypal-email-input" name="account-paypal-email-input">
+    </div>
+  </div>
+
+  <div class="form-group" id="account-organization">
+    <label class="col-sm-2 control-label">Organization</label>
+    <div class="col-sm-10">
+      <input class="form-control" type="text" id="account-organization-input" name="account-organization-input">
+    </div>
+  </div>
+
+  <div class="form-group" id="account-phone-number">
+    <label class="col-sm-2 control-label">Phone Number</label>
+    <div class="col-sm-10">
+      <input class="form-control" type="text" id="account-phone-number-input" name="account-phone-number-input">
+    </div>
+  </div>
+
+
+  <!-- Account Payments -->
+  <div name="add-account-payment" class="panel panel-default">
+
+    <div class="panel-heading">
+      <h4>Payment #<span name="account-payment-number">0</span></h4>
+    </div>
+
+    <div class="panel-body">
+
+      <div name="account-payment">
+        <div data-lift="embed?what=_add_payment"></div>
+      </div>
+
+      <div class="col-sm-4 col-sm-offset-2">
+        <p><button type="button" name="account-payment-add">+</button> | <button type="button" name="account-payment-remove">-</button></p>
+      </div>
+    </div>
+  </div>
+  <div id="account-payment-elements"></div>
+
+</div>
