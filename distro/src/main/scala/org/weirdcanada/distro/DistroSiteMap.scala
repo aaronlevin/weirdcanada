@@ -5,7 +5,8 @@ import Loc.{LocGroup, LocSnippets, Snippet}
 import net.liftweb.common._
 import net.liftweb.http._
 import org.weirdcanada.distro.api.shopify.Shopify
-import org.weirdcanada.distro.data.{Artist, ArtistData, Album, AlbumData, ConsignedItem, Publisher, PublisherData}
+import org.weirdcanada.distro.data.{Account, Artist, ArtistData, Album, AlbumData, ConsignedItem, Publisher, PublisherData}
+import Account.AccountData
 import ConsignedItem.ConsignedItemData
 import org.weirdcanada.distro.page.{AccountPage}
 import org.weirdcanada.distro.page.snippet.EditArtistPage
@@ -43,6 +44,13 @@ class DistroSiteMapBuilder(service: Service, shopify: Shopify) {
     id => ConsignedItem.findByStringId(id).map { c => (c, ConsignedItem.toData(c), shopify) },
     (tuple) => tuple._2.id.toString
   ) / "admin" / "edit-consigned-item" >> mustBeAdmin >> LocGroup("actions")
+
+  val editConsignorPage = Menu.param[(Account, AccountData)](
+    "EditAccountPage",
+    "Edit Account Page",
+    id => Account.findByStringId(id).map { a => (a, Account.toData(a)) },
+    (tuple) => tuple._2.toString
+  ) / "admin" / "edit-consignor" >> mustBeAdmin >> LocGroup("actions")
 
   def toSiteMap =
     SiteMap(
