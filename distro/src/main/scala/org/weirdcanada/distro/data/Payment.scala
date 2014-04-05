@@ -62,7 +62,7 @@ object Payment extends Payment with LongKeyedMetaMapper[Payment] {
     (p) => p.requestedAt.toString("YYYY-MM-dd")
   )
   private val paidAtLens: Lens[PaymentData, String] = Lens.lensu(
-    (p,ps) => {println("xxx string: %s".format(ps)); p.copy(paidAt = Some(new DateTime(ps))) },
+    (p,ps) => {p.copy(paidAt = if(ps.isEmpty) None else Some(new DateTime(ps))) },
     (p) => p.paidAt.map { _.toString("YYYY-MM-dd") }.getOrElse { "" }
   )
   private val amountLens: Lens[PaymentData, String] = Lens.lensu(

@@ -8,7 +8,7 @@ import net.liftweb.util.{ClearClearable, ClearNodes, CssSel, Helpers, PassThru}
 import Helpers._
 import org.weirdcanada.common.util.{DateTimeUtil, LiftUtils}
 import org.weirdcanada.distro.service.{BalanceTooLow, EmailNotValidated, PaymentAllowed, Service}
-import org.weirdcanada.distro.data.{Account, Album, Sale, UserRole}
+import org.weirdcanada.distro.data.{Account, Album, Payment, Sale, UserRole}
 import Album.Type._
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
@@ -56,6 +56,8 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
    */
   lazy val sales: List[Sale] = Sale.getSalesByAccount(account.id.is)
   lazy val salesMap: Map[Long, List[Sale]] = sales.groupBy { _.consignedItem.is }
+  lazy val payments: List[Payment] = account.payments.toList
+  lazy val totalPaid: BigDecimal = payments.filter { p => ! Option(p.paidAt.is).isEmpty }.foldLeft(BigDecimal(0.0)){ _ + _.amount.is }
 
   /**
    * when a user visits this page, they may or may not have been validated or
@@ -143,7 +145,7 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
     lazy val totalSales = saleItems.foldLeft(0){ _ + _.quantity.is}
     lazy val amountOwed = saleItems.foldLeft(BigDecimal(0.0)){ (acc,sale) => 
       acc + (sale.amount.is - sale.markUp.is) 
-    }
+    } - totalPaid
     lazy val topCities: List[(String, String)] =
       saleItems
         .groupBy { _.city.is }
