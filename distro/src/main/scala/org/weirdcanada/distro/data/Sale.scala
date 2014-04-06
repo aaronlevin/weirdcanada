@@ -60,7 +60,7 @@ object Sale extends Sale with LongKeyedMetaMapper[Sale] {
       }
   
   def findByLineItemId(lineItemId: Long) = {
-    this.find(By(Sale.lineItemid, lineItemId))
+    this.find(By(Sale.lineItemId, lineItemId))
   }
   def findByOrderId(orderId: Long) = {
     this.find(By(Sale.orderId, orderId))
