@@ -28,7 +28,7 @@ class Sale extends LongKeyedMapper[Sale] with IdPK with Address {
 
 // The companion object to the above Class
 object Sale extends Sale with LongKeyedMetaMapper[Sale] {
-  override def dbIndexes = UniqueIndex(orderId) :: super.dbIndexes
+  //override def dbIndexes = UniqueIndex(orderId) :: super.dbIndexes
   
   def getLatestOrderId = {
     DB.runQuery("SELECT MAX(orderId) FROM sale")._2.headOption.flatMap(_.headOption).filterNot(_ == null).map(_.toLong)
@@ -60,7 +60,7 @@ object Sale extends Sale with LongKeyedMetaMapper[Sale] {
       }
   
   def findByLineItemId(lineItemId: Long) = {
-    this.find(By(Sale.lineItemId, lineItemId))
+    this.find(By(Sale.lineItemid, lineItemId))
   }
   def findByOrderId(orderId: Long) = {
     this.find(By(Sale.orderId, orderId))
