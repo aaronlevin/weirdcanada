@@ -283,7 +283,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
 
   private val descriptionTextArea = textAreaRender(albumDescriptionLens.get)("name=album-description-input")("Description") _
   private val weirdCanadaSaysTextArea = textAreaRender(weirdCanadaSaysLens.get)("name=album-weirdcanadasays-input")("Description") _
-  private val embedPlayerTextArea = textAreaRender(embedPlayerLens.get)("name=album-embed-player-input")("Embeded Player") _
+  private val embedPlayerTextArea = textAreaRender(embedPlayerLens.get)("name=album-embed-player-input")("HTML for Bancamp / Soundcloud / etc embeddable players") _
 
   private val albumFirstPressingCheckbox = 
     checkboxRender(albumPressingLens.get)("@album-pressing-input") _
@@ -514,7 +514,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
       additionalImageUrls = additionalImageUrls,
       weirdCanadaUrl = Option(album.weirdCanadaUrl.is).flatMap { s => if(s.isEmpty) None else Some(s) },
       weirdCanadaSays = Option(album.weirdCanadaSays.is).flatMap { s => if(s.isEmpty) None else Some(s) },
-      embedPlayer = album.embedPlayer.is.toString,
+      embedPlayer = album.embedPlayer.is,
       artistIds = album.artists.map { _.id.is.toString }.zipWithIndex.map { _.swap }.toMap,
       publisherIds = album.publishers.map { _.id.is.toString }.zipWithIndex.map { _.swap }.toMap,
       tracks = album.tracks.map { Track.toData }.zipWithIndex.map { _.swap }.toMap

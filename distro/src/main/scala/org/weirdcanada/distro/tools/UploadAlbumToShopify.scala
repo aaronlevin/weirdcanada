@@ -151,6 +151,12 @@ class UploadAlbumToShopify(album: Album, shopify: Shopify) {
         Metafield("catalogNumber", album.catalogNumber.is, "weirdcanada"),
         Metafield("weirdcanadasays", album.weirdCanadaSays.is, "weirdcanada"),
         Metafield("weirdcanadaurl", album.weirdCanadaUrl.is, "weirdcanada")
-      ))
+      ) ++ { 
+        if( Option(album.embedPlayer.is).isEmpty ) 
+          Seq.empty 
+        else 
+          Seq(Metafield("player", album.embedPlayer.is, "weirdcanada"))
+      }
+    )
   }
 }
