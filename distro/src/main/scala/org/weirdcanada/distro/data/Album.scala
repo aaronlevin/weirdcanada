@@ -41,6 +41,7 @@ class Album extends LongKeyedMapper[Album] with IdPK with ManyToMany with OneToM
   object tracks extends MappedOneToMany(Track, Track.album, OrderBy(Track.number, Ascending))
 
   object consignedItems extends MappedOneToMany(ConsignedItem, ConsignedItem.album, OrderBy(ConsignedItem.createdAt, Ascending))
+  object embedPlayer extends MappedText(this)
 
   /**
    * Convert the `Type` enum to a string
@@ -170,6 +171,7 @@ case class AlbumData(
   additionalImageUrls: Map[Int, S3Image],
   weirdCanadaUrl: Option[String],
   weirdCanadaSays: Option[String],
+  embedPlayer: String,
   artistIds: Map[Int, String],
   publisherIds: Map[Int, String],
   tracks: Map[Int, TrackData]
@@ -258,6 +260,10 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
     (a,i) => if( i.isEmpty ) a else a.copy(weirdCanadaSays = Some(i)),
     (a) => a.weirdCanadaSays.getOrElse { "" }
   )
+  private val embedPlayerLens: Lens[AlbumData, String] = Lens.lensu(
+    (a,s) => if( s.isEmpty ) a else a.copy(embedPlayer = s),
+    (a) => a.embedPlayer
+  )
 
   private val albumAdditionalImageUrlsLens: Lens[AlbumData, Map[Int, S3Image]] = Lens.lensu(
     (a,map) => a.copy(additionalImageUrls = map),
@@ -277,6 +283,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
 
   private val descriptionTextArea = textAreaRender(albumDescriptionLens.get)("name=album-description-input")("Description") _
   private val weirdCanadaSaysTextArea = textAreaRender(weirdCanadaSaysLens.get)("name=album-weirdcanadasays-input")("Description") _
+  private val embedPlayertextArea = textAreaRender(embedPlayerLens.get)("name=album-embed-player-input")("Embeded Player") _
 
   private val albumFirstPressingCheckbox = 
     checkboxRender(albumPressingLens.get)("@album-pressing-input") _
@@ -321,6 +328,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
       imageUrl = "",
       weirdCanadaUrl = None,
       weirdCanadaSays = None,
+      embedPlayer = None,
       additionalImageUrls = Map.empty[Int, S3Image],
       artistIds = Map.empty[Int, String],
       publisherIds = Map.empty[Int, String],
@@ -347,6 +355,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
       ManyRecordField[AlbumData, S3Image]("album-additionalimageurls",albumAdditionalImageUrlsLens),
       BasicField[AlbumData]("album-weirdcanadaurl", weirdCanadaUrlLens),
       BasicField[AlbumData]("album-weirdcanadasays", weirdCanadaSaysLens, Some(weirdCanadaSaysTextArea)),
+      BasicField[AlbumData]("album-embed-player", embedPlayerLens, Some(embedPlayerTextArea)),
       ManyTypeaheadField[AlbumData, ArtistData](
         name = "album-artist", 
         typeaheadLabel = "Add Artist", 
@@ -388,6 +397,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
         .releaseYear(data.releaseYear)
         .catalogNumber(data.catalogNumber)
         .imageUrl(data.imageUrl)
+        .embedPlayer(data.embedPlayer)
         .additionalImageUrls(data.additionalImageUrls.values.map { _.url.toString }.mkString(","))
       )
   } catch {
@@ -504,6 +514,7 @@ object Album extends Album with LongKeyedMetaMapper[Album] with MapperObjectUtil
       additionalImageUrls = additionalImageUrls,
       weirdCanadaUrl = Option(album.weirdCanadaUrl.is).flatMap { s => if(s.isEmpty) None else Some(s) },
       weirdCanadaSays = Option(album.weirdCanadaSays.is).flatMap { s => if(s.isEmpty) None else Some(s) },
+      embedPlayer = album.embedplayer.is.toString,
       artistIds = album.artists.map { _.id.is.toString }.zipWithIndex.map { _.swap }.toMap,
       publisherIds = album.publishers.map { _.id.is.toString }.zipWithIndex.map { _.swap }.toMap,
       tracks = album.tracks.map { Track.toData }.zipWithIndex.map { _.swap }.toMap
