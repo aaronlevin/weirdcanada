@@ -13,6 +13,8 @@ sealed trait Country {
 case object Canada extends Country { val name = "Canada"; val slug = "canada" }
 case object USA extends Country { val name = "United State of America"; val slug = "usa" }
 case object Japan extends Country { val name = "Japan"; val slug = "japan" }
+case object Germany extends Country { val name = "Germany"; val slug = "germany" }
+case object Other extends Country { val name = "Other"; val slug = "other" }
 
 object Country {
 
