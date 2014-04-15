@@ -91,17 +91,23 @@ object ConsignedItemDatum {
     casecodec3(ConsignedItemDatum.apply, ConsignedItemDatum.unapply)("value","tokens", "id")
 
   def consignedItemToDatum(item: ConsignedItem): ConsignedItemDatum = {
-    val album = item.album.is
-    val albumFormatString = album.formatTypeString
-    val artistsString = album.artists.toList.map { _.name.is }.mkString(" // ")
-    val titleString = album.title.is
-    val consignorString = item.consignor.is.displayName
-
-    ConsignedItemDatum(
-      value = "%s - %s (%s) (%s)".format(artistsString, titleString, albumFormatString, consignorString),
-      tokens = titleString.split(' ').toList ++ consignorString.split(' ').toList ++ artistsString.replace("//","").split(' ').toList,
-      id = item.id.is.toString
-    )
+    (for {
+      album <- item.album.obj
+      consignor <- item.consignor.obj
+    } yield {
+      val albumFormatString = album.formatTypeString
+      val artistsString = album.artists.toList.map { _.name.is }.mkString(" // ")
+      val titleString = album.title.is
+      val consignorString = consignor.displayName
+      ConsignedItemDatum(
+        value = "%s - %s (%s) (%s)".format(artistsString, titleString, albumFormatString, consignorString),
+        tokens = titleString.split(' ').toList ++ consignorString.split(' ').toList ++ artistsString.replace("//","").split(' ').toList,
+        id = item.id.is.toString
+      )
+    }) match {
+      case Full(cs) => cs
+      case _ => ConsignedItemDatum("", Nil, "")
+    }
   }
 }
 
