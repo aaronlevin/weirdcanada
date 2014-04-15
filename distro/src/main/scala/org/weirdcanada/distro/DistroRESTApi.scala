@@ -91,13 +91,12 @@ object ConsignedItemDatum {
     casecodec3(ConsignedItemDatum.apply, ConsignedItemDatum.unapply)("value","tokens", "id")
 
   def consignedItemToDatum(item: ConsignedItem): ConsignedItemDatum = {
-    val album = Album.findByKey(item.album.is).openOrThrowException("DB Should manage consignedItem<->album reference")
+    val album = item.album.is
     val albumFormatString = album.formatTypeString
     val artistsString = album.artists.toList.map { _.name.is }.mkString(" // ")
     val titleString = album.title.is
-    val consignorString =
-      Account.findByKey(item.consignor.is).openOrThrowException("DB handle consignedItem<->Account relation").displayName
-    
+    val consignorString = item.consignor.is.displayName
+
     ConsignedItemDatum(
       value = "%s - %s (%s) (%s)".format(artistsString, titleString, albumFormatString, consignorString),
       tokens = titleString.split(' ').toList ++ consignorString.split(' ').toList ++ artistsString.replace("//","").split(' ').toList,
