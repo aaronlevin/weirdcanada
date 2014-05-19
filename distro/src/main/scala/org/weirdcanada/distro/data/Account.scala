@@ -44,6 +44,9 @@ class Account extends LongKeyedMapper[Account] with IdPK with OneToMany[Long, Ac
 
   object consignedItems extends MappedOneToMany(ConsignedItem, ConsignedItem.consignor, OrderBy(ConsignedItem.createdAt, Ascending))
 
+  object sales extends MappedOneToMany(Sale, Sale.consignor)
+  object payments extends MappedOneToMany(Payment, Payment.consignor)
+
   object role extends MappedEnum(this, UserRole)
 
   object payments extends MappedOneToMany(Payment, Payment.consignor, OrderBy(Payment.requestedAt, Descending))
@@ -81,6 +84,16 @@ object Account
   // This is used for cookie logins
   def findByWcdId(wcdid: String) =
     Account.find(By(Account.wcdid, wcdid))
+
+  def amountOwed(account: Account): BigDecimal = {
+    val sales = account.sales.foldLeft(BigDecimal(0.0)){ (acc, sale) => (sale.amount.is - sale.markUp.is) }
+    val payments = 
+      account
+        .payments
+        .filterNot { payment => Option(payment.paidAt.is).isEmpty }
+        .foldLeft(BigDecimal(0.0)) { (acc, payment) => acc + payment.amount.is }
+    (sales - payments)
+  }
 
   def findByPartialName(name: String) = Account.findAllByPreparedStatement({ conn => 
     val stmt = conn.connection.prepareStatement("""select id, firstname, lastname, organization from account where lower(firstname) like lower(?) OR lower(lastname) like lower(?) OR lower(organization) like lower(?) """)
