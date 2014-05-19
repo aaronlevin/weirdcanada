@@ -45,7 +45,6 @@ class Account extends LongKeyedMapper[Account] with IdPK with OneToMany[Long, Ac
   object consignedItems extends MappedOneToMany(ConsignedItem, ConsignedItem.consignor, OrderBy(ConsignedItem.createdAt, Ascending))
 
   object sales extends MappedOneToMany(Sale, Sale.consignor)
-  object payments extends MappedOneToMany(Payment, Payment.consignor)
 
   object role extends MappedEnum(this, UserRole)
 
