@@ -114,7 +114,7 @@ class AccountManager(config: Config, emailManager: EmailManager) {
           PaymentRequestEmail(
             account.displayName,
             config.distroEndPoint + AccountPage.calcHref(Some(account.id.is)),
-            account.unofficialBalance.is,
+            Account.amountOwed(account),
             payment.id.is
           )
         )
