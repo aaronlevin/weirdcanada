@@ -64,11 +64,12 @@ class DistroSiteMapBuilder(service: Service, shopify: Shopify) {
         >> Loc.Hidden,
 
       // Actions
-      Menu.i("Request Return") / "request-return"
+      /*Menu.i("Request Return") / "request-return"
         >> mustBeLoggedIn
         >> Loc.Hidden
         >> Loc.EarlyResponse(() => requestPaymentResponse)
-        >> LocGroup("actions"),
+        >> LocGroup("actions"),*/
+
 
       Menu.i("Add an Artist") / "admin" / "add-artist"
         >> mustBeAdmin
@@ -91,10 +92,10 @@ class DistroSiteMapBuilder(service: Service, shopify: Shopify) {
         >> mustBeAdmin
         >> LocGroup("actions"),
 
-     Menu.i("My Account") / "my-account" 
+     /* Menu.i("My Account") / "my-account" 
         >> mustBeLoggedIn
-        >> LocGroup("actions"),
-
+        >> LocGroup("actions"),*/
+      
       Menu.i("Forgot Password") / "forgot-password" 
         >> mustBeVisitor 
         >> LocGroup("actions"),
