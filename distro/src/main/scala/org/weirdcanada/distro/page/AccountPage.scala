@@ -38,6 +38,6 @@ object AccountPage {
   // Convenience method for when you have an ID but don't want to dig up a account object.
   // called by the Admin Dashboard Page when listing account sessions
   def calcHref(accountId: Option[Long]) = {
-     accountId.map("/admin/account/%s".format(_)).getOrElse("#")
+     accountId.map("/admin/edit-account/%s".format(_)).getOrElse("#")
    }
 }

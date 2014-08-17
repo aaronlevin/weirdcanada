@@ -85,7 +85,7 @@ object Account
     Account.find(By(Account.wcdid, wcdid))
 
   def amountOwed(account: Account): BigDecimal = {
-    val sales = account.sales.foldLeft(BigDecimal(0.0)){ (acc, sale) => (sale.amount.is - sale.markUp.is) }
+    val sales = account.sales.foldLeft(BigDecimal(0.0)){ (acc, sale) => acc + (sale.amount.is - sale.markUp.is) }
     val payments = 
       account
         .payments

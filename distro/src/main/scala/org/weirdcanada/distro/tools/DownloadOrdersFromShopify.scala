@@ -109,7 +109,7 @@ class DownloadOrdersFromShopify(args: Args, shopify: Shopify) {
   
   def download = {
     vprintln("Using " + args.toString)
-    
+
     val options =
       List(
         args.since.map("since_id" -> _),
@@ -117,16 +117,13 @@ class DownloadOrdersFromShopify(args: Args, shopify: Shopify) {
         args.financialStatus.map("financial_status" -> _),
         args.fulfillmentStatus.map("fulfillment_status" -> _)
       ).flatten.toArray
-    
 
     vprintln("downloading orders...")
     val orders = shopify.getOrders(options : _*)
-    
-    
+
     // Helper method to make the for-comprehension below a little cleaner
     def require(bool: => Boolean) = if (bool) Some(true) else None
-    
-    
+
     // Iterate through the orders, processing one at a time
     orders.foreach( order => {
       vprintln("processing order %d".format(order.id))
@@ -135,7 +132,7 @@ class DownloadOrdersFromShopify(args: Args, shopify: Shopify) {
       order.lineItems.foreach( lineItem => {
         try {
           vprintln("found sku: " + lineItem.sku)
-          
+
           for {
             consignedItem <- ConsignedItem.findBySku(lineItem.sku) orElse exit("can't find item by sku: %s".format(lineItem.sku))
             consignor <- consignedItem.consignor.obj orElse exit("can't find consignor for item: %s".format(consignedItem.id.is))
@@ -148,7 +145,7 @@ class DownloadOrdersFromShopify(args: Args, shopify: Shopify) {
           }
           yield {
             // Note: taxes appear as separate line items
-            
+
             if (args.writeToDb) {
               val (sale, isNew) = 
                 Sale.findByLineItemId(lineItem.id) // Does this order already exist in the database?
