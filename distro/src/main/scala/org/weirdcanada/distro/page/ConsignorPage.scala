@@ -165,7 +165,7 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
     } &
     "name=total-sales-count *" #> saleItems.length &
     "name=total-sales-owed" #> amountOwed &
-    "name=top-selling-cities-list" #> topCities.map { case (city, province) =>
+    "name=top-selling-cities-list *" #> topCities.map { case (city, province) =>
       "%s, %s".format(city, province)
     } &
     "@viz-4" #> { if( totalPaid < 1.0 ) ClearNodes else PassThru } &
