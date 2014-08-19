@@ -37,7 +37,7 @@ class RegisterPage(service: Service) extends DistroPage {
    */
   def updateEmailAddress(newValue: String, fnAssign: String => Unit) = {
     // TODO: perform basic validation (e.g. matches regex?, no domain name misspellings?, already registered,? etc)
-    fnAssign(newValue)
+    fnAssign(newValue.toLowerCase)
     JsCmds.Noop
   }
 
