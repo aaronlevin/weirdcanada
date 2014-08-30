@@ -42,18 +42,18 @@ class SslEmailFactory(config: Config) extends EmailFactory {
     try {
       val message = new MimeMessage(session)
       message.setFrom(new InternetAddress(from))
-      if (config.smtpOverrideTo.isEmpty && Props.productionMode)
-        message.setRecipients(Message.RecipientType.TO, to) //InternetAddress.parse(to))
+      message.addRecipients(Message.RecipientType.CC, "support@weirdcanada.com")
+      if (config.smtpOverrideTo.isEmpty && Props.productionMode) {
+        message.addRecipients(Message.RecipientType.TO, to)
+      }
       else
         message.setRecipients(Message.RecipientType.TO, config.smtpOverrideTo)      
       message.setSubject(subject)
       //message.setText(body);
       message.setContent(body.toString, "text/html")
-      
+
       Transport.send(message);
- 
       System.out.println("Done");
- 
     } catch {
       case e: MessagingException =>
         // TODO: log with Airbrake

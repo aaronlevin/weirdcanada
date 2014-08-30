@@ -29,7 +29,7 @@ class EmailManager(config: Config, emailFactory: EmailFactory) {
         "#confirm [href]" #> confirmUrl &
         "#first-name" #> firstName
       ).apply(confirmRegistrationTemplate)
-      
+
       case PaymentRequestEmail(name, accountUrl, unofficialBalance, paymentId) => (
         "#name" #> name &
         "#account-link [href]" #> accountUrl &
