@@ -3,7 +3,8 @@ wc = {
     $( document ).ready(function() {
       $(inputId).typeahead({
         name: inputId,
-        remote: remoteUrl
+        remote: remoteUrl,
+        limit: 20
       });
       $(inputId + '.input-sm').siblings('input.tt-hint').addClass('hint-small');
       $(inputId + '.input-lg').siblings('input.tt-hint').addClass('hint-large');
