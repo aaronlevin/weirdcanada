@@ -24,6 +24,11 @@ class Sale extends LongKeyedMapper[Sale] with IdPK with Address {
   object customerId extends MappedLong(this) // Comes from Shopify
   
   object consignor extends MappedLongForeignKey(this, Account)
+
+  object wholesale extends MappedBoolean(this)
+  object refund extends MappedDecimal(this, MathContext.DECIMAL32,2)
+  object refundNote extends MappedText(this)
+
 }
 
 // The companion object to the above Class
