@@ -144,7 +144,7 @@ class ConsignorPage(service: Service) extends DispatchSnippet {
 
     lazy val totalSales = saleItems.foldLeft(0){ _ + _.quantity.is}
     lazy val amountOwed = saleItems.foldLeft(BigDecimal(0.0)){ (acc,sale) => 
-      acc + (sale.amount.is - sale.markUp.is) 
+      acc + (sale.amount.is - sale.markUp.is - Option(sale.refund.is).getOrElse(0.0))
     } - totalPaid
     lazy val topCities: List[(String, String)] =
       saleItems
