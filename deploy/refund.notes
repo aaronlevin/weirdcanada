@@ -1,0 +1,25 @@
+p=# select s.id, s.amount, a.title from sale as s inner join consigneditem as ci on s.consigneditem = ci.id inner join album as a on a.id = ci.album where orderid = 366474441;
+
+ id  | amount |             title
+-----+--------+-------------------------------
+ 877 |  20.00 | Meet The Factory
+ 878 |   6.50 | First View Of The New
+ 879 |   8.50 | THATHATHAT
+ 880 |   7.50 | Pictures On The Wall
+ 881 |  16.99 | Saturnalia Regalia!
+ 882 |   6.50 | Corrupt the Youth
+ 883 |   7.00 | 6015 Willow
+ 884 |  15.00 | S/T | Endless Bummer
+ 885 |  17.00 | Elements of an Incomplete Map
+ 886 |   5.50 | EP
+(10 rows)
+
+p=# update sale SET refund = 2.00 where id = 877;
+p=# update sale SET refund = 1.00 where id = 878;
+p=# update sale SET refund = 2.00 where id = 879;
+p=# update sale SET refund = 1.00 where id = 880;
+p=# update sale SET refund = 2.00 where id = 881;
+p=# update sale SET refund = 2.5 where id = 882;
+p=# update sale SET refund = 4.50 where id = 884;
+p=# update sale SET refund = 6.00 where id = 885;
+
