@@ -1,0 +1,5 @@
+:set prompt "> "
+:set -XOverloadedStrings
+import System.IO
+import Data.ByteString.Lazy.Char8 (pack)
+import Data.Aeson (decode, FromJSON(parseJSON), Value(Object), (.:), (.:?))
