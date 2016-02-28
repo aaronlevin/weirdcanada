@@ -18,13 +18,13 @@ instance FromJSON Price where
 
 data LineItem =
   LineItem { lineItemId :: Integer
-           , lineItemVariantId :: Int
+           , lineItemVariantId :: Maybe Int
            , lineItemTitle :: Text
            , lineItemQuantity :: Int
            , lineItemPrice :: Price
-           , lineItemSku :: Text
+           , lineItemSku :: Maybe Text
            , lineItemVariantTitle :: Maybe Text
-           , lineItemProductId :: Int
+           , lineItemProductId :: Maybe Int
            , lineItemOriginLocation :: Maybe Location
            , lineItemDestinationLocation :: Maybe Location
            } deriving (Eq, Ord, Show)
@@ -32,13 +32,13 @@ data LineItem =
 instance FromJSON LineItem where
   parseJSON (Object v) =
     LineItem <$> v .: "id"
-             <*> v .: "variant_id"
+             <*> v .:? "variant_id"
              <*> v .: "title"
              <*> v .: "quantity"
              <*> v .: "price"
-             <*> v .: "sku"
+             <*> v .:? "sku"
              <*> v .:? "variant_title"
-             <*> v .: "product_id"
+             <*> v .:? "product_id"
              <*> v .:? "origin_location"
              <*> v .:? "destination_location"
   parseJSON _ = mempty

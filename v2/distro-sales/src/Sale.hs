@@ -24,7 +24,7 @@ data DBSale =
          , saleConsignor       :: Integer
          , saleAddressLine1    :: Maybe Text
          , saleAddressLine2    :: Maybe Text
-         , saleSku             :: Text
+         , saleSku             :: Maybe Text
          , saleConsignedItemId :: Integer
          , saleOrderId         :: Integer
          , saleLineItemId      :: Integer

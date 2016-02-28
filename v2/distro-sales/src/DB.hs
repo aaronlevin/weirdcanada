@@ -12,11 +12,11 @@ import Sale (DBSale)
 -- markup and consigned item
 
 dbConsignedItemBySkusQ :: Query
-dbConsignedItemBySkusQ = "select sku, consignor, markup, id from consigneditem where sku in ?"
+dbConsignedItemBySkusQ = "select sku, id, markup, consignor from consigneditem where sku in ?"
 
 dbConsignedItemBySkus :: Connection
                       -> [Text]      -- skus
-                      -> IO (Map Text (Maybe Integer, Maybe Double, Integer))
+                      -> IO (Map Text (Integer, Maybe Double, Maybe Integer))
 dbConsignedItemBySkus conn skus =
   fromList . fmap (\(!w,!x,!y,!z) -> (w,(x, fromRational <$> y, z))) <$> query conn dbConsignedItemBySkusQ (Only $ In skus)
 

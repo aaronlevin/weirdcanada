@@ -16,6 +16,7 @@ import           Data.Aeson                        (FromJSON, ToJSON)
 import           Data.ByteString.Lazy              (ByteString)
 import           Data.CountryCodes                 (toName)
 import           Data.Map.Strict                   (Map, lookup, map)
+import           Data.Maybe                        (catMaybes)
 import           Data.Set                          (Set, fromList, member, (\\))
 import           Data.Text                         (Text)
 import           Data.Time                         (UTCTime)
@@ -86,22 +87,22 @@ lineToSale orderId
             }
 
 -- | each error carries the orderid
-data SaleError = SkuDNE Integer Text
-               | ConsignedItemIdDNE Integer
+data SaleError = SkuDNE Integer (Maybe Text)
+               | ConsignorDNE Integer
                | MarkUpDNE Integer
                deriving (Eq, Ord, Show)
 
 getDBItems :: (MonadWriter [SaleError] m)
-           => Map Text (Maybe ConsignedItemId, Maybe ConsignedItemMarkUp, ConsignorId)
+           => Map Text (ConsignedItemId, Maybe ConsignedItemMarkUp, Maybe ConsignorId)
            -> Order
            -> m [DBSale]
 getDBItems skuMap Order {..} =
   let go oId oDate oShipLoc oBillLoc mCustId dbSales lineItem@LineItem{..} =
-        case lookup lineItemSku skuMap of
+        case lineItemSku >>= flip lookup skuMap of
           Nothing -> tell [SkuDNE oId lineItemSku] >> return dbSales
-          Just (Nothing, _, _) -> tell [ConsignedItemIdDNE oId ] >> return dbSales
-          Just (_, Nothing, _) -> tell [MarkUpDNE oId] >> return dbSales
-          Just (Just cItemId, Just cMarkUp, cId) ->
+          Just (_, Nothing, _) -> tell [ConsignorDNE oId ] >> return dbSales
+          Just (_, _, Nothing) -> tell [MarkUpDNE oId] >> return dbSales
+          Just (cItemId, Just cMarkUp, Just cId) ->
             let sale = lineToSale oId
                                   oDate
                                   cId
@@ -141,11 +142,11 @@ process conn orders = do
       skus = fmap lineItemSku lineitems
       orderedLineItems = filteredOrders >>= \o -> fmap ((,) o) (orderLineItems o)
 
-  let cFunc (mId, mMarkUp, cId) = (,,) (fmap ConsignedItemId mId)
+  let cFunc (mId, mMarkUp, cId) = (,,) (ConsignedItemId mId)
                                       (fmap ConsignedItemMarkUp mMarkUp)
-                                      (ConsignorId cId)
+                                      (fmap ConsignorId cId)
   -- consignedItemMap :: Map Text (Maybe ConsignedItemId, Maybe ConsignedItemMarkUp)
-  consignedItemMap <- map cFunc <$> dbConsignedItemBySkus conn skus
+  consignedItemMap <- map cFunc <$> dbConsignedItemBySkus conn (catMaybes skus)
 
   -- loop through the filtered orders and construct items to be inserted into the db.
   let dbSalesAction =
