@@ -13,7 +13,6 @@ import Database.PostgreSQL.Simple (ConnectInfo (ConnectInfo),connect)
 import System.Environment (getEnv, lookupEnv)
 import Network.Wreq (asJSON, get, Response, responseBody)
 import Order (Order(..))
-import TestData (myData)
 import LineItem (unStringPrice)
 
 data OrderResponse =
