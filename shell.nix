@@ -3,7 +3,7 @@ nixpkgs.myEnvFun {
   name = "wyrd-distro";
   buildInputs = [
     nixpkgs.python27
-    nixpkgs.python27Packages.fabric
+    nixpkgs.python27Packages.Fabric
     nixpkgs.mpg123
     nixpkgs.vorbisTools
   ];
