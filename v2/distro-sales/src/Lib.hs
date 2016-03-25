@@ -65,7 +65,7 @@ lineToSale orderId
   in DBSale { saleFormat = 0
             , saleCountry = fmap toName (lineItemDestinationLocation >>= locationCountryCode)
             , saleId = Nothing
-            , saleAmount = unStringPrice lineItemPrice
+            , saleAmount = unStringPrice lineItemPrice * fromIntegral lineItemQuantity
             , saleDatetime = orderCreatedAt
             , saleCity = loc >>= locationCity
             , saleProvince = loc >>= locationProvinceCode
@@ -78,7 +78,7 @@ lineToSale orderId
             , saleOrderId = orderId
             , saleLineItemId = lineItemId
             , saleQuantity = lineItemQuantity
-            , saleMarkup = markup * fromInteger (toInteger lineItemQuantity)
+            , saleMarkup = markup * fromIntegral lineItemQuantity
             , salePaidToConsignor = Just 0.0
             , saleCustomerId = mCustId
             , saleWholesale = Nothing
